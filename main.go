@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/anshitabaid/miniHawk/app"
+	"github.com/kelsier27/hawkeye19/app"
 	"os"
 )
 func main (){

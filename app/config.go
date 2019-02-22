@@ -12,9 +12,8 @@ func LoadDefaultConfiguration () {
 		DBUsername: "hawkadmin",
 		DBPassword: "neverat12",
 		DBName:     "hawkeyedb",
-		
-
-
+		HashKey: "",
+		BlockKey: "",
 	}
 }
 
@@ -27,12 +26,12 @@ func ConfigureInstance () error {
 		return err
 	}
 	err = json.Unmarshal(jsonConfig, &Configuration)
-	fmt.Println (string (jsonConfig))
 	if err !=  nil {
 		fmt.Println ("Error in unmarshalling config, switching to default\n\t" + err.Error ())
 		LoadDefaultConfiguration()
 		return err
 	}
+	fmt.Println ("Config file successfully read")
 	return nil
 }
 

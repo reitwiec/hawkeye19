@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"github.com/gorilla/securecookie"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"gopkg.in/go-playground/validator.v9"
@@ -12,6 +13,7 @@ import (
 var (
 	Configuration	Settings
 	validate		*validator.Validate
+	CookieHandler	*securecookie.SecureCookie
 )
 
 func (hawk *App) Initialise () {
@@ -24,6 +26,8 @@ func (hawk *App) Initialise () {
 	//DB connection string
 	Configuration.DBConn = fmt.Sprintf ("%s:%s@/%s?charset=utf8&parseTime=True&loc=Local",
 		Configuration.DBUsername, Configuration.DBPassword, Configuration.DBName)
+	//create securecookie instance
+	CookieHandler = securecookie.New (convertStringToByteSlice(Configuration.HashKey), convertStringToByteSlice(Configuration.BlockKey))
 
 
 
