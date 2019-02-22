@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+    "time"
 )
 
 func ResponseWriter (flag bool, msg string, data interface {}, status int, w http.ResponseWriter){
@@ -38,6 +39,7 @@ func convertStringToByteSlice(s string) []byte {
 }
 
 func RandomString () string {
+    rand.Seed(time.Now().UnixNano())
 	s := "1234567890qwertyuiopasdfghjklzxcvbnmMNBVCXZLKJHFDSAPOIUYTREWQ"
 	l := len (s)
 	var j int

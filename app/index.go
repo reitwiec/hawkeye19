@@ -19,13 +19,17 @@ var (
 func (hawk *App) Initialise () {
 	//configure Instance
 	ConfigureInstance ()
+
 	//configure mux
 	hawk.LoadRoutes ()
+
 	//initialise validator
 	validate = validator.New ()
+
 	//DB connection string
 	Configuration.DBConn = fmt.Sprintf ("%s:%s@/%s?charset=utf8&parseTime=True&loc=Local",
 		Configuration.DBUsername, Configuration.DBPassword, Configuration.DBName)
+    
 	//create securecookie instance
 	CookieHandler = securecookie.New (convertStringToByteSlice(Configuration.HashKey), convertStringToByteSlice(Configuration.BlockKey))
 
