@@ -30,6 +30,15 @@ func (hawk *App) Initialise() {
 	//DB connection string
 	Configuration.DBConn = fmt.Sprintf("%s:%s@/%s?charset=utf8&parseTime=True&loc=Local",
 		Configuration.DBUsername, Configuration.DBPassword, Configuration.DBName)
+	fmt.Printf(`
+Configuration:
+DB Username: %s
+DB Password: %s
+DB Name: %s
+Hash Key: %s
+Block Key: %s
+
+`, Configuration.DBUsername, Configuration.DBPassword, Configuration.DBName, Configuration.HashKey, Configuration.BlockKey)
 
 	//create securecookie instance
 	CookieHandler = securecookie.New([]byte(Configuration.HashKey), []byte(Configuration.BlockKey))

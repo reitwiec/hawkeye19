@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"math/rand"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -38,4 +39,12 @@ func RandomString() string {
 	}
 	return (s1)
 
+}
+
+// GetEnv gets an environment variable with default value as fallback
+func GetEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return fallback
 }

@@ -9,6 +9,8 @@ require (
 	github.com/jinzhu/gorm v1.9.2
 	github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a // indirect
 	github.com/leodido/go-urn v1.1.0 // indirect
+	github.com/stretchr/testify v1.3.0 // indirect
+	github.com/subosito/gotenv v1.1.1
 	golang.org/x/crypto v0.0.0-20190222235706-ffb98f73852f
 	gopkg.in/go-playground/validator.v9 v9.27.0
 )
