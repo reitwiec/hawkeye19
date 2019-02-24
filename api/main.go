@@ -9,6 +9,7 @@ import (
 
 func init() {
 	gotenv.Load()
+	gotenv.Load(".env.keys")
 }
 
 func main() {
