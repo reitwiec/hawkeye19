@@ -1,1 +1,6 @@
-/config.json
+.env
+config.json
+
+/.idea
+/.vscode
+/node_modules
