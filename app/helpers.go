@@ -6,25 +6,25 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-    "time"
+	"time"
 )
 
-func ResponseWriter (flag bool, msg string, data interface {}, status int, w http.ResponseWriter){
+func ResponseWriter(flag bool, msg string, data interface{}, status int, w http.ResponseWriter) {
 	response := Response{
 		Success: flag,
 		Message: msg,
-		Data: data,
+		Data:    data,
 	}
 
-	payload, err := json.Marshal (response)
+	payload, err := json.Marshal(response)
 
-	if err !=  nil {
-		http.Error (w, err.Error (), http.StatusInternalServerError)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.Header ().Set ("Content-Type", "application/json")
-	w.Write (payload)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(payload)
 
 }
 
@@ -38,15 +38,15 @@ func convertStringToByteSlice(s string) []byte {
 	return b
 }
 
-func RandomString () string {
-    rand.Seed(time.Now().UnixNano())
+func RandomString() string {
+	rand.Seed(time.Now().UnixNano())
 	s := "1234567890qwertyuiopasdfghjklzxcvbnmMNBVCXZLKJHFDSAPOIUYTREWQ"
-	l := len (s)
+	l := len(s)
 	var j int
 	s1 := ""
-	for i := 0; i<l; i++ {
+	for i := 0; i < l; i++ {
 		j = rand.Intn(l)
-		s1 +=  string (s[j])
+		s1 += string(s[j])
 	}
 	return (s1)
 

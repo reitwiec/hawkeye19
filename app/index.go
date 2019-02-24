@@ -11,46 +11,43 @@ import (
 )
 
 var (
-	Configuration	Settings
-	validate		*validator.Validate
-	CookieHandler	*securecookie.SecureCookie
+	Configuration Settings
+	validate      *validator.Validate
+	CookieHandler *securecookie.SecureCookie
 )
 
-func (hawk *App) Initialise () {
+func (hawk *App) Initialise() {
 	//configure Instance
-	ConfigureInstance ()
+	ConfigureInstance()
 
 	//configure mux
-	hawk.LoadRoutes ()
+	hawk.LoadRoutes()
 
 	//initialise validator
-	validate = validator.New ()
+	validate = validator.New()
 
 	//DB connection string
-	Configuration.DBConn = fmt.Sprintf ("%s:%s@/%s?charset=utf8&parseTime=True&loc=Local",
+	Configuration.DBConn = fmt.Sprintf("%s:%s@/%s?charset=utf8&parseTime=True&loc=Local",
 		Configuration.DBUsername, Configuration.DBPassword, Configuration.DBName)
-    
+
 	//create securecookie instance
-	CookieHandler = securecookie.New (convertStringToByteSlice(Configuration.HashKey), convertStringToByteSlice(Configuration.BlockKey))
-
-
+	CookieHandler = securecookie.New(convertStringToByteSlice(Configuration.HashKey), convertStringToByteSlice(Configuration.BlockKey))
 
 }
 
-func (hawk *App) Run (Args [] string) {
+func (hawk *App) Run(Args []string) {
 	var err error
-	hawk.DB, err = gorm.Open ("mysql", Configuration.DBConn)
+	hawk.DB, err = gorm.Open("mysql", Configuration.DBConn)
 	if err != nil {
-		log.Fatalf ("Could not establish database connection, shutting down")
+		log.Fatalf("Could not establish database connection, shutting down")
 		return
 	}
-	fmt.Println ("Database connection established")
-	defer hawk.DB.Close ()
-	fmt.Println ("Server started")
+	fmt.Println("Database connection established")
+	defer hawk.DB.Close()
+	fmt.Println("Server started")
 	err = http.ListenAndServe(Configuration.ServerAddr, hawk.router)
 	if err != nil {
-		fmt.Println ("Could not start server, shutting down")
+		fmt.Println("Could not start server, shutting down")
 	}
-
 
 }

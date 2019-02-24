@@ -5,9 +5,8 @@ import (
 	"os"
 )
 
-func main (){
-	hawk:=app.App {}
-	hawk.Initialise ()
-	hawk.Run (os.Args)
+func main() {
+	hawk := app.App{}
+	hawk.Initialise()
+	hawk.Run(os.Args)
 }
-

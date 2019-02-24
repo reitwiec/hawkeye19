@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func (hawk * App) addUser (w http.ResponseWriter, r *http.Request) {
+func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 	user := User{}
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
@@ -28,7 +28,7 @@ func (hawk * App) addUser (w http.ResponseWriter, r *http.Request) {
 			ResponseWriter(false, "Invalid validation error ", nil, http.StatusBadRequest, w)
 			return
 		}
-		var fields [] string
+		var fields []string
 		for _, err := range err.(validator.ValidationErrors) {
 			fields = append(fields, err.Field())
 		}
@@ -38,7 +38,7 @@ func (hawk * App) addUser (w http.ResponseWriter, r *http.Request) {
 
 	//validation successful
 	//hash  and salt password
-	hash, err := bcrypt.GenerateFromPassword([]byte (user.Password), 14)
+	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), 14)
 	if err != nil {
 		log.Println(err)
 		ResponseWriter(false, "Error in hash and salt", nil, http.StatusInternalServerError, w)
@@ -60,20 +60,20 @@ func (hawk * App) addUser (w http.ResponseWriter, r *http.Request) {
 	//load newUser to database
 	//hawk.DB.CreateTable (&User{})
 	//begin transaction
-	tx := hawk.DB.Begin ()
-	err = tx.Create (&newUser).Error
+	tx := hawk.DB.Begin()
+	err = tx.Create(&newUser).Error
 	if err != nil {
-		fmt.Println ("Database error, new user not created")
+		fmt.Println("Database error, new user not created")
 		ResponseWriter(false, "Database error, new user not created", nil, http.StatusInternalServerError, w)
-		tx.Rollback ()
+		tx.Rollback()
 		return
 	}
-	tx.Commit ()
-	fmt.Println ("New user registered")
+	tx.Commit()
+	fmt.Println("New user registered")
 	ResponseWriter(true, "New user registered", nil, http.StatusOK, w)
 }
 
-func (hawk *App) login (w http.ResponseWriter, r *http.Request) {
+func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 	//get username and password from user
 	//check if username exists
 	//compare password
@@ -100,7 +100,7 @@ func (hawk *App) login (w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//compare passwords
-	err = bcrypt.CompareHashAndPassword([]byte (strings.TrimSpace(user.Password)), []byte (formData.Password))
+	err = bcrypt.CompareHashAndPassword([]byte(strings.TrimSpace(user.Password)), []byte(formData.Password))
 	if err != nil {
 		fmt.Println("Cannot log in, incorrect password")
 		ResponseWriter(false, "Incorrect password, cannot log in", nil, http.StatusUnauthorized, w)
@@ -122,19 +122,19 @@ func (hawk *App) login (w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "Error in setting session, user not logged in", nil, http.StatusInternalServerError, w)
 		return
 	}
-	fmt.Println ("User logged in and session set")
+	fmt.Println("User logged in and session set")
 	ResponseWriter(true, "User logged in and session is set", nil, http.StatusOK, w)
 }
 
-func (hawk *App) logout (w http.ResponseWriter, r *http.Request){
+func (hawk *App) logout(w http.ResponseWriter, r *http.Request) {
 	//@TODO: what if user is not logged in ?
-	ClearSession (w)
+	ClearSession(w)
 	fmt.Println("Logout successful")
 	ResponseWriter(true, "User logged out", nil, http.StatusOK, w)
 
 }
 
-func (hawk *App) forgotPassword (w http.ResponseWriter, r *http.Request) {
+func (hawk *App) forgotPassword(w http.ResponseWriter, r *http.Request) {
 
 	//get email from user
 	formData := ForgotPassReq{}
@@ -151,7 +151,7 @@ func (hawk *App) forgotPassword (w http.ResponseWriter, r *http.Request) {
 			ResponseWriter(false, "Invalid validation error ", nil, http.StatusBadRequest, w)
 			return
 		}
-		var fields [] string
+		var fields []string
 		for _, err := range err.(validator.ValidationErrors) {
 			fields = append(fields, err.Field())
 		}
@@ -160,7 +160,7 @@ func (hawk *App) forgotPassword (w http.ResponseWriter, r *http.Request) {
 	}
 	//check if email exists in database
 	formData.Email = strings.TrimSpace(formData.Email)
-	err = hawk.DB.Where("email = ?", formData.Email).First (&User{}).Error
+	err = hawk.DB.Where("email = ?", formData.Email).First(&User{}).Error
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			fmt.Println("Email not found")
@@ -193,7 +193,7 @@ func (hawk *App) forgotPassword (w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func (hawk *App ) resetPassword (w http.ResponseWriter, r *http.Request) {
+func (hawk *App) resetPassword(w http.ResponseWriter, r *http.Request) {
 	//obtain token from request
 	formData := ResetPassReq{}
 	err := json.NewDecoder(r.Body).Decode(&formData)
@@ -213,7 +213,7 @@ func (hawk *App ) resetPassword (w http.ResponseWriter, r *http.Request) {
 			ResponseWriter(false, "Invalid validation error ", nil, http.StatusBadRequest, w)
 			return
 		}
-		var fields [] string
+		var fields []string
 		for _, err := range err.(validator.ValidationErrors) {
 			fields = append(fields, err.Field())
 		}
@@ -253,7 +253,7 @@ func (hawk *App ) resetPassword (w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//create hash for new password
-	hash, err := bcrypt.GenerateFromPassword([] byte (formData.Password), 14)
+	hash, err := bcrypt.GenerateFromPassword([]byte(formData.Password), 14)
 	//update the users database
 	forgotPassUser := User{}
 	hawk.DB.Where("Email = ? ", forgotPassReqUser.Email).First(&forgotPassUser)
@@ -271,7 +271,7 @@ func (hawk *App ) resetPassword (w http.ResponseWriter, r *http.Request) {
 	//delete token entry from forgotpassrequser
 	err = tx.Delete(&forgotPassReqUser).Error
 	if err != nil {
-		fmt.Println("Could not delete token entry but password updated/n/t" + err.Error ())
+		fmt.Println("Could not delete token entry but password updated/n/t" + err.Error())
 		ResponseWriter(false, "Could not delete token entry but password updated", nil, http.StatusInternalServerError, w)
 		tx.Rollback()
 		return
