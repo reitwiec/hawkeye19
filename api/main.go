@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/kelsier27/hawkeye19/app"
 	"os"
+
+	"github.com/kelsier27/hawkeye19/api/app"
 )
 
 func main() {
