@@ -45,12 +45,8 @@ Block Key: %s
 }
 
 func (hawk *App) migrate() {
-	err := hawk.DB.CreateTable(&User{}, &Attempt{}, &Question{}, &Hint{})
-	if err != nil {
-		fmt.Println("Could not create tables")
-	} else {
-		fmt.Println("Tables created")
-	}
+	fmt.Println("Creating Tables")
+	hawk.DB.CreateTable(&User{}, &Attempt{}, &Question{}, &Hint{})
 }
 
 func (hawk *App) Run(Args []string) {
