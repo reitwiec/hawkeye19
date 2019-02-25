@@ -24,3 +24,12 @@ $ make keys
 ```bash
 $ make serve
 ```
+
+## Commands
+
+```bash
+make serve
+make keys
+make migrate
+mkae drop_all
+```
