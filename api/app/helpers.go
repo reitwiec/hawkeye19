@@ -5,8 +5,6 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
-	"strconv"
-	"strings"
 	"time"
 )
 
@@ -27,16 +25,6 @@ func ResponseWriter(flag bool, msg string, data interface{}, status int, w http.
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(payload)
 
-}
-
-func convertStringToByteSlice(s string) []byte {
-	x := strings.Split(s, ",")
-	b := make([]byte, len(x))
-	for i := range x {
-		y, _ := strconv.Atoi(x[i])
-		b[i] = byte(y)
-	}
-	return b
 }
 
 func RandomString() string {

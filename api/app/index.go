@@ -2,12 +2,13 @@ package app
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/gorilla/securecookie"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"gopkg.in/go-playground/validator.v9"
-	"log"
-	"net/http"
 )
 
 var (
@@ -19,6 +20,17 @@ var (
 func (hawk *App) Initialise() {
 	//configure Instance
 	ConfigureInstance()
+	fmt.Printf(`
+
+Configuration:
+DB Username: %s
+DB Password: %s
+DB Name: %s
+Hash Key: %s
+Block Key: %s
+
+`, Configuration.DBUsername, Configuration.DBPassword, Configuration.DBName, Configuration.HashKey, Configuration.BlockKey)
+
 	//configure mux
 	hawk.LoadRoutes()
 	//initialise validator
@@ -26,8 +38,9 @@ func (hawk *App) Initialise() {
 	//DB connection string
 	Configuration.DBConn = fmt.Sprintf("%s:%s@/%s?charset=utf8&parseTime=True&loc=Local",
 		Configuration.DBUsername, Configuration.DBPassword, Configuration.DBName)
+
 	//create securecookie instance
-	CookieHandler = securecookie.New(convertStringToByteSlice(Configuration.HashKey), convertStringToByteSlice(Configuration.BlockKey))
+	CookieHandler = securecookie.New([]byte(Configuration.HashKey), []byte(Configuration.BlockKey))
 
 }
 
