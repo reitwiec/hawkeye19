@@ -28,7 +28,11 @@ type CurrUser struct {
 	Username string
 	Email    string
 	Access   int
-	Level    int
+	Region1  int
+	Region2  int
+	Region3  int
+	Region4  int
+	Region5  int
 	Points   int
 }
 
@@ -51,19 +55,49 @@ type User struct {
 	College string `gorm:"not null" json:"college" validate:"alpha,required"`
 
 	//Gameplay status
-	Level  int `json:"level"`
-	Banned int `json:"banned"`
-	Points int `json:"points"`
+	Region1   int    `json:"Region1"`
+	Region2   int    `json:"Region2"`
+	Region3   int    `json:"Region3"`
+	Region4   int    `json:"Region4"`
+	Region5   int    `json:"Region5"`
+	Banned    int    `json:"banned"`
+	Points    int    `json:"points"`
+	Sidequest string `json:"sidequest"`
+}
+
+type Attempt struct {
+	ID       int    `gorm:"primary_key;auto_increment" json:"attemptID"`
+	User     int    `gorm:"not null" json:"userID" validate:"required"`
+	Question int    `gorm:"not null" json:"questionID" validate:"required"`
+	Region   int    `gorm:"not null" json:"regionID" validate:"required"`
+	Answer   string `gorm:"not null" json:"answer" validate:"alphanum; required"`
+	status   int    `gorm:"not null" json:"status" validate:"required"`
+}
+
+type Question struct {
+	ID       int    `gorm:"primary_key;auto_increment" json:"questionID"`
+	Level    int    `gorm:"not null" json:"level" validate:"required"`
+	Region   int    `gorm:"not null" json:"region" validate:"required"`
+	Question string `gorm:"not null" json:"question" validate:"required"`
+	Answer   string `gorm:"not null" json:"answer,omitempty" validate:"required"`
+	AddInfo  string `json:"addinfo"`
+	AddedBy  string `gorm:"not null" json:"addedBy" validate:"required"`
+}
+
+type Hint struct {
+	ID       int    `gorm:"primary_key; autoincrement" json:"hintID"`
+	Question int    `gorm:"not null" json:"questionID" validate:"required"`
+	Active   int    `gorm:"not null" json:"active"`
+	Hint     string `json:"hint" validate:"required"`
 }
 
 type ForgotPassReq struct {
-	ID        int       `gorm:"auto_increment;primary_key" json:"id;omitempty"`
+	ID        string    `gorm:"primary_key" json:"id"`
 	Email     string    `gorm:"not null" json:"email" validate:"email"`
-	Token     string    `json:"token"`
-	Timestamp time.Time `gorm:"" json:"timestamp"`
+	Timestamp time.Time `json:"timestamp"`
 }
 
 type ResetPassReq struct {
-	Token    string `json:"token" validate:"required"`
-	Password string `json:"password" validate:"min=8,max=24,required"`
+	Token    string `json:"token"`
+	Password string `json:"password"`
 }

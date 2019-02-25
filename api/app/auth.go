@@ -53,7 +53,11 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 		Email:    strings.TrimSpace(user.Email),
 		Tel:      strings.TrimSpace(user.Tel),
 		College:  strings.TrimSpace(user.College),
-		Level:    1,
+		Region1:  1,
+		Region2:  1,
+		Region3:  1,
+		Region4:  1,
+		Region5:  1,
 		Banned:   0,
 		Points:   2,
 	}
@@ -113,7 +117,11 @@ func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 		Username: user.Username,
 		Email:    user.Username,
 		Access:   user.Access,
-		Level:    user.Level,
+		Region1:  user.Region1,
+		Region2:  user.Region2,
+		Region3:  user.Region3,
+		Region4:  user.Region4,
+		Region5:  user.Region5,
 		Points:   user.Points,
 	}
 	//set session for 1 day
@@ -135,7 +143,6 @@ func (hawk *App) logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hawk *App) forgotPassword(w http.ResponseWriter, r *http.Request) {
-
 	//get email from user
 	formData := ForgotPassReq{}
 	err := json.NewDecoder(r.Body).Decode(&formData)
@@ -144,6 +151,7 @@ func (hawk *App) forgotPassword(w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "Error in decoding form data, password not reset", nil, http.StatusBadRequest, w)
 		return
 	}
+	formData.Email = strings.TrimSpace(formData.Email)
 	err = validate.Struct(formData)
 	if err != nil {
 		if _, ok := err.(*validator.InvalidValidationError); ok {
@@ -158,9 +166,9 @@ func (hawk *App) forgotPassword(w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "Bad Request", fields, http.StatusBadRequest, w)
 		return
 	}
+
 	//check if email exists in database
-	formData.Email = strings.TrimSpace(formData.Email)
-	err = hawk.DB.Where("email = ?", formData.Email).First(&User{}).Error
+	err = hawk.DB.Where("email = ?", formData.Email).First(&formData).Error
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			fmt.Println("Email not found")
@@ -176,8 +184,14 @@ func (hawk *App) forgotPassword(w http.ResponseWriter, r *http.Request) {
 	formData.Timestamp = time.Now()
 	//generate token for password reset
 	token := RandomString()
-	formData.Token = token
+	hashedToken, err := bcrypt.GenerateFromPassword([]byte(token), 14)
+	if err != nil {
+		fmt.Println("Could not hash token")
+		ResponseWriter(false, "Could not hash token", nil, http.StatusInternalServerError, w)
+		return
+	}
 	//add to database
+	formData.ID = string(hashedToken)
 	tx := hawk.DB.Begin()
 	err = tx.Create(&formData).Error
 	if err != nil {
@@ -194,6 +208,11 @@ func (hawk *App) forgotPassword(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hawk *App) resetPassword(w http.ResponseWriter, r *http.Request) {
+	//obtain id from request
+	//hash it
+	//check if it exists in database
+	//if it does ask for new password and update in db, and delete from password reset table
+	//else abort
 	//obtain token from request
 	formData := ResetPassReq{}
 	err := json.NewDecoder(r.Body).Decode(&formData)
@@ -205,26 +224,15 @@ func (hawk *App) resetPassword(w http.ResponseWriter, r *http.Request) {
 	//trim spaces
 	formData.Token = strings.TrimSpace(formData.Token)
 	formData.Password = strings.TrimSpace(formData.Password)
-	//validation
-	err = validate.Struct(formData)
-	if err != nil {
-		if _, ok := err.(*validator.InvalidValidationError); ok {
-			fmt.Println(err)
-			ResponseWriter(false, "Invalid validation error ", nil, http.StatusBadRequest, w)
-			return
-		}
-		var fields []string
-		for _, err := range err.(validator.ValidationErrors) {
-			fields = append(fields, err.Field())
-		}
-		ResponseWriter(false, "Bad Request", fields, http.StatusBadRequest, w)
-		return
-	}
+	//hash the token
+	hash, err := bcrypt.GenerateFromPassword([]byte(formData.Token), 14)
+	hashedToken := string(hash)
 	forgotPassReqUser := ForgotPassReq{}
-	//check if token exists in database
-	err = hawk.DB.Where("TOKEN = ?", formData.Token).First(&forgotPassReqUser).Error
+	//check if hashed token exists in database
+	err = hawk.DB.Where("ID = ?", hashedToken).First(&forgotPassReqUser).Error
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
+			fmt.Println("Incorrect token")
 			ResponseWriter(false, "Incorrect token", nil, http.StatusOK, w)
 			return
 		} else {
@@ -233,7 +241,7 @@ func (hawk *App) resetPassword(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	//token exists in database
+	//hashed token exists in database
 	//if difference in time > 24 hours delete token and return
 	t24, _ := time.ParseDuration("24h")
 	if time.Since(forgotPassReqUser.Timestamp) >= t24 {
@@ -253,7 +261,7 @@ func (hawk *App) resetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//create hash for new password
-	hash, err := bcrypt.GenerateFromPassword([]byte(formData.Password), 14)
+	hash, err = bcrypt.GenerateFromPassword([]byte(formData.Password), 14)
 	//update the users database
 	forgotPassUser := User{}
 	hawk.DB.Where("Email = ? ", forgotPassReqUser.Email).First(&forgotPassUser)
@@ -265,13 +273,12 @@ func (hawk *App) resetPassword(w http.ResponseWriter, r *http.Request) {
 		tx.Rollback()
 		return
 	}
-	fmt.Println("Password updated")
 	tx.Commit()
-	tx = hawk.DB.Begin()
+	tx.Begin()
 	//delete token entry from forgotpassrequser
 	err = tx.Delete(&forgotPassReqUser).Error
 	if err != nil {
-		fmt.Println("Could not delete token entry but password updated/n/t" + err.Error())
+		fmt.Println("Could not delete token entry but password updated")
 		ResponseWriter(false, "Could not delete token entry but password updated", nil, http.StatusInternalServerError, w)
 		tx.Rollback()
 		return
