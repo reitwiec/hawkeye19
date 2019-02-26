@@ -32,3 +32,21 @@ func ClearSession(w http.ResponseWriter) {
 	}
 	http.SetCookie(w, cookie)
 }
+
+func GetCurrUser(w http.ResponseWriter, r *http.Request) CurrUser {
+	c, err := r.Cookie("session")
+	if err != nil {
+		fmt.Println("Error in reading cookie\n\t" + err.Error())
+		return CurrUser{}
+	}
+	value := CurrUser{}
+	if err = CookieHandler.Decode("session", c.Value, &value); err == nil {
+		//ResponseWriter(true, "Returning current user", value, http.StatusOK, w)
+		fmt.Println("Returning curruser")
+		return value
+	} else {
+		//ResponseWriter(false, "Could not read cookie data", nil, http.StatusInternalServerError, w)
+		fmt.Println("Could not read cookie data\n" + err.Error())
+		return CurrUser{}
+	}
+}

@@ -115,7 +115,7 @@ func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 	currUser := CurrUser{
 		ID:       user.ID,
 		Username: user.Username,
-		Email:    user.Username,
+		Email:    user.Email,
 		Access:   user.Access,
 		Region1:  user.Region1,
 		Region2:  user.Region2,

@@ -71,7 +71,7 @@ type Attempt struct {
 	Question int    `gorm:"not null" json:"questionID" validate:"required"`
 	Region   int    `gorm:"not null" json:"regionID" validate:"required"`
 	Answer   string `gorm:"not null" json:"answer" validate:"alphanum; required"`
-	status   int    `gorm:"not null" json:"status" validate:"required"`
+	Status   int    `gorm:"not null" json:"status" validate:"required"`
 }
 
 type Question struct {
