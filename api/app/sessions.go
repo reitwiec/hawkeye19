@@ -32,3 +32,17 @@ func ClearSession(w http.ResponseWriter) {
 	}
 	http.SetCookie(w, cookie)
 }
+
+func GetCurrentUser(w http.ResponseWriter,r *http.Request) (CurrUser,error){
+	userCookie, err := r.Cookie("session")
+	if(err!=nil) {
+		return CurrUser{}, err
+	}
+	currUser := CurrUser{}
+	err = CookieHandler.Decode("session",userCookie.Value,&currUser)
+	if(err!=nil) {
+		return CurrUser{}, nil
+	}
+
+	return currUser, nil
+}
