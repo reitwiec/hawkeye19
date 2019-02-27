@@ -41,6 +41,14 @@ func RandomString() string {
 
 }
 
+func checkAnswerStatus(userAnswer string, answer string) int {
+	if answer == userAnswer{
+		return 1
+	} else {
+		return 0
+	}
+}
+
 // GetEnv gets an environment variable with default value as fallback
 func GetEnv(key, fallback string) string {
 	if value, ok := os.LookupEnv(key); ok {

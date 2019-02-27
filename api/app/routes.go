@@ -10,12 +10,17 @@ import (
 func (hawk *App) LoadRoutes() {
 
 	hawk.router = mux.NewRouter()
+	//Auth routes
 	hawk.router.HandleFunc("/api/addUser", hawk.addUser).Methods("POST")
 	hawk.router.HandleFunc("/api/login", hawk.login).Methods("POST")
 	hawk.router.HandleFunc("/api/logout", hawk.logout).Methods("POST")
 	hawk.router.HandleFunc("/api/forgotPassword", hawk.forgotPassword).Methods("POST")
 	hawk.router.HandleFunc("/api/resetPassword", hawk.resetPassword).Methods("POST")
 	hawk.router.HandleFunc("/api/checkContext", hawk.createContext(hawk.checkContext)).Methods("POST")
+
+	//Gameplay routes
+	hawk.router.HandleFunc("/api/checkAnswer",hawk.createContext(hawk.checkAnswer)).Methods("POST")
+	hawk.router.HandleFunc("/api/getQuestion",hawk.createContext(hawk.getQuestion)).Methods("GET")
 }
 
 func (hawk *App) createContext(next http.HandlerFunc) http.HandlerFunc {
