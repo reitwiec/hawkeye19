@@ -69,4 +69,22 @@ func (hawk *App) getQuestion (w http.ResponseWriter, r *http.Request) {
 	ResponseWriter(true,"Question fetched.", question, http.StatusOK, w)
 }
 
+func (hawk *App) getHints (w http.ResponseWriter, r *http.Request) {
+	keys ,ok := r.URL.Query()["question"]
+	if !ok || len(keys[0])<1 {
+		ResponseWriter(false,"Invalid request",nil,http.StatusBadRequest, w)
+		return
+	}
 
+	key := keys[0]
+
+	var hints []string
+
+	err := hawk.DB.Model(&Hint{}).Where("question=? AND active=1", key).Pluck("hint",&hints).Error
+	if err != nil {
+		ResponseWriter(false,"Could not fetch hint.",hints,http.StatusInternalServerError, w)
+		return
+		}
+
+	ResponseWriter(true, "Hints fetched.", hints, http.StatusOK, w)
+}
