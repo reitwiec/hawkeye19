@@ -35,7 +35,7 @@ func (hawk *App) createContext(next http.HandlerFunc) http.HandlerFunc {
 				return
 			}
 			currUser.Points = user.Points
-			currUser.Access = user.Points
+			currUser.Access = user.Access
 			currUser.Region1 = user.Region1
 			currUser.Region2 = user.Region2
 			currUser.Region3 = user.Region3
@@ -50,8 +50,6 @@ func (hawk *App) createContext(next http.HandlerFunc) http.HandlerFunc {
 
 //sample method to see if context is working
 func (hawk *App) checkContext(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	//checks for value in context and converts to type CurrUser {}
-	currUser := ctx.Value("CurrUser").(CurrUser)
+	currUser := r.Context().Value("CurrUser").(CurrUser)
 	fmt.Println(currUser)
 }
