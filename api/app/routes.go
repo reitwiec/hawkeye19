@@ -28,14 +28,14 @@ func (hawk *App) createContext(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			//extract data from cookie
-			currUser := GetCurrUser(w, r)
-			if currUser == (CurrUser{}) {
+			currUser, err := GetCurrUser(w, r)
+			if err != nil {
 				fmt.Println("Could not read cookie data")
 				return
 			}
 			user := User{}
 			//gets rest of the data from db
-			err := hawk.DB.First(&user, currUser.ID).Error
+			err = hawk.DB.First(&user, currUser.ID).Error
 			if err != nil {
 				fmt.Println("Database error " + err.Error())
 				return

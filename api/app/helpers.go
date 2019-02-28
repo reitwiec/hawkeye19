@@ -40,8 +40,8 @@ func RandomString() string {
 	return (s1)
 
 }
-
-func checkAnswerStatus(userAnswer string, answer string) int {
+//check answer status according to levenstein score
+func CheckAnswerStatus(userAnswer string, answer string) int {
 	if answer == userAnswer{
 		return 1
 	} else {

@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
 type CheckAnswer struct {
-	Answer	string
-	Regionid	int
-	Level 		int
+	Answer   string
+	Regionid int
+	Level    int
 }
 
 type Stats struct {
@@ -19,12 +20,20 @@ type Stats struct {
 
 }
 
-func (hawk *App) checkAnswer (w http.ResponseWriter, r *http.Request){
+const (
+	CorrectAnswer   = 1
+	CloseAnswer     = 2
+	IncorrectAnswer = 3
+)
+
+func (hawk *App) checkAnswer (w http.ResponseWriter, r *http.Request) {
+	//obtain currUser from context
+	currUser := r.Context().Value("CurrUser").(CurrUser)
 	//obtain answerid, regionid, level, answer from request
-	checkAns := CheckAnswer {}
-	err := json.NewDecoder(r.Body).Decode (&checkAns)
-	if  err != nil {
-		fmt.Println ("Could not decode checkAnswer struct")
+	checkAns := CheckAnswer{}
+	err := json.NewDecoder(r.Body).Decode(&checkAns)
+	if err != nil {
+		fmt.Println("Could not decode checkAnswer struct")
 		ResponseWriter(false, "Could not decode check answer struct", nil, http.StatusInternalServerError, w)
 		return
 	}
@@ -32,16 +41,37 @@ func (hawk *App) checkAnswer (w http.ResponseWriter, r *http.Request){
 	checkAns.Answer = strings.TrimSpace(checkAns.Answer)
 	checkAns.Answer = strings.ToLower(checkAns.Answer)
 	//find actual answer
-	question := Question {}
-	err = hawk.DB.Where ("level = ? AND region = ?", checkAns.Level, checkAns.Regionid).First (&question).Error
+	question := Question{}
+	err = hawk.DB.Where("level = ? AND region = ?", checkAns.Level, checkAns.Regionid).First(&question).Error
 	actualAns := question.Answer
-
 	//check if same, close or wrong
-	status := checkAnswerStatus (checkAns.Answer, actualAns)
-
-
-	ResponseWriter(true,"Answer status", status,http.StatusOK, w)
-
+	status := CheckAnswerStatus(checkAns.Answer, actualAns)
+	if status == CorrectAnswer {
+		//answer is correct
+		//update level in region
+		switch checkAns.Regionid {
+		case 1:
+			currUser.Region1 += 1
+		case 2:
+			currUser.Region2 += 1
+		case 3:
+			currUser.Region3 += 1
+		case 4:
+			currUser.Region4 += 1
+		case 5:
+			currUser.Region5 += 1
+		}
+		user := User{}
+		hawk.DB.Where("ID = ?", currUser.ID).First(&user)
+		tx := hawk.DB.Begin()
+		region := "Region" + strconv.Itoa(checkAns.Regionid)
+		err = tx.Model(&user).Update(region, checkAns.Level+1).Error
+		//set new cookie
+		err = SetSession(w, currUser, 86400)
+		//commit transaction
+		tx.Commit()
+	}
+	ResponseWriter(true, "Answer status", status, http.StatusOK, w)
 }
 
 func (hawk *App) getQuestion (w http.ResponseWriter, r *http.Request) {
@@ -62,28 +92,33 @@ func (hawk *App) getQuestion (w http.ResponseWriter, r *http.Request) {
 	level := 0
 
 	switch key {
-	case "1": level = currUser.Region1
-	case "2": level = currUser.Region2
-	case "3": level = currUser.Region3
-	case "4": level = currUser.Region4
-	case "5": level = currUser.Region5
+	case "1":
+		level = currUser.Region1
+	case "2":
+		level = currUser.Region2
+	case "3":
+		level = currUser.Region3
+	case "4":
+		level = currUser.Region4
+	case "5":
+		level = currUser.Region5
 	}
 
 	question := Question{}
 
 	err := hawk.DB.Where("level=? AND region=?", level, key).First(&question).Error
 	if err != nil {
-		ResponseWriter(false,"Could not fetch question.",nil,http.StatusInternalServerError, w)
+		ResponseWriter(false, "Could not fetch question.", nil, http.StatusInternalServerError, w)
 		return
 	}
 
-	ResponseWriter(true,"Question fetched.", question, http.StatusOK, w)
+	ResponseWriter(true, "Question fetched.", question, http.StatusOK, w)
 }
 
-func (hawk *App) getHints (w http.ResponseWriter, r *http.Request) {
-	keys ,ok := r.URL.Query()["question"]
-	if !ok || len(keys[0])<1 {
-		ResponseWriter(false,"Invalid request",nil,http.StatusBadRequest, w)
+func (hawk *App) getHints(w http.ResponseWriter, r *http.Request) {
+	keys, ok := r.URL.Query()["question"]
+	if !ok || len(keys[0]) < 1 {
+		ResponseWriter(false, "Invalid request", nil, http.StatusBadRequest, w)
 		return
 	}
 
@@ -91,11 +126,11 @@ func (hawk *App) getHints (w http.ResponseWriter, r *http.Request) {
 
 	var hints []string
 
-	err := hawk.DB.Model(&Hint{}).Where("question=? AND active=1", key).Pluck("hint",&hints).Error
+	err := hawk.DB.Model(&Hint{}).Where("question=? AND active=1", key).Pluck("hint", &hints).Error
 	if err != nil {
-		ResponseWriter(false,"Could not fetch hint.",hints,http.StatusInternalServerError, w)
+		ResponseWriter(false, "Could not fetch hint.", hints, http.StatusInternalServerError, w)
 		return
-		}
+	}
 
 	ResponseWriter(true, "Hints fetched.", hints, http.StatusOK, w)
 }

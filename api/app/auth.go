@@ -93,7 +93,7 @@ func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 	}
 	user := User{}
 	//check if username exists
-	err = hawk.DB.Where("name = ?", strings.TrimSpace(formData.Username)).First(&user).Error
+	err = hawk.DB.Where("username = ?", strings.TrimSpace(formData.Username)).First(&user).Error
 	if gorm.IsRecordNotFoundError(err) {
 		fmt.Println("User not registered")
 		ResponseWriter(false, "User not registered", nil, http.StatusOK, w)
@@ -245,7 +245,7 @@ func (hawk *App) resetPassword(w http.ResponseWriter, r *http.Request) {
 	//if difference in time > 24 hours delete token and return
 	t24, _ := time.ParseDuration("24h")
 	if time.Since(forgotPassReqUser.Timestamp) >= t24 {
-		fmt.Println("Token exprired")
+		fmt.Println("Token expired")
 		ResponseWriter(false, "Token Expired", nil, http.StatusOK, w)
 		//delete token
 		tx := hawk.DB.Begin()
