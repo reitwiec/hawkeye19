@@ -131,7 +131,7 @@ func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Println("User logged in and session set")
-	ResponseWriter(true, "User logged in and session is set", nil, http.StatusOK, w)
+	ResponseWriter(true, "User logged in and session is set", currUser, http.StatusOK, w)
 }
 
 func (hawk *App) logout(w http.ResponseWriter, r *http.Request) {

@@ -13,6 +13,12 @@ type CheckAnswer struct {
 	Level 		int
 }
 
+type Stats struct {
+	TotalPlayers int
+	AnswerAttempts int
+
+}
+
 func (hawk *App) checkAnswer (w http.ResponseWriter, r *http.Request){
 	//obtain answerid, regionid, level, answer from request
 	checkAns := CheckAnswer {}
@@ -39,13 +45,18 @@ func (hawk *App) checkAnswer (w http.ResponseWriter, r *http.Request){
 }
 
 func (hawk *App) getQuestion (w http.ResponseWriter, r *http.Request) {
+
+	currUser := r.Context().Value("CurrUser").(CurrUser)
+	if (currUser == CurrUser{}) {
+		ResponseWriter(false,"User not logged in.",nil,http.StatusNetworkAuthenticationRequired, w)
+		return
+	}
+
 	keys ,ok := r.URL.Query()["region"]
 	if !ok || len(keys[0])<1 {
 		ResponseWriter(false,"Invalid request",nil,http.StatusBadRequest, w)
 		return
 	}
-
-	currUser := r.Context().Value("CurrUser").(CurrUser)
 
 	key := keys[0]
 	level := 0
@@ -87,4 +98,23 @@ func (hawk *App) getHints (w http.ResponseWriter, r *http.Request) {
 		}
 
 	ResponseWriter(true, "Hints fetched.", hints, http.StatusOK, w)
+}
+
+func (hawk *App) getStats (w http.ResponseWriter, r *http.Request) {
+	currUser := r.Context().Value("CurrUser").(CurrUser)
+	if (currUser == CurrUser{}) {
+		ResponseWriter(false,"User not logged in.",nil,http.StatusNetworkAuthenticationRequired, w)
+		return
+	}
+
+	currStats := Stats{}
+
+	err := hawk.DB.Model(&User{}).Count(&currStats.TotalPlayers).Error
+	if err != nil {
+		ResponseWriter(false,"Cant get total players", nil,http.StatusInternalServerError, w)
+		return
+	}
+
+
+
 }
