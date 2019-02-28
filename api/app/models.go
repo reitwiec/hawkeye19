@@ -66,12 +66,12 @@ type User struct {
 }
 
 type Attempt struct {
-	ID       int    `gorm:"primary_key;auto_increment" json:"attemptID"`
-	User     int    `gorm:"not null" json:"userID" validate:"required"`
-	Question int    `gorm:"not null" json:"questionID" validate:"required"`
-	Region   int    `gorm:"not null" json:"regionID" validate:"required"`
-	Answer   string `gorm:"not null" json:"answer" validate:"alphanum; required"`
-	Status   int    `gorm:"not null" json:"status" validate:"required"`
+	ID        int       `gorm:"primary_key;auto_increment" json:"attemptID"`
+	User      int       `gorm:"not null" json:"userID" validate:"required"`
+	Question  int       `gorm:"not null" json:"questionID" validate:"required"`
+	Answer    string    `gorm:"not null" json:"answer" validate:"alphanum; required"`
+	Status    int       `gorm:"not null" json:"status" validate:"required"`
+	Timestamp time.Time `gorm:"not null" json:"timestamp"`
 }
 
 type Question struct {

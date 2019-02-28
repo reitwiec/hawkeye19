@@ -6,35 +6,29 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type CheckAnswer struct {
 	Answer   string
-	Regionid int
+	RegionId int
 	Level    int
 }
 
 type Stats struct {
-	TotalPlayers int
+	TotalPlayers   int
 	AnswerAttempts int
-
 }
 
-const (
-	CorrectAnswer   = 1
-	CloseAnswer     = 2
-	IncorrectAnswer = 3
-)
-
-func (hawk *App) checkAnswer (w http.ResponseWriter, r *http.Request) {
+func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 	//obtain currUser from context
 	currUser := r.Context().Value("CurrUser").(CurrUser)
-	//obtain answerid, regionid, level, answer from request
+	//obtain answer, regionId, level from request
 	checkAns := CheckAnswer{}
 	err := json.NewDecoder(r.Body).Decode(&checkAns)
 	if err != nil {
-		fmt.Println("Could not decode checkAnswer struct")
-		ResponseWriter(false, "Could not decode check answer struct", nil, http.StatusInternalServerError, w)
+		fmt.Println("Could not decode checkAnswer struct " + err.Error())
+		ResponseWriter(false, "Could not decode check answer struct", nil, http.StatusBadRequest, w)
 		return
 	}
 	//sanitize answer
@@ -42,14 +36,31 @@ func (hawk *App) checkAnswer (w http.ResponseWriter, r *http.Request) {
 	checkAns.Answer = strings.ToLower(checkAns.Answer)
 	//find actual answer
 	question := Question{}
-	err = hawk.DB.Where("level = ? AND region = ?", checkAns.Level, checkAns.Regionid).First(&question).Error
+	err = hawk.DB.Where("level = ? AND region = ?", checkAns.Level, checkAns.RegionId).First(&question).Error
 	actualAns := question.Answer
 	//check if same, close or wrong
 	status := CheckAnswerStatus(checkAns.Answer, actualAns)
+	//log attempt
+	attempt := Attempt{
+		User:      currUser.ID,
+		Question:  question.ID,
+		Answer:    checkAns.Answer,
+		Status:    status,
+		Timestamp: time.Now(),
+	}
+	tx := hawk.DB.Begin()
+	hawk.DB.CreateTable(Attempt{})
+	err = tx.Create(&attempt).Error
+	if err != nil {
+		fmt.Println("Could not log answer attempt")
+		ResponseWriter(false, "Could not log answer", nil, http.StatusInternalServerError, w)
+		return
+	}
+	//if answer is correct
 	if status == CorrectAnswer {
 		//answer is correct
 		//update level in region
-		switch checkAns.Regionid {
+		switch checkAns.RegionId {
 		case 1:
 			currUser.Region1 += 1
 		case 2:
@@ -64,27 +75,38 @@ func (hawk *App) checkAnswer (w http.ResponseWriter, r *http.Request) {
 		user := User{}
 		hawk.DB.Where("ID = ?", currUser.ID).First(&user)
 		tx := hawk.DB.Begin()
-		region := "Region" + strconv.Itoa(checkAns.Regionid)
+		region := "Region" + strconv.Itoa(checkAns.RegionId)
 		err = tx.Model(&user).Update(region, checkAns.Level+1).Error
+		if err != nil {
+			fmt.Println("Could not update level")
+			ResponseWriter(false, "Could not update level", nil, http.StatusInternalServerError, w)
+			tx.Rollback()
+		}
 		//set new cookie
 		err = SetSession(w, currUser, 86400)
+		if err != nil {
+			fmt.Println("Could not set cookie")
+			ResponseWriter(false, "Could not set cookie in checking answer", nil, http.StatusInternalServerError, w)
+			tx.Rollback()
+		}
 		//commit transaction
 		tx.Commit()
 	}
 	ResponseWriter(true, "Answer status", status, http.StatusOK, w)
 }
 
-func (hawk *App) getQuestion (w http.ResponseWriter, r *http.Request) {
+func (hawk *App) getQuestion(w http.ResponseWriter, r *http.Request) {
 
 	currUser := r.Context().Value("CurrUser").(CurrUser)
+	//@TODO: Implement in middleware
 	if (currUser == CurrUser{}) {
-		ResponseWriter(false,"User not logged in.",nil,http.StatusNetworkAuthenticationRequired, w)
+		ResponseWriter(false, "User not logged in.", nil, http.StatusNetworkAuthenticationRequired, w)
 		return
 	}
 
-	keys ,ok := r.URL.Query()["region"]
-	if !ok || len(keys[0])<1 {
-		ResponseWriter(false,"Invalid request",nil,http.StatusBadRequest, w)
+	keys, ok := r.URL.Query()["region"]
+	if !ok || len(keys[0]) < 1 {
+		ResponseWriter(false, "Invalid request", nil, http.StatusBadRequest, w)
 		return
 	}
 
@@ -111,7 +133,6 @@ func (hawk *App) getQuestion (w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "Could not fetch question.", nil, http.StatusInternalServerError, w)
 		return
 	}
-
 	ResponseWriter(true, "Question fetched.", question, http.StatusOK, w)
 }
 
@@ -135,10 +156,10 @@ func (hawk *App) getHints(w http.ResponseWriter, r *http.Request) {
 	ResponseWriter(true, "Hints fetched.", hints, http.StatusOK, w)
 }
 
-func (hawk *App) getStats (w http.ResponseWriter, r *http.Request) {
+func (hawk *App) getStats(w http.ResponseWriter, r *http.Request) {
 	currUser := r.Context().Value("CurrUser").(CurrUser)
 	if (currUser == CurrUser{}) {
-		ResponseWriter(false,"User not logged in.",nil,http.StatusNetworkAuthenticationRequired, w)
+		ResponseWriter(false, "User not logged in.", nil, http.StatusNetworkAuthenticationRequired, w)
 		return
 	}
 
@@ -146,10 +167,8 @@ func (hawk *App) getStats (w http.ResponseWriter, r *http.Request) {
 
 	err := hawk.DB.Model(&User{}).Count(&currStats.TotalPlayers).Error
 	if err != nil {
-		ResponseWriter(false,"Cant get total players", nil,http.StatusInternalServerError, w)
+		ResponseWriter(false, "Cant get total players", nil, http.StatusInternalServerError, w)
 		return
 	}
-
-
 
 }
