@@ -1,14 +1,18 @@
 import React, { useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { Button, TextField } from '../components';
 
-const LoginPage = ({ className }) => {
+const RegisterPage = ({ className }) => {
 	const [formData, setformData] = useState({
+		name: '',
 		username: '',
-		password: ''
+		password: '',
+		confirm_password: '',
+		email: '',
+		tel: '',
+		college: ''
 	});
 
 	const onChange = useCallback((name, value) => {
@@ -21,7 +25,8 @@ const LoginPage = ({ className }) => {
 
 	return (
 		<div className={className}>
-			<h1>Login</h1>
+			<h1>Register</h1>
+			<TextField name="name" placeholder="Name" onChange={onChange} />
 			<TextField name="username" placeholder="Username" onChange={onChange} />
 			<TextField
 				name="password"
@@ -29,17 +34,30 @@ const LoginPage = ({ className }) => {
 				placeholder="Password"
 				onChange={onChange}
 			/>
-			<Button onClick={onSubmit}>Login</Button>
-			<Link to="/register">Register</Link>
+			<TextField
+				name="confirm_password"
+				type="password"
+				placeholder="Confirm password"
+				onChange={onChange}
+			/>
+			<TextField
+				name="email"
+				type="email"
+				placeholder="Email"
+				onChange={onChange}
+			/>
+			<TextField name="tel" placeholder="Phone Number" onChange={onChange} />
+			<TextField name="college" placeholder="College" onChange={onChange} />
+			<Button onClick={onSubmit}>Register</Button>
 		</div>
 	);
 };
 
-LoginPage.propTypes = {
+RegisterPage.propTypes = {
 	className: PropTypes.string
 };
 
-export default styled(LoginPage)`
+export default styled(RegisterPage)`
 	display: flex;
 	flex-flow: column nowrap;
 	width: min-content;
