@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
-// import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
+import { inject, observer } from 'mobx-react';
+
+import { UserStore } from '../stores';
 
 const regions = [
 	'Installation 09',
@@ -13,14 +15,18 @@ const regions = [
 
 type Props = {
 	className: string;
+	UserStore: typeof UserStore;
 };
 
+@inject('UserStore')
+@observer
 class Dashboard extends Component<Props> {
 	render() {
 		const { className } = this.props;
 		return (
 			<div className={className}>
 				<h1>Dashboard</h1>
+				<h5>Logged in as {this.props.UserStore.username}</h5>
 				<div className="regions-container">
 					{regions.map((region, i) => (
 						<span key={i}>
