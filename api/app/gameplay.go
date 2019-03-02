@@ -18,6 +18,10 @@ type CheckAnswer struct {
 type Stats struct {
 	TotalPlayers   int
 	AnswerAttempts int
+	MaxPoints      int
+	SameLevel      int
+	Leading        int
+	Trailing       int
 }
 
 func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
@@ -170,5 +174,23 @@ func (hawk *App) getStats(w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "Cant get total players", nil, http.StatusInternalServerError, w)
 		return
 	}
+
+	err = hawk.DB.Model(&User{}).Where("level = ?", currUser.Points).Count(&currStats.SameLevel).Error
+	if err != nil {
+		ResponseWriter(false, "Cant get players at par", nil, http.StatusInternalServerError, w)
+		return
+	}
+
+	err = hawk.DB.Model(&User{}).Where("level > ?", currUser.Points).Count(&currStats.Leading).Error
+	if err != nil {
+		ResponseWriter(false, "Cant get leading users", nil, http.StatusInternalServerError, w)
+		return
+	}
+
+	currStats.TotalPlayers += 1
+	currStats.Leading += 1
+	currStats.Trailing = currStats.TotalPlayers - (currStats.Leading + currStats.SameLevel)
+
+	ResponseWriter(true, "Current stats", currStats, http.StatusOK, w)
 
 }
