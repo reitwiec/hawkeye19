@@ -1,9 +1,10 @@
 package app
 
 import (
+	"time"
+
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
-	"time"
 )
 
 type Settings struct {
@@ -24,16 +25,16 @@ type Response struct {
 }
 
 type CurrUser struct {
-	ID       int
-	Username string
-	Email    string
-	Access   int
-	Region1  int
-	Region2  int
-	Region3  int
-	Region4  int
-	Region5  int
-	Points   int
+	ID       int    `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Access   int    `json:"access"`
+	Region1  int    `json:"region1"`
+	Region2  int    `json:"region2"`
+	Region3  int    `json:"region3"`
+	Region4  int    `json:"region4"`
+	Region5  int    `json:"region5"`
+	Points   int    `json:"points"`
 }
 
 type App struct {
