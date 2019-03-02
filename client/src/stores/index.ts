@@ -9,3 +9,5 @@ class User {
 	@observable region4 = '';
 	@observable region5 = '';
 }
+
+export default User;

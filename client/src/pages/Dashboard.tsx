@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 
@@ -11,7 +11,11 @@ const regions = [
 	'Ash Valley'
 ];
 
-class Dashboard extends Component {
+type Props = {
+	className: string;
+};
+
+class Dashboard extends Component<Props> {
 	render() {
 		const { className } = this.props;
 		return (
@@ -34,14 +38,15 @@ class Dashboard extends Component {
 	}
 }
 
-Dashboard.propTypes = {
-	className: PropTypes.string
-};
-
 export default styled(Dashboard)`
-	.regions-container {
+	.regions-container,
+	.attempts-container {
 		display: flex;
 		flex-flow: column nowrap;
+	}
+
+	.attempts-container {
+		margin-top: 1em;
 	}
 
 	.region-link {
