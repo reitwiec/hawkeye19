@@ -44,7 +44,10 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "Error in hash and salt", nil, http.StatusInternalServerError, w)
 		return
 	}
-
+	//@TODO: Fix yo shit. Default region is 0, Points 0, SideQuest(Yes it exists) is "0:0:0:0:0:0"
+	// Add regionUnlockOrder field and assign a random order
+	// create an array = ["1:2:3:4", "1:2:4:3"...all permutation with 1 at first place (6 hain)]
+	// And assign a random string to user.
 	newUser := User{
 		Username: strings.TrimSpace(user.Username),
 		Name:     strings.TrimSpace(user.Name),
@@ -74,8 +77,7 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 	}
 	tx.Commit()
 	fmt.Println("New user registered")
-	ResponseWriter(true, "New user registered", nil, http.StatusOK, w)
-}
+	ResponseWriter(true, "New user registered", nil, http.StatusOK, w)}
 
 func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 	//get username and password from user
@@ -94,6 +96,7 @@ func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 	user := User{}
 	//check if username exists
 	err = hawk.DB.Where("username = ?", strings.TrimSpace(formData.Username)).First(&user).Error
+	// @TODO: add recordnotfound to other DB queries as well
 	if gorm.IsRecordNotFoundError(err) {
 		fmt.Println("User not registered")
 		ResponseWriter(false, "User not registered", nil, http.StatusOK, w)

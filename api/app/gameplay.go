@@ -35,9 +35,12 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "Could not decode check answer struct", nil, http.StatusBadRequest, w)
 		return
 	}
+
+
 	//sanitize answer
 	checkAns.Answer = strings.TrimSpace(checkAns.Answer)
 	checkAns.Answer = strings.ToLower(checkAns.Answer)
+
 	//find actual answer
 	question := Question{}
 	err = hawk.DB.Where("level = ? AND region = ?", checkAns.Level, checkAns.RegionId).First(&question).Error
@@ -75,6 +78,7 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 		case 5:
 			currUser.Region5 += 1
 		}
+
 		user := User{}
 		hawk.DB.Where("ID = ?", currUser.ID).First(&user)
 		tx := hawk.DB.Begin()
