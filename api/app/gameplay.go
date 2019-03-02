@@ -53,7 +53,6 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 		Timestamp: time.Now(),
 	}
 	tx := hawk.DB.Begin()
-	hawk.DB.CreateTable(Attempt{})
 	err = tx.Create(&attempt).Error
 	if err != nil {
 		fmt.Println("Could not log answer attempt")
@@ -175,13 +174,13 @@ func (hawk *App) getStats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = hawk.DB.Model(&User{}).Where("level = ?", currUser.Points).Count(&currStats.SameLevel).Error
+	err = hawk.DB.Model(&User{}).Where("points = ?", currUser.Points).Count(&currStats.SameLevel).Error
 	if err != nil {
 		ResponseWriter(false, "Cant get players at par", nil, http.StatusInternalServerError, w)
 		return
 	}
 
-	err = hawk.DB.Model(&User{}).Where("level > ?", currUser.Points).Count(&currStats.Leading).Error
+	err = hawk.DB.Model(&User{}).Where("points > ?", currUser.Points).Count(&currStats.Leading).Error
 	if err != nil {
 		ResponseWriter(false, "Cant get leading users", nil, http.StatusInternalServerError, w)
 		return

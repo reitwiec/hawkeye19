@@ -19,9 +19,9 @@ func (hawk *App) LoadRoutes() {
 
 	//Gameplay routes
 
-	hawk.router.HandleFunc("/api/checkAnswer",hawk.createContext(hawk.checkAnswer)).Methods("POST")
-	hawk.router.HandleFunc("/api/getQuestion",hawk.createContext(hawk.getQuestion)).Methods("GET")
-	hawk.router.HandleFunc("/api/getHints",hawk.createContext(hawk.getHints)).Methods("GET")
+	hawk.router.HandleFunc("/api/checkAnswer", hawk.createContext(hawk.checkAnswer)).Methods("POST")
+	hawk.router.HandleFunc("/api/getQuestion", hawk.createContext(hawk.getQuestion)).Methods("GET")
+	hawk.router.HandleFunc("/api/getHints", hawk.createContext(hawk.getHints)).Methods("GET")
 	hawk.router.HandleFunc("/api/getStats", hawk.createContext(hawk.getStats)).Methods("GET")
 
 }

@@ -46,7 +46,13 @@ Block Key: %s
 
 func (hawk *App) migrate() {
 	fmt.Println("Creating Tables")
-	hawk.DB.CreateTable(&User{}, &Attempt{}, &Question{}, &Hint{}, &ForgotPassReq{})
+	hawk.DB.CreateTable(
+		&User{},
+		&Attempt{},
+		&Question{},
+		&Hint{},
+		&ForgotPassReq{},
+	)
 }
 
 func (hawk *App) Run(Args []string) {
