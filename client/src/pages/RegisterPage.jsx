@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import validator from 'validator';
 
 import { Button, TextField } from '../components';
 
@@ -15,13 +16,12 @@ const RegisterPage = ({ className }) => {
 		college: ''
 	});
 
-	const onChange = useCallback((name, value) => {
-		setformData(Object.assign(formData, { [name]: value }));
+	const onChange = useCallback((name, value, error) => {
+		setformData(Object.assign(formData, { [name]: { value, error } }));
+		console.log(formData);
 	}, []);
 
-	const onSubmit = useCallback(() => {
-		// TODO: Make API call
-	}, []);
+	const onSubmit = useCallback(() => {}, []);
 
 	return (
 		<div className={className}>
@@ -45,8 +45,16 @@ const RegisterPage = ({ className }) => {
 				type="email"
 				placeholder="Email"
 				onChange={onChange}
+				validation={v => (validator.isEmail(v) ? '' : 'Invalid Email')}
+				validateOnChange
 			/>
-			<TextField name="tel" placeholder="Phone Number" onChange={onChange} />
+			<TextField
+				name="tel"
+				placeholder="Mobile Number"
+				onChange={onChange}
+				validation={v => (validator.isMobilePhone(v) ? '' : 'Invalid Number')}
+				validateOnChange
+			/>
 			<TextField name="college" placeholder="College" onChange={onChange} />
 			<Button onClick={onSubmit}>Register</Button>
 		</div>
