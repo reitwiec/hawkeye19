@@ -103,9 +103,9 @@ type ResetPassReq struct {
 }
 
 type CheckUsername struct {
-	Username	string
+	Username string
 }
 
 type CheckEmail struct {
-	Email	string
+	Email string
 }

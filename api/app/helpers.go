@@ -70,7 +70,7 @@ func GetEnv(key, fallback string) string {
 	return fallback
 }
 
-func Sanitize (s string) string {
+func Sanitize(s string) string {
 	s = strings.Replace(s, " ", "", -1)
 	s = strings.ToLower(s)
 	return s
