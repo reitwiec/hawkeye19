@@ -45,15 +45,9 @@ func (hawk *App) createContext(next http.HandlerFunc) http.HandlerFunc {
 				fmt.Println("Database error " + err.Error())
 				return
 			}
-			currUser.Points = user.Points
-			currUser.Access = user.Access
-			currUser.Region1 = user.Region1
-			currUser.Region2 = user.Region2
-			currUser.Region3 = user.Region3
-			currUser.Region4 = user.Region4
-			currUser.Region5 = user.Region5
+			user.Password = ""
 			//create new context with CurrUser
-			ctx := context.WithValue(r.Context(), "CurrUser", currUser)
+			ctx := context.WithValue(r.Context(), "User", user)
 			r = r.WithContext(ctx)
 			next.ServeHTTP(w, r)
 		})

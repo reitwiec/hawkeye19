@@ -26,14 +26,6 @@ type Response struct {
 type CurrUser struct {
 	ID       int
 	Username string
-	Email    string
-	Access   int
-	Region1  int
-	Region2  int
-	Region3  int
-	Region4  int
-	Region5  int
-	Points   int
 }
 
 type App struct {

@@ -8,7 +8,6 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -87,15 +86,8 @@ func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 	//if matched, set session and current user
 	//else return not registered
 
-	//user already logged in if cookie already set
-	currUser, err := GetCurrUser(w, r)
-	if err == nil {
-		fmt.Println ("User already logged in")
-		ResponseWriter(false, "User aready logged in", nil, http.StatusOK, w)
-		return
-	}
 	formData := User{}
-	err = json.NewDecoder(r.Body).Decode(&formData)
+	err := json.NewDecoder(r.Body).Decode(&formData)
 	if err != nil {
 		fmt.Println("Could not decode login information")
 		ResponseWriter(false, "Could not decode login information", nil, http.StatusInternalServerError, w)
@@ -115,7 +107,7 @@ func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//compare passwords
-	err = bcrypt.CompareHashAndPassword([]byte(strings.TrimSpace(user.Password)), []byte(formData.Password))
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(Sanitize(formData.Password)))
 	if err != nil {
 		fmt.Println("Cannot log in, incorrect password")
 		ResponseWriter(false, "Incorrect password, cannot log in", nil, http.StatusUnauthorized, w)
@@ -123,17 +115,9 @@ func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 	}
 	//username and password have matched
 	//setting current user
-	currUser = CurrUser{
+	currUser := CurrUser{
 		ID:       user.ID,
 		Username: user.Username,
-		Email:    user.Email,
-		Access:   user.Access,
-		Region1:  user.Region1,
-		Region2:  user.Region2,
-		Region3:  user.Region3,
-		Region4:  user.Region4,
-		Region5:  user.Region5,
-		Points:   user.Points,
 	}
 	//set session for 1 day
 	err = SetSession(w, currUser, 86400)
@@ -162,7 +146,7 @@ func (hawk *App) forgotPassword(w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "Error in decoding form data, password not reset", nil, http.StatusBadRequest, w)
 		return
 	}
-	formData.Email = strings.TrimSpace(formData.Email)
+	formData.Email = Sanitize(formData.Email)
 	err = validate.Struct(formData)
 	if err != nil {
 		if _, ok := err.(*validator.InvalidValidationError); ok {
@@ -233,8 +217,8 @@ func (hawk *App) resetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//trim spaces
-	formData.Token = strings.TrimSpace(formData.Token)
-	formData.Password = strings.TrimSpace(formData.Password)
+	formData.Token = Sanitize(formData.Token)
+	formData.Password = Sanitize(formData.Password)
 	//hash the token
 	hash, err := bcrypt.GenerateFromPassword([]byte(formData.Token), 14)
 	hashedToken := string(hash)

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -26,7 +25,7 @@ type Stats struct {
 
 func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 	//obtain currUser from context
-	currUser := r.Context().Value("CurrUser").(CurrUser)
+	currUser := r.Context().Value("User").(User)
 	//obtain answer, regionId, level from request
 	checkAns := CheckAnswer{}
 	err := json.NewDecoder(r.Body).Decode(&checkAns)
@@ -37,8 +36,7 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//sanitize answer
-	checkAns.Answer = strings.TrimSpace(checkAns.Answer)
-	checkAns.Answer = strings.ToLower(checkAns.Answer)
+	checkAns.Answer = Sanitize(checkAns.Answer)
 
 	//find actual answer
 	question := Question{}
@@ -64,35 +62,28 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 	//if answer is correct
 	if status == CorrectAnswer {
 		//answer is correct
-		//update level in region
-		switch checkAns.RegionId {
-		case 1:
-			currUser.Region1 += 1
-		case 2:
-			currUser.Region2 += 1
-		case 3:
-			currUser.Region3 += 1
-		case 4:
-			currUser.Region4 += 1
-		case 5:
-			currUser.Region5 += 1
-		}
-
 		user := User{}
 		hawk.DB.Where("ID = ?", currUser.ID).First(&user)
 		tx := hawk.DB.Begin()
+		/*
+			switch checkAns.RegionId {
+			case 1:
+				err = tx.Model(&user).Update("Region1", checkAns.Level+1).Error
+			case 2:
+				err = tx.Model(&user).Update("Region2", checkAns.Level+1).Error
+			case 3:
+				err = tx.Model(&user).Update("Region3", checkAns.Level+1).Error
+			case 4:
+				err = tx.Model(&user).Update("Region4", checkAns.Level+1).Error
+			case 5:
+				err = tx.Model(&user).Update("Region5", checkAns.Level+1).Error
+			}
+		*/
 		region := "Region" + strconv.Itoa(checkAns.RegionId)
 		err = tx.Model(&user).Update(region, checkAns.Level+1).Error
 		if err != nil {
 			fmt.Println("Could not update level")
 			ResponseWriter(false, "Could not update level", nil, http.StatusInternalServerError, w)
-			tx.Rollback()
-		}
-		//set new cookie
-		err = SetSession(w, currUser, 86400)
-		if err != nil {
-			fmt.Println("Could not set cookie")
-			ResponseWriter(false, "Could not set cookie in checking answer", nil, http.StatusInternalServerError, w)
 			tx.Rollback()
 		}
 		//commit transaction
@@ -103,7 +94,7 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 
 func (hawk *App) getQuestion(w http.ResponseWriter, r *http.Request) {
 
-	currUser := r.Context().Value("CurrUser").(CurrUser)
+	currUser := r.Context().Value("User").(User)
 	//@TODO: Implement in middleware
 	if (currUser == CurrUser{}) {
 		ResponseWriter(false, "User not logged in.", nil, http.StatusNetworkAuthenticationRequired, w)
@@ -163,7 +154,7 @@ func (hawk *App) getHints(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hawk *App) getRecentTries(w http.ResponseWriter, r *http.Request) {
-	currUser := r.Context().Value("CurrUser").(CurrUser)
+	currUser := r.Context().Value("CurrUser").(User)
 	if currUser == (CurrUser{}) {
 		fmt.Println("Not logged in")
 		ResponseWriter(false, "Not logged in", nil, http.StatusNetworkAuthenticationRequired, w)
@@ -175,7 +166,7 @@ func (hawk *App) getRecentTries(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hawk *App) getStats(w http.ResponseWriter, r *http.Request) {
-	currUser := r.Context().Value("CurrUser").(CurrUser)
+	currUser := r.Context().Value("CurrUser").(User)
 	if (currUser == CurrUser{}) {
 		ResponseWriter(false, "User not logged in.", nil, http.StatusNetworkAuthenticationRequired, w)
 		return
