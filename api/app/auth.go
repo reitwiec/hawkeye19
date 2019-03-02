@@ -94,7 +94,7 @@ func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 	}
 	user := User{}
 	//check if username exists
-	err = hawk.DB.Where("name = ?", strings.TrimSpace(formData.Username)).First(&user).Error
+	err = hawk.DB.Where("username = ?", strings.TrimSpace(formData.Username)).First(&user).Error
 	if gorm.IsRecordNotFoundError(err) {
 		fmt.Println("User not registered")
 		ResponseWriter(false, "User not registered", nil, http.StatusOK, w)
@@ -116,7 +116,7 @@ func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 	currUser := CurrUser{
 		ID:       user.ID,
 		Username: user.Username,
-		Email:    user.Username,
+		Email:    user.Email,
 		Access:   user.Access,
 		Region1:  user.Region1,
 		Region2:  user.Region2,
@@ -132,7 +132,7 @@ func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Println("User logged in and session set")
-	ResponseWriter(true, "User logged in and session is set", nil, http.StatusOK, w)
+	ResponseWriter(true, "User logged in and session is set", currUser, http.StatusOK, w)
 }
 
 func (hawk *App) logout(w http.ResponseWriter, r *http.Request) {
@@ -246,7 +246,7 @@ func (hawk *App) resetPassword(w http.ResponseWriter, r *http.Request) {
 	//if difference in time > 24 hours delete token and return
 	t24, _ := time.ParseDuration("24h")
 	if time.Since(forgotPassReqUser.Timestamp) >= t24 {
-		fmt.Println("Token exprired")
+		fmt.Println("Token expired")
 		ResponseWriter(false, "Token Expired", nil, http.StatusOK, w)
 		//delete token
 		tx := hawk.DB.Begin()

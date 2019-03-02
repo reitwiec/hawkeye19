@@ -46,14 +46,20 @@ Block Key: %s
 
 func (hawk *App) migrate() {
 	fmt.Println("Creating Tables")
-	hawk.DB.CreateTable(&User{}, &Attempt{}, &Question{}, &Hint{})
+	hawk.DB.CreateTable(
+		&User{},
+		&Attempt{},
+		&Question{},
+		&Hint{},
+		&ForgotPassReq{},
+	)
 }
 
 func (hawk *App) Run(Args []string) {
 	var err error
 	hawk.DB, err = gorm.Open("mysql", Configuration.DBConn)
 	if err != nil {
-		log.Fatalf("Could not establish database connection, shutting down")
+		log.Fatalf("Could not establish database connection, shutting down\n\t" + err.Error())
 		return
 	}
 	fmt.Println("Database connection established")
@@ -66,7 +72,7 @@ func (hawk *App) Run(Args []string) {
 		}
 	}
 
-	fmt.Println("Server started!")
+	fmt.Println("Server started")
 	err = http.ListenAndServe(Configuration.ServerAddr, hawk.router)
 	if err != nil {
 		fmt.Println("Could not start server, shutting down")
