@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -67,4 +68,10 @@ func GetEnv(key, fallback string) string {
 		return value
 	}
 	return fallback
+}
+
+func Sanitize (s string) string {
+	s = strings.Replace(s, " ", "", -1)
+	s = strings.ToLower(s)
+	return s
 }

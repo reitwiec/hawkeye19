@@ -101,3 +101,11 @@ type ResetPassReq struct {
 	Token    string `json:"token"`
 	Password string `json:"password"`
 }
+
+type CheckUsername struct {
+	Username	string
+}
+
+type CheckEmail struct {
+	Email	string
+}

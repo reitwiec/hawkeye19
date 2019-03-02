@@ -163,6 +163,18 @@ func (hawk *App) getHints(w http.ResponseWriter, r *http.Request) {
 	ResponseWriter(true, "Hints fetched.", hints, http.StatusOK, w)
 }
 
+func (hawk *App) getRecentTries (w http.ResponseWriter, r *http.Request){
+	currUser := r.Context().Value ("CurrUser").(CurrUser)
+	if currUser == (CurrUser {}){
+		fmt.Println ("Not logged in")
+		ResponseWriter(false, "Not logged in", nil, http.StatusNetworkAuthenticationRequired, w)
+		return
+	}
+	//get user ID from context, region and level from GET request
+	keys, _ := r.URL.Query ()["question"]
+	fmt.Println (keys[0])
+}
+
 func (hawk *App) getStats(w http.ResponseWriter, r *http.Request) {
 	currUser := r.Context().Value("CurrUser").(CurrUser)
 	if (currUser == CurrUser{}) {

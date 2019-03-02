@@ -49,13 +49,13 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 	// create an array = ["1:2:3:4", "1:2:4:3"...all permutation with 1 at first place (6 hain)]
 	// And assign a random string to user.
 	newUser := User{
-		Username: strings.TrimSpace(user.Username),
-		Name:     strings.TrimSpace(user.Name),
+		Username: Sanitize(user.Username),
+		Name:     Sanitize(user.Name),
 		Password: string(hash),
 		Access:   0,
-		Email:    strings.TrimSpace(user.Email),
-		Tel:      strings.TrimSpace(user.Tel),
-		College:  strings.TrimSpace(user.College),
+		Email:    Sanitize(user.Email),
+		Tel:      Sanitize(user.Tel),
+		College:  Sanitize(user.College),
 		Region1:  1,
 		Region2:  1,
 		Region3:  1,
@@ -95,8 +95,8 @@ func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 	}
 	user := User{}
 	//check if username exists
-	err = hawk.DB.Where("username = ?", strings.TrimSpace(formData.Username)).First(&user).Error
 	// @TODO: add recordnotfound to other DB queries as well
+	err = hawk.DB.Where("username = ?", Sanitize(formData.Username)).First(&user).Error
 	if gorm.IsRecordNotFoundError(err) {
 		fmt.Println("User not registered")
 		ResponseWriter(false, "User not registered", nil, http.StatusOK, w)
@@ -289,5 +289,62 @@ func (hawk *App) resetPassword(w http.ResponseWriter, r *http.Request) {
 	tx.Commit()
 	fmt.Println("Password updated successfully")
 	ResponseWriter(true, "Password updated successfully", nil, http.StatusOK, w)
+	return
+}
+
+
+func (hawk *App) checkUsername (w http.ResponseWriter, r *http.Request){
+	 checkUsername := CheckUsername {}
+	 err := json.NewDecoder(r.Body).Decode (&checkUsername)
+	 if err != nil {
+	 	fmt.Println ("Error in decoding")
+	 	ResponseWriter(false, "Error in decoding", nil, http.StatusInternalServerError, w)
+		 return
+	 }
+	 //look for username in string
+	 checkUsername.Username = Sanitize(checkUsername.Username)
+	 err = hawk.DB.Where("Username = ?", checkUsername.Username).Find (&User{}).Error
+	 if err != nil {
+	 	if gorm.IsRecordNotFoundError(err){
+	 		fmt.Println ("Username available")
+	 		ResponseWriter(true, "Username available", nil, http.StatusOK, w)
+			return
+		} else {
+			fmt.Println ("Database error")
+			ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
+			return
+		}
+	 }
+	 //username exists
+	 fmt.Println ("Username taken")
+	 ResponseWriter(false, "Username taken", nil, http.StatusOK, w)
+	return
+}
+
+func (hawk *App) checkEmail (w http.ResponseWriter, r *http.Request){
+	checkEmail := CheckEmail {}
+	err := json.NewDecoder(r.Body).Decode (&checkEmail)
+	if err != nil {
+		fmt.Println ("Error in decoding")
+		ResponseWriter(false, "Error in decoding", nil, http.StatusInternalServerError, w)
+		return
+	}
+	//look for email in DB
+	checkEmail.Email = Sanitize(checkEmail.Email)
+	err = hawk.DB.Where("Email = ?", checkEmail.Email).Select ("email").Find (&User{}).Error
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err){
+			fmt.Println ("Email available")
+			ResponseWriter(true, "Email available", nil, http.StatusOK, w)
+			return
+		} else {
+			fmt.Println ("Database error")
+			ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
+			return
+		}
+	}
+	//username exists
+	fmt.Println ("Email registered")
+	ResponseWriter(false, "Email registered", nil, http.StatusOK, w)
 	return
 }
