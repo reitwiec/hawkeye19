@@ -3,6 +3,7 @@ package app
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/jinzhu/gorm"
 	"net/http"
 	"strconv"
 	"time"
@@ -59,11 +60,12 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "Could not log answer", nil, http.StatusInternalServerError, w)
 		return
 	}
+	tx.Commit()
 	//if answer is correct
 	if status == CorrectAnswer {
 		//answer is correct
-		user := User{}
-		hawk.DB.Where("ID = ?", currUser.ID).First(&user)
+		//user := User{}
+		//hawk.DB.Where("ID = ?", currUser.ID).First(&user)
 		tx := hawk.DB.Begin()
 		/*
 			switch checkAns.RegionId {
@@ -80,7 +82,7 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 			}
 		*/
 		region := "Region" + strconv.Itoa(checkAns.RegionId)
-		err = tx.Model(&user).Update(region, checkAns.Level+1).Error
+		err = tx.Model(&currUser).Update(region, checkAns.Level+1).Error
 		if err != nil {
 			fmt.Println("Could not update level")
 			ResponseWriter(false, "Could not update level", nil, http.StatusInternalServerError, w)
@@ -92,11 +94,33 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 	ResponseWriter(true, "Answer status", status, http.StatusOK, w)
 }
 
+func (hawk *App) getRecentTries(w http.ResponseWriter, r *http.Request) {
+	currUser := r.Context().Value ("User").(User)
+	//get user ID from context, region and level from GET request
+	keys, ok := r.URL.Query()["question"]
+	if !ok || len (keys) < 1 {
+		fmt.Println("Param absent")
+		ResponseWriter(false, "Param absent", nil, http.StatusBadRequest, w)
+		return
+	}
+	var answers []string
+	//query db for answers
+	err := hawk.DB.Model (&Attempt{}).Where ("question = ? AND user = ?", keys[0], currUser.ID).Order("timestamp desc").Pluck("answer", &answers).Error
+	if err != nil && !gorm.IsRecordNotFoundError(err) {
+			fmt.Println("Database error")
+			ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
+		return
+	}
+	ResponseWriter(true, "", answers, http.StatusOK, w)
+}
+
+
+
 func (hawk *App) getQuestion(w http.ResponseWriter, r *http.Request) {
 
 	currUser := r.Context().Value("User").(User)
 	//@TODO: Implement in middleware
-	if (currUser == CurrUser{}) {
+	if (currUser == User{}) {
 		ResponseWriter(false, "User not logged in.", nil, http.StatusNetworkAuthenticationRequired, w)
 		return
 	}
@@ -125,7 +149,7 @@ func (hawk *App) getQuestion(w http.ResponseWriter, r *http.Request) {
 
 	question := Question{}
 
-	err := hawk.DB.Where("level=? AND region=?", level, key).First(&question).Error
+	err := hawk.DB.Where("level=? AND region = ?", level, key).First(&question).Error
 	if err != nil {
 		ResponseWriter(false, "Could not fetch question.", nil, http.StatusInternalServerError, w)
 		return
@@ -153,21 +177,11 @@ func (hawk *App) getHints(w http.ResponseWriter, r *http.Request) {
 	ResponseWriter(true, "Hints fetched.", hints, http.StatusOK, w)
 }
 
-func (hawk *App) getRecentTries(w http.ResponseWriter, r *http.Request) {
-	currUser := r.Context().Value("CurrUser").(User)
-	if currUser == (CurrUser{}) {
-		fmt.Println("Not logged in")
-		ResponseWriter(false, "Not logged in", nil, http.StatusNetworkAuthenticationRequired, w)
-		return
-	}
-	//get user ID from context, region and level from GET request
-	keys, _ := r.URL.Query()["question"]
-	fmt.Println(keys[0])
-}
+
 
 func (hawk *App) getStats(w http.ResponseWriter, r *http.Request) {
-	currUser := r.Context().Value("CurrUser").(User)
-	if (currUser == CurrUser{}) {
+	currUser := r.Context().Value("User").(User)
+	if (currUser == User{}) {
 		ResponseWriter(false, "User not logged in.", nil, http.StatusNetworkAuthenticationRequired, w)
 		return
 	}
