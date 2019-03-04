@@ -43,28 +43,24 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "Error in hash and salt", nil, http.StatusInternalServerError, w)
 		return
 	}
-	//@TODO: Fix yo shit. Default region is 0, Points 0, SideQuest(Yes it exists) is "0:0:0:0:0:0"
-	// Add regionUnlockOrder field and assign a random order
-	// create an array = ["1:2:3:4", "1:2:4:3"...all permutation with 1 at first place (6 hain)]
-	// And assign a random string to user.
 	newUser := User{
-		Username: Sanitize(user.Username),
-		Name:     Sanitize(user.Name),
-		Password: string(hash),
-		Access:   0,
-		Email:    Sanitize(user.Email),
-		Tel:      Sanitize(user.Tel),
-		College:  Sanitize(user.College),
-		Region1:  0,
-		Region2:  0,
-		Region3:  0,
-		Region4:  0,
-		Region5:  0,
-		Banned:   0,
-		Points:   2,
+		Username:  Sanitize(user.Username),
+		Name:      Sanitize(user.Name),
+		Password:  string(hash),
+		Access:    0,
+		Email:     Sanitize(user.Email),
+		Tel:       Sanitize(user.Tel),
+		College:   Sanitize(user.College),
+		Region1:   0,
+		Region2:   0,
+		Region3:   0,
+		Region4:   0,
+		Region5:   0,
+		Banned:    0,
+		Points:    2,
+		SideQuest: SideQuestOrder(),
 	}
 	//load newUser to database
-	//hawk.DB.CreateTable (&User{})
 	//begin transaction
 	tx := hawk.DB.Begin()
 	err = tx.Create(&newUser).Error

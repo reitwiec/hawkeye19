@@ -15,6 +15,7 @@ const (
 	CorrectAnswer      = 1
 	CloseAnswer        = 2
 	IncorrectAnswer    = 3
+	LevelCount         = 6
 )
 
 func ResponseWriter(flag bool, msg string, data interface{}, status int, w http.ResponseWriter) {
@@ -74,4 +75,54 @@ func Sanitize(s string) string {
 	s = strings.Replace(s, " ", "", -1)
 	s = strings.ToLower(s)
 	return s
+}
+
+/*
+func SideQuestOrdere () [LevelCount] int {
+	var index int
+	a := [LevelCount]int{1,2,3,4,5,7}
+	//shuffle a
+	s1 := rand.NewSource(time.Now().UnixNano())
+	r1 := rand.New(s1)
+	for i:= 0 ; i < LevelCount; i++ {
+		//generate random index
+		index = r1.Intn(LevelCount)
+		//swap ith number with number at index
+		a[i], a[index] = a[index], a[i]
+	}
+	return a
+}
+*/
+func SideQuestOrder() string {
+	permutations := [24]string{
+		"1,2,3,4,5",
+		"1,3,2,4,5",
+		"1,4,2,3,5",
+		"1,2,4,3,5",
+		"1,3,4,2,5",
+		"1,4,3,2,5",
+		"1,4,3,5,2",
+		"1,3,4,5,2",
+		"1,5,4,3,2",
+		"1,4,5,3,2",
+		"1,3,5,4,2",
+		"1,5,3,4,2",
+		"1,5,2,4,3",
+		"1,2,5,4,3",
+		"1,4,5,2,3",
+		"1,5,4,2,3",
+		"1,2,4,5,3",
+		"1,4,2,5,3",
+		"1,3,2,5,4",
+		"1,2,3,5,4",
+		"1,5,3,2,4",
+		"1,3,5,2,4",
+		"1,2,5,3,4",
+		"1,5,2,3,4",
+	}
+	rand.Seed(time.Now().UnixNano())
+	//random integer to pick random string
+	n := rand.Intn(24)
+	return permutations[n]
+
 }

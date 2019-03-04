@@ -54,7 +54,7 @@ type User struct {
 	Region5   int    `json:"Region5"`
 	Banned    int    `json:"banned"`
 	Points    int    `json:"points"`
-	Sidequest string `json:"sidequest"`
+	SideQuest string `json:"sidequest"`
 }
 
 type Attempt struct {
