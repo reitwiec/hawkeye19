@@ -53,7 +53,6 @@ func (hawk *App) addHint(w http.ResponseWriter, r *http.Request) {
 		tx.Rollback()
 		return
 	}
-
 	tx.Commit()
-	ResponseWriter(true, "Question added", nil, http.StatusOK, w)
+	ResponseWriter(true, "Hint added", nil, http.StatusOK, w)
 }
