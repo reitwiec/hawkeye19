@@ -26,7 +26,6 @@ func (hawk *App) LoadRoutes() {
 	hawk.router.HandleFunc("/api/getStats", hawk.createContext(hawk.getStats, false)).Methods("GET")
 	hawk.router.HandleFunc("/api/getRecentTries", hawk.createContext(hawk.getRecentTries, false)).Methods("GET")
 
-
 	//Admin gameplay routes
 	hawk.router.HandleFunc("/api/addQuestion", hawk.createContext(hawk.addQuestion, true)).Methods("POST")
 	hawk.router.HandleFunc("/api/addHint", hawk.createContext(hawk.addHint, true)).Methods("POST")
@@ -66,4 +65,3 @@ func (hawk *App) createContext(next http.HandlerFunc, isAdmin bool) http.Handler
 			next.ServeHTTP(w, r)
 		})
 }
-
