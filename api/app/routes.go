@@ -20,26 +20,27 @@ func (hawk *App) LoadRoutes() {
 	hawk.router.HandleFunc("/api/checkEmail", hawk.checkEmail).Methods("POST")
 
 	//Gameplay routes
+	hawk.router.HandleFunc("/api/checkAnswer", hawk.createContext(hawk.checkAnswer, false)).Methods("POST")
+	hawk.router.HandleFunc("/api/getQuestion", hawk.createContext(hawk.getQuestion, false)).Methods("GET")
+	hawk.router.HandleFunc("/api/getHints", hawk.createContext(hawk.getHints, false)).Methods("GET")
+	hawk.router.HandleFunc("/api/getStats", hawk.createContext(hawk.getStats, false)).Methods("GET")
+	hawk.router.HandleFunc("/api/getRecentTries", hawk.createContext(hawk.getRecentTries, false)).Methods("GET")
 
-	hawk.router.HandleFunc("/api/checkAnswer", hawk.createContext(hawk.checkAnswer)).Methods("POST")
-	hawk.router.HandleFunc("/api/getQuestion", hawk.createContext(hawk.getQuestion)).Methods("GET")
-	hawk.router.HandleFunc("/api/getHints", hawk.createContext(hawk.getHints)).Methods("GET")
-	hawk.router.HandleFunc("/api/getStats", hawk.createContext(hawk.getStats)).Methods("GET")
-	hawk.router.HandleFunc("/api/getRecentTries", hawk.createContext(hawk.getRecentTries)).Methods("GET")
 
 	//Admin gameplay routes
-	hawk.router.HandleFunc("/api/addQuestion", hawk.addQuestion).Methods("POST")
-	hawk.router.HandleFunc("/api/addHint",hawk.addHint).Methods("POST")
+	hawk.router.HandleFunc("/api/addQuestion", hawk.createContext(hawk.addQuestion, true)).Methods("POST")
+	hawk.router.HandleFunc("/api/addHint", hawk.createContext(hawk.addHint, true)).Methods("POST")
+
 }
 
-func (hawk *App) createContext(next http.HandlerFunc) http.HandlerFunc {
+func (hawk *App) createContext(next http.HandlerFunc, isAdmin bool) http.HandlerFunc {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			//extract data from cookie
 			currUser, err := GetCurrUser(w, r)
 			if err != nil {
-				fmt.Println("Could not read cookie data")
-				ResponseWriter(false, "Could not read cookie data", nil, http.StatusInternalServerError, w)
+				fmt.Println("Not logged in")
+				ResponseWriter(false, "Not logged in", nil, http.StatusForbidden, w)
 				return
 			}
 			user := User{}
@@ -50,6 +51,15 @@ func (hawk *App) createContext(next http.HandlerFunc) http.HandlerFunc {
 				return
 			}
 			user.Password = ""
+			//for only admins
+			if isAdmin {
+				//check if Admin
+				if user.Access != 1 {
+					fmt.Println("Not an admin")
+					ResponseWriter(false, "Not an admin", user, http.StatusForbidden, w)
+					return
+				}
+			}
 			//create new context with CurrUser
 			ctx := context.WithValue(r.Context(), "User", user)
 			r = r.WithContext(ctx)
@@ -57,10 +67,3 @@ func (hawk *App) createContext(next http.HandlerFunc) http.HandlerFunc {
 		})
 }
 
-/*
-//sample method to see if context is working
-func (hawk *App) checkContext(w http.ResponseWriter, r *http.Request) {
-	currUser := r.Context().Value("CurrUser").(CurrUser)
-	fmt.Println(currUser)
-}
-*/

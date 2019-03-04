@@ -95,26 +95,24 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hawk *App) getRecentTries(w http.ResponseWriter, r *http.Request) {
-	currUser := r.Context().Value ("User").(User)
+	currUser := r.Context().Value("User").(User)
 	//get user ID from context, region and level from GET request
 	keys, ok := r.URL.Query()["question"]
-	if !ok || len (keys) < 1 {
+	if !ok || len(keys) < 1 {
 		fmt.Println("Param absent")
 		ResponseWriter(false, "Param absent", nil, http.StatusBadRequest, w)
 		return
 	}
 	var answers []string
 	//query db for answers
-	err := hawk.DB.Model (&Attempt{}).Where ("question = ? AND user = ?", keys[0], currUser.ID).Order("timestamp desc").Pluck("answer", &answers).Error
+	err := hawk.DB.Model(&Attempt{}).Where("question = ? AND user = ?", keys[0], currUser.ID).Order("timestamp desc").Pluck("answer", &answers).Error
 	if err != nil && !gorm.IsRecordNotFoundError(err) {
-			fmt.Println("Database error")
-			ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
+		fmt.Println("Database error")
+		ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
 		return
 	}
 	ResponseWriter(true, "", answers, http.StatusOK, w)
 }
-
-
 
 func (hawk *App) getQuestion(w http.ResponseWriter, r *http.Request) {
 
@@ -176,8 +174,6 @@ func (hawk *App) getHints(w http.ResponseWriter, r *http.Request) {
 
 	ResponseWriter(true, "Hints fetched.", hints, http.StatusOK, w)
 }
-
-
 
 func (hawk *App) getStats(w http.ResponseWriter, r *http.Request) {
 	currUser := r.Context().Value("User").(User)
