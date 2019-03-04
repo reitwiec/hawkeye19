@@ -209,3 +209,39 @@ func (hawk *App) getStats(w http.ResponseWriter, r *http.Request) {
 	ResponseWriter(true, "Current stats", currStats, http.StatusOK, w)
 
 }
+
+func (hawk *App) getSideQuestQuestion(w http.ResponseWriter, r *http.Request) {
+	currUser := r.Context().Value("User").(User)
+	//get sidequest level from request
+	keys, ok := r.URL.Query()["level"]
+	if !ok || len(keys) < 1 {
+		fmt.Println("Params missing")
+		ResponseWriter(false, "Param missing", nil, http.StatusBadRequest, w)
+		return
+	}
+	index, err := strconv.Atoi(keys[0])
+	index -= 1
+	if err != nil {
+		fmt.Println("Error in Atoi")
+		ResponseWriter(false, "Error in Atoi", nil, http.StatusInternalServerError, w)
+		return
+	}
+	level := currUser.SideQuest[index] - 48 //ascii to int
+	fmt.Println(level)
+	question := Question{}
+	err = hawk.DB.Where("region = ? AND level = ?", 0, level).First(&question).Error
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			fmt.Println("Question does not exist")
+			ResponseWriter(false, "Question does not exist", nil, http.StatusNotFound, w)
+			return
+		} else {
+			fmt.Println("Database error")
+			ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
+			return
+		}
+
+	}
+	question.Answer = ""
+	ResponseWriter(true, "Question fetched", question, http.StatusOK, w)
+}
