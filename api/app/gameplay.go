@@ -147,11 +147,12 @@ func (hawk *App) getQuestion(w http.ResponseWriter, r *http.Request) {
 
 	question := Question{}
 
-	err := hawk.DB.Where("level=? AND region = ?", level, key).First(&question).Error
+	err := hawk.DB.Select("id, question, add_info").Where("level=? AND region = ?", level, key).First(&question).Error
 	if err != nil {
 		ResponseWriter(false, "Could not fetch question.", nil, http.StatusInternalServerError, w)
 		return
 	}
+
 	ResponseWriter(true, "Question fetched.", question, http.StatusOK, w)
 }
 

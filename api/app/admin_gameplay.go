@@ -9,6 +9,12 @@ import (
 func (hawk *App) addQuestion(w http.ResponseWriter, r *http.Request) {
 	newQues := Question{}
 
+	currUser := r.Context().Value("User").(User)
+	if (currUser == User{}) {
+		ResponseWriter(false, "User not logged in.", nil, http.StatusNetworkAuthenticationRequired, w)
+		return
+	}
+
 	err := json.NewDecoder(r.Body).Decode(&newQues)
 	if err != nil {
 		ResponseWriter(false, "Could not parse request body", nil, http.StatusInternalServerError, w)
@@ -17,7 +23,7 @@ func (hawk *App) addQuestion(w http.ResponseWriter, r *http.Request) {
 
 	newQues.Question = strings.TrimSpace(newQues.Question)
 	newQues.AddInfo = strings.TrimSpace(newQues.AddInfo)
-	newQues.AddedBy = strings.TrimSpace(newQues.AddedBy)
+	newQues.AddedBy = currUser.Username
 	newQues.Answer = Sanitize(newQues.Answer)
 
 	tx := hawk.DB.Begin()
