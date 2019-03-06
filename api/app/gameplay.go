@@ -121,12 +121,11 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		if isRegionComplete {
-			//update unlock order
-			currUser.UnlockOrder = UpdateUnlockOrder(currUser.UnlockOrder, checkAns.RegionId)
+
 			//get next region
 			nextRegion := GetNextRegion(currUser.UnlockOrder)
+			currUser.UnlockOrder = UpdateUnlockOrder(currUser.UnlockOrder, int(nextRegion)-48)
 			//update DB with unlocked region
-			fmt.Println("next region " + string(nextRegion))
 			switch nextRegion {
 			case '2':
 				err = tx.Model(&currUser).Update("Region2", 1).Error
@@ -143,8 +142,7 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 				tx.Rollback()
 				return
 			}
-			fmt.Println(currUser.UnlockOrder)
-			//edit UnlockOrder string
+			//update UnlockOrder string in DB
 			err = tx.Model(&currUser).Update("unlock_order", currUser.UnlockOrder).Error
 			if err != nil {
 				fmt.Println("Could not unlock region in DB")

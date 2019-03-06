@@ -225,12 +225,12 @@ func SideQuestOrder() string {
 
 func UnlockOrder() string {
 	permutations := [6]string{
-		"1,2,3,4,5",
-		"1,2,4,3,5",
-		"1,3,2,4,5",
-		"1,3,4,2,5",
-		"1,4,2,3,5",
-		"1,4,3,2,5",
+		"0,2,3,4,5",
+		"0,2,4,3,5",
+		"0,3,2,4,5",
+		"0,3,4,2,5",
+		"0,4,2,3,5",
+		"0,4,3,2,5",
 	}
 	rand.Seed(time.Now().UnixNano())
 	n := rand.Intn(6)
