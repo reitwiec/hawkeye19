@@ -131,11 +131,11 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 			case '2':
 				err = tx.Model(&currUser).Update("Region2", 1).Error
 			case '3':
-				err = tx.Model(&currUser).Update("Region2", 1).Error
+				err = tx.Model(&currUser).Update("Region3", 1).Error
 			case '4':
-				err = tx.Model(&currUser).Update("Region2", 1).Error
+				err = tx.Model(&currUser).Update("Region4", 1).Error
 			case '5':
-				err = tx.Model(&currUser).Update("Region2", 1).Error
+				err = tx.Model(&currUser).Update("Region5", 1).Error
 			}
 			if err != nil {
 				fmt.Println("Could not unlock region in DB")
@@ -145,7 +145,6 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 			}
 			fmt.Println(currUser.UnlockOrder)
 			//edit UnlockOrder string
-			currUser.UnlockOrder = UpdateUnlockOrder(currUser.UnlockOrder, checkAns.RegionId)
 			err = tx.Model(&currUser).Update("unlock_order", currUser.UnlockOrder).Error
 			if err != nil {
 				fmt.Println("Could not unlock region in DB")
