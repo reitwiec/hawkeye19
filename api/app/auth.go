@@ -57,7 +57,7 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 		Region4:   0,
 		Region5:   0,
 		Banned:    0,
-		Points:    2,
+		Points:    0,
 		SideQuest: SideQuestOrder(),
 	}
 	//load newUser to database
