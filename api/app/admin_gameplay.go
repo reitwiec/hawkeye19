@@ -4,8 +4,13 @@ import (
 	"encoding/json"
 	"github.com/jinzhu/gorm"
 	"net/http"
+	"strconv"
 	"strings"
 )
+
+
+const quesPerPage = 15
+const quesLogsPerPage = 15
 
 func (hawk *App) addQuestion(w http.ResponseWriter, r *http.Request) {
 	newQues := Question{}
@@ -254,3 +259,48 @@ func (hawk *App) deactivateHint(w http.ResponseWriter, r *http.Request) {
 	tx.Commit()
 	ResponseWriter(true, "Hint deactivated", nil, http.StatusOK, w)
 }
+
+func (hawk *App) listQuestions(w http.ResponseWriter, r *http.Request) {
+	pgs, ok := r.URL.Query()["page"]
+	if !ok || len(pgs[0]) < 1 {
+		ResponseWriter(false, "Cant list questions", nil, http.StatusBadRequest, w)
+		return
+	}
+	page, err := strconv.Atoi(pgs[0])
+	if err != nil {
+		ResponseWriter(false, "Parameters not valid. Cannot list questions.", nil, http.StatusBadRequest, w)
+		return
+	}
+	var questions []Question
+	offset := (page - 1) * quesPerPage
+	err = hawk.DB.Find(&questions).Offset(offset).Order("level asc").Limit(quesPerPage).Error
+	if err != nil {
+		ResponseWriter(false, "Cannot list questions", nil, http.StatusInternalServerError, w)
+		return
+	}
+	ResponseWriter(true, "List of questions", questions, http.StatusOK, w)
+
+}
+
+func (hawk *App) listHints(w http.ResponseWriter, r *http.Request) {
+	keys, ok := r.URL.Query()["id"]
+	if !ok || len(keys[0]) < 1 {
+		ResponseWriter(false, "Cant list hints", nil, http.StatusBadRequest, w)
+		return
+	}
+	id, err := strconv.Atoi(keys[0])
+	if err != nil {
+		ResponseWriter(false, "Parameters not valid Cannot display hints.", nil, http.StatusBadRequest, w)
+		return
+	}
+	var hints []Hint
+	err = hawk.DB.Where(" id = ?", id).Find(&hints).Error
+	if err != nil {
+		ResponseWriter(false, "Cannot list hints", nil, http.StatusInternalServerError, w)
+		return
+	}
+	ResponseWriter(true, "List of hints", hints, http.StatusOK, w)
+
+}
+
+
