@@ -50,10 +50,12 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 	unlockOrder := ""
 	count := 1
 
-	perm := rand.Perm(5)
+	perm := rand.Perm(4)
 	fmt.Println(perm)
 	for i := range perm{
-		unlockOrder += strconv.Itoa(i+1)
+		fmt.Println(i)
+		i = perm[i]+2
+		unlockOrder += strconv.Itoa(i)
 		if count != len(perm) {
 			unlockOrder += ":"
 		}
@@ -69,7 +71,7 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 		Email:     Sanitize(user.Email),
 		Tel:       Sanitize(user.Tel),
 		College:   Sanitize(user.College),
-		Region1:   0,
+		Region1:   1,
 		Region2:   0,
 		Region3:   0,
 		Region4:   0,
