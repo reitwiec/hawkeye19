@@ -81,7 +81,7 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 	//if answer is correct
 	if status == CorrectAnswer {
 		//answer is correct
-		//update currUser
+		//update currUser level
 		tx := hawk.DB.Begin()
 		region := "Region" + strconv.Itoa(checkAns.RegionId)
 		err = tx.Model(&currUser).Update(region, checkAns.Level+1).Error
@@ -91,29 +91,25 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 			tx.Rollback()
 		}
 
-		//update currUser level and unlock region if needed
+		//unlock region
 		isRegionComplete := false
 		switch checkAns.RegionId {
 		case 1:
 			if currUser.Region1 == RegionComplete {
-				//nextRegion = GetNextRegion(currUser.UnlockOrder)
 				isRegionComplete = true
 			}
 		case 2:
 			if currUser.Region2 == RegionComplete {
 				isRegionComplete = true
-				//nextRegion = GetNextRegion(currUser.UnlockOrder)
 
 			}
 		case 3:
 			if currUser.Region3 == RegionComplete {
 				isRegionComplete = true
-				//nextRegion = GetNextRegion(currUser.UnlockOrder)
 			}
 		case 4:
 			if currUser.Region4 == RegionComplete {
 				isRegionComplete = true
-				//nextRegion = GetNextRegion(currUser.UnlockOrder)
 			}
 		case 5:
 			if currUser.Region5 == RegionComplete {
