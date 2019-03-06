@@ -8,6 +8,7 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -61,13 +62,13 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 	*/
 
 	newUser := User{
-		Username:    Sanitize(user.Username),
-		Name:        Sanitize(user.Name),
+		Username:    strings.TrimSpace(user.Username),
+		Name:        strings.TrimSpace(user.Name),
 		Password:    string(hash),
 		Access:      0,
 		Email:       Sanitize(user.Email),
 		Tel:         Sanitize(user.Tel),
-		College:     Sanitize(user.College),
+		College:     strings.TrimSpace(user.College),
 		Region1:     1,
 		Region2:     0,
 		Region3:     0,

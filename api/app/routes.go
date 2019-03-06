@@ -44,6 +44,14 @@ func (hawk *App) LoadRoutes() {
 	hawk.router.HandleFunc("/api/listQuestions", hawk.createContext(hawk.listQuestions, true)).Methods("GET")
 	hawk.router.HandleFunc("/api/listHints", hawk.createContext(hawk.listHints, true)).Methods("GET")
 
+	//Admin User routes
+	hawk.router.HandleFunc("/api/editUser", hawk.createContext(hawk.editUser, true)).Methods("POST")
+	hawk.router.HandleFunc("/api/deleteUser", hawk.createContext(hawk.deleteUser, true)).Methods("GET")
+	hawk.router.HandleFunc("/api/banUser", hawk.createContext(hawk.banUser, true)).Methods("GET")
+	hawk.router.HandleFunc("/api/unbanUser", hawk.createContext(hawk.unbanUser, true)).Methods("GET")
+	hawk.router.HandleFunc("/api/makeAdmin", hawk.createContext(hawk.makeAdmin, true)).Methods("GET")
+	hawk.router.HandleFunc("/api/revokeAdmin", hawk.createContext(hawk.revokeAdmin, true)).Methods("GET")
+
 }
 
 func (hawk *App) createContext(next http.HandlerFunc, isAdmin bool) http.HandlerFunc {
