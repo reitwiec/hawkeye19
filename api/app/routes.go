@@ -30,6 +30,12 @@ func (hawk *App) LoadRoutes() {
 	//Admin gameplay routes
 	hawk.router.HandleFunc("/api/addQuestion", hawk.createContext(hawk.addQuestion, true)).Methods("POST")
 	hawk.router.HandleFunc("/api/addHint", hawk.createContext(hawk.addHint, true)).Methods("POST")
+	hawk.router.HandleFunc("/api/editQuestion", hawk.createContext(hawk.editQuestion, true)).Methods("POST")
+	hawk.router.HandleFunc("/api/editHint", hawk.createContext(hawk.editHint, true)).Methods("POST")
+	hawk.router.HandleFunc("/api/deleteHint", hawk.createContext(hawk.deleteHint, true)).Methods("GET")
+	hawk.router.HandleFunc("/api/deleteQuestion", hawk.createContext(hawk.deleteQuestion, true)).Methods("GET")
+	hawk.router.HandleFunc("/api/activateHint", hawk.createContext(hawk.activateHint, true)).Methods("PUT")
+	hawk.router.HandleFunc("/api/deactivateHint", hawk.createContext(hawk.deactivateHint, true)).Methods("PUT")
 
 }
 

@@ -46,39 +46,37 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
 	unlockOrder := ""
 	count := 1
 
 	perm := rand.Perm(3)
 	fmt.Println(perm)
-	for i := range perm{
+	for i := range perm {
 		fmt.Println(i)
-		i = perm[i]+2
+		i = perm[i] + 2
 		unlockOrder += strconv.Itoa(i)
 		if count != len(perm) {
 			unlockOrder += ":"
 		}
-		count ++
+		count++
 	}
 
-
 	newUser := User{
-		Username:  Sanitize(user.Username),
-		Name:      Sanitize(user.Name),
-		Password:  string(hash),
-		Access:    0,
-		Email:     Sanitize(user.Email),
-		Tel:       Sanitize(user.Tel),
-		College:   Sanitize(user.College),
-		Region1:   1,
-		Region2:   0,
-		Region3:   0,
-		Region4:   0,
-		Region5:   0,
-		Banned:    0,
-		Points:    0,
-		SideQuest: SideQuestOrder(),
+		Username:    Sanitize(user.Username),
+		Name:        Sanitize(user.Name),
+		Password:    string(hash),
+		Access:      0,
+		Email:       Sanitize(user.Email),
+		Tel:         Sanitize(user.Tel),
+		College:     Sanitize(user.College),
+		Region1:     1,
+		Region2:     0,
+		Region3:     0,
+		Region4:     0,
+		Region5:     0,
+		Banned:      0,
+		Points:      0,
+		SideQuest:   SideQuestOrder(),
 		UnlockOrder: unlockOrder,
 	}
 	//load newUser to database
