@@ -8,7 +8,6 @@ import (
 	"strings"
 )
 
-
 const quesPerPage = 15
 const quesLogsPerPage = 15
 
@@ -78,12 +77,12 @@ func (hawk *App) editQuestion(w http.ResponseWriter, r *http.Request) {
 	}
 
 	newQues.Question = strings.TrimSpace(newQues.Question)
-	newQues.Answer = strings.TrimSpace(newQues.Answer)
+	newQues.Answer = Sanitize(newQues.Answer)
 	newQues.AddInfo = strings.TrimSpace(newQues.AddInfo)
 
 	q := Question{}
 	tx := hawk.DB.Begin()
-	err = tx.Where("level = ? and region=?", newQues.Level,newQues.Region).First(&q).Error
+	err = tx.Where("level = ? and region = ?", newQues.Level, newQues.Region).First(&q).Error
 	if err != nil {
 		tx.Rollback()
 		if gorm.IsRecordNotFoundError(err) {
@@ -300,7 +299,4 @@ func (hawk *App) listHints(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ResponseWriter(true, "List of hints", hints, http.StatusOK, w)
-
 }
-
-

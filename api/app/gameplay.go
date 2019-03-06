@@ -24,16 +24,32 @@ type Stats struct {
 	Trailing       int
 }
 
+const RegionComplete = 4 //no of questions + 1
+
 func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 	//obtain currUser from context
 	currUser := r.Context().Value("User").(User)
-	//obtain answer, regionId, level from request
+	//obtain answer, regionId from request
 	checkAns := CheckAnswer{}
 	err := json.NewDecoder(r.Body).Decode(&checkAns)
 	if err != nil {
 		fmt.Println("Could not decode checkAnswer struct " + err.Error())
 		ResponseWriter(false, "Could not decode check answer struct", nil, http.StatusBadRequest, w)
 		return
+	}
+	//get level from currUser
+	switch checkAns.RegionId {
+	case 1:
+		checkAns.Level = currUser.Region1
+	case 2:
+		checkAns.Level = currUser.Region2
+	case 3:
+		checkAns.Level = currUser.Region3
+	case 4:
+		checkAns.Level = currUser.Region4
+	case 5:
+		checkAns.Level = currUser.Region5
+
 	}
 
 	//sanitize answer
@@ -58,29 +74,15 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("Could not log answer attempt")
 		ResponseWriter(false, "Could not log answer", nil, http.StatusInternalServerError, w)
+		tx.Rollback()
 		return
 	}
 	tx.Commit()
 	//if answer is correct
 	if status == CorrectAnswer {
 		//answer is correct
-		//user := User{}
-		//hawk.DB.Where("ID = ?", currUser.ID).First(&user)
+		//update currUser
 		tx := hawk.DB.Begin()
-		/*
-			switch checkAns.RegionId {
-			case 1:
-				err = tx.Model(&user).Update("Region1", checkAns.Level+1).Error
-			case 2:
-				err = tx.Model(&user).Update("Region2", checkAns.Level+1).Error
-			case 3:
-				err = tx.Model(&user).Update("Region3", checkAns.Level+1).Error
-			case 4:
-				err = tx.Model(&user).Update("Region4", checkAns.Level+1).Error
-			case 5:
-				err = tx.Model(&user).Update("Region5", checkAns.Level+1).Error
-			}
-		*/
 		region := "Region" + strconv.Itoa(checkAns.RegionId)
 		err = tx.Model(&currUser).Update(region, checkAns.Level+1).Error
 		if err != nil {
@@ -88,8 +90,72 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 			ResponseWriter(false, "Could not update level", nil, http.StatusInternalServerError, w)
 			tx.Rollback()
 		}
-		//commit transaction
+
+		//update currUser level and unlock region if needed
+		isRegionComplete := false
+		switch checkAns.RegionId {
+		case 1:
+			if currUser.Region1 == RegionComplete {
+				//nextRegion = GetNextRegion(currUser.UnlockOrder)
+				isRegionComplete = true
+			}
+		case 2:
+			if currUser.Region2 == RegionComplete {
+				isRegionComplete = true
+				//nextRegion = GetNextRegion(currUser.UnlockOrder)
+
+			}
+		case 3:
+			if currUser.Region3 == RegionComplete {
+				isRegionComplete = true
+				//nextRegion = GetNextRegion(currUser.UnlockOrder)
+			}
+		case 4:
+			if currUser.Region4 == RegionComplete {
+				isRegionComplete = true
+				//nextRegion = GetNextRegion(currUser.UnlockOrder)
+			}
+		case 5:
+			if currUser.Region5 == RegionComplete {
+				//unlock linear gameplay
+			}
+		}
+		if isRegionComplete {
+			//update unlock order
+			currUser.UnlockOrder = UpdateUnlockOrder(currUser.UnlockOrder, checkAns.RegionId)
+			//get next region
+			nextRegion := GetNextRegion(currUser.UnlockOrder)
+			//update DB with unlocked region
+			fmt.Println("next region " + string(nextRegion))
+			switch nextRegion {
+			case '2':
+				err = tx.Model(&currUser).Update("Region2", 1).Error
+			case '3':
+				err = tx.Model(&currUser).Update("Region2", 1).Error
+			case '4':
+				err = tx.Model(&currUser).Update("Region2", 1).Error
+			case '5':
+				err = tx.Model(&currUser).Update("Region2", 1).Error
+			}
+			if err != nil {
+				fmt.Println("Could not unlock region in DB")
+				ResponseWriter(false, "Could not unlock region in DB", nil, http.StatusInternalServerError, w)
+				tx.Rollback()
+				return
+			}
+			fmt.Println(currUser.UnlockOrder)
+			//edit UnlockOrder string
+			currUser.UnlockOrder = UpdateUnlockOrder(currUser.UnlockOrder, checkAns.RegionId)
+			err = tx.Model(&currUser).Update("unlock_order", currUser.UnlockOrder).Error
+			if err != nil {
+				fmt.Println("Could not unlock region in DB")
+				ResponseWriter(false, "Could not unlock region in DB", nil, http.StatusInternalServerError, w)
+				tx.Rollback()
+				return
+			}
+		}
 		tx.Commit()
+
 	}
 	ResponseWriter(true, "Answer status", status, http.StatusOK, w)
 }

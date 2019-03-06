@@ -7,9 +7,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/go-playground/validator.v9"
 	"log"
-	"math/rand"
 	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -45,21 +43,22 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "Error in hash and salt", nil, http.StatusInternalServerError, w)
 		return
 	}
+	/*
+		unlockOrder := ""
+		count := 1
 
-	unlockOrder := ""
-	count := 1
-
-	perm := rand.Perm(3)
-	fmt.Println(perm)
-	for i := range perm {
-		fmt.Println(i)
-		i = perm[i] + 2
-		unlockOrder += strconv.Itoa(i)
-		if count != len(perm) {
-			unlockOrder += ":"
+		perm := rand.Perm(3)
+		fmt.Println(perm)
+		for i := range perm {
+			fmt.Println(i)
+			i = perm[i] + 2
+			unlockOrder += strconv.Itoa(i)
+			if count != len(perm) {
+				unlockOrder += ":"
+			}
+			count++
 		}
-		count++
-	}
+	*/
 
 	newUser := User{
 		Username:    Sanitize(user.Username),
@@ -77,8 +76,9 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 		Banned:      0,
 		Points:      0,
 		SideQuest:   SideQuestOrder(),
-		UnlockOrder: unlockOrder,
+		UnlockOrder: UnlockOrder(),
 	}
+	fmt.Println("Unlock order " + newUser.UnlockOrder)
 	//load newUser to database
 	//begin transaction
 	tx := hawk.DB.Begin()

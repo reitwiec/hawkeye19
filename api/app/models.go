@@ -54,7 +54,7 @@ type User struct {
 	Region5     int    `json:"region5"`
 	Banned      int    `json:"banned"`
 	Points      int    `json:"points"`
-	SideQuest   string `json:"sidequest"`
+	SideQuest   string `json:"sideQuest"`
 	UnlockOrder string `json:"unlockOrder"`
 }
 

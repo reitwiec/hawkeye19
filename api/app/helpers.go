@@ -2,6 +2,7 @@ package app
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/texttheater/golang-levenshtein/levenshtein"
 	"math/rand"
 	"net/http"
@@ -220,5 +221,43 @@ func SideQuestOrder() string {
 	//random integer to pick random string
 	n := rand.Intn(120)
 	return permutations[n]
+}
 
+func UnlockOrder() string {
+	permutations := [6]string{
+		"1,2,3,4,5",
+		"1,2,4,3,5",
+		"1,3,2,4,5",
+		"1,3,4,2,5",
+		"1,4,2,3,5",
+		"1,4,3,2,5",
+	}
+	rand.Seed(time.Now().UnixNano())
+	n := rand.Intn(6)
+	return permutations[n]
+}
+
+func GetNextRegion(unlockOrder string) uint8 {
+	//traverse till non 0 number is encountered
+	l := len(unlockOrder)
+	for i := 0; i < l; i++ {
+		if unlockOrder[i] != ',' && unlockOrder[i] != '0' {
+			fmt.Println(unlockOrder[i])
+			return unlockOrder[i]
+		}
+	}
+	return '0' //error
+}
+
+func UpdateUnlockOrder(unlockOrder string, region int) string {
+	l := len(unlockOrder)
+	var updatedUO string
+	aregion := uint8(region + 48)
+	for i := 0; i < l; i++ {
+		if unlockOrder[i] == aregion {
+			updatedUO = unlockOrder[:i] + "0" + unlockOrder[i+1:]
+			break
+		}
+	}
+	return updatedUO
 }
