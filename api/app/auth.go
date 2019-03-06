@@ -50,7 +50,7 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 	unlockOrder := ""
 	count := 1
 
-	perm := rand.Perm(4)
+	perm := rand.Perm(3)
 	fmt.Println(perm)
 	for i := range perm{
 		fmt.Println(i)
