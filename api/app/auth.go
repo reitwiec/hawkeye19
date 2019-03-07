@@ -3,13 +3,14 @@ package app
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/jinzhu/gorm"
-	"golang.org/x/crypto/bcrypt"
-	"gopkg.in/go-playground/validator.v9"
 	"log"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/jinzhu/gorm"
+	"golang.org/x/crypto/bcrypt"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {

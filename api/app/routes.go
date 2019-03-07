@@ -3,8 +3,9 @@ package app
 import (
 	"context"
 	"fmt"
-	"github.com/gorilla/mux"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 func (hawk *App) LoadRoutes() {

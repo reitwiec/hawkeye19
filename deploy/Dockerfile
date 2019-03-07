@@ -1,0 +1,5 @@
+FROM golang:latest
+
+ARG HAWK_GH_ACCESS_TOKEN
+
+RUN echo ${HAWK_GH_ACCESS_TOKEN}
