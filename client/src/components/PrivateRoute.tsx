@@ -5,13 +5,18 @@ import Logout from './Logout';
 
 const redirect = '/';
 
-const PrivateRoute = ({ component: Component, auth, ...restProps }) => (
+const PrivateRoute = ({
+	component: Component,
+	showLogout = true,
+	auth,
+	...restProps
+}) => (
 	<Route
 		{...restProps}
 		render={props =>
 			auth() ? (
 				<>
-					<Logout />
+					{showLogout ? <Logout /> : null}
 					<Component {...props} />
 				</>
 			) : (
