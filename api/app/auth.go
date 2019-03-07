@@ -45,25 +45,43 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "Error in hash and salt", nil, http.StatusInternalServerError, w)
 		return
 	}
+	/*
+		unlockOrder := ""
+		count := 1
+
+		perm := rand.Perm(3)
+		fmt.Println(perm)
+		for i := range perm {
+			fmt.Println(i)
+			i = perm[i] + 2
+			unlockOrder += strconv.Itoa(i)
+			if count != len(perm) {
+				unlockOrder += ":"
+			}
+			count++
+		}
+	*/
 
 	newUser := User{
-		Username: strings.TrimSpace(user.Username),
-		Name:     strings.TrimSpace(user.Name),
-		Password: string(hash),
-		Access:   0,
-		Email:    strings.TrimSpace(user.Email),
-		Tel:      strings.TrimSpace(user.Tel),
-		College:  strings.TrimSpace(user.College),
-		Region1:  0,
-		Region2:  0,
-		Region3:  0,
-		Region4:  0,
-		Region5:  0,
-		Banned:   0,
-		Points:   2,
+		Username:    strings.TrimSpace(user.Username),
+		Name:        strings.TrimSpace(user.Name),
+		Password:    string(hash),
+		Access:      0,
+		Email:       Sanitize(user.Email),
+		Tel:         Sanitize(user.Tel),
+		College:     strings.TrimSpace(user.College),
+		Region1:     1,
+		Region2:     0,
+		Region3:     0,
+		Region4:     0,
+		Region5:     0,
+		Banned:      0,
+		Points:      0,
+		SideQuest:   SideQuestOrder(),
+		UnlockOrder: UnlockOrder(),
 	}
+	fmt.Println("Unlock order " + newUser.UnlockOrder)
 	//load newUser to database
-	//hawk.DB.CreateTable (&User{})
 	//begin transaction
 	tx := hawk.DB.Begin()
 	err = tx.Create(&newUser).Error
@@ -84,7 +102,7 @@ func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 	//compare password
 	//if matched, set session and current user
 	//else return not registered
-	//@TODO: check if already logged in
+
 	formData := User{}
 	err := json.NewDecoder(r.Body).Decode(&formData)
 	if err != nil {
@@ -94,7 +112,8 @@ func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 	}
 	user := User{}
 	//check if username exists
-	err = hawk.DB.Where("username = ?", strings.TrimSpace(formData.Username)).First(&user).Error
+	// @TODO: add recordnotfound to other DB queries as well
+	err = hawk.DB.Where("username = ?", Sanitize(formData.Username)).First(&user).Error
 	if gorm.IsRecordNotFoundError(err) {
 		fmt.Println("User not registered")
 		ResponseWriter(false, "User not registered", nil, http.StatusOK, w)
@@ -105,7 +124,7 @@ func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//compare passwords
-	err = bcrypt.CompareHashAndPassword([]byte(strings.TrimSpace(user.Password)), []byte(formData.Password))
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(Sanitize(formData.Password)))
 	if err != nil {
 		fmt.Println("Cannot log in, incorrect password")
 		ResponseWriter(false, "Incorrect password, cannot log in", nil, http.StatusUnauthorized, w)
@@ -116,14 +135,6 @@ func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 	currUser := CurrUser{
 		ID:       user.ID,
 		Username: user.Username,
-		Email:    user.Email,
-		Access:   user.Access,
-		Region1:  user.Region1,
-		Region2:  user.Region2,
-		Region3:  user.Region3,
-		Region4:  user.Region4,
-		Region5:  user.Region5,
-		Points:   user.Points,
 	}
 	//set session for 1 day
 	err = SetSession(w, currUser, 86400)
@@ -152,7 +163,7 @@ func (hawk *App) forgotPassword(w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "Error in decoding form data, password not reset", nil, http.StatusBadRequest, w)
 		return
 	}
-	formData.Email = strings.TrimSpace(formData.Email)
+	formData.Email = Sanitize(formData.Email)
 	err = validate.Struct(formData)
 	if err != nil {
 		if _, ok := err.(*validator.InvalidValidationError); ok {
@@ -223,8 +234,8 @@ func (hawk *App) resetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//trim spaces
-	formData.Token = strings.TrimSpace(formData.Token)
-	formData.Password = strings.TrimSpace(formData.Password)
+	formData.Token = Sanitize(formData.Token)
+	formData.Password = Sanitize(formData.Password)
 	//hash the token
 	hash, err := bcrypt.GenerateFromPassword([]byte(formData.Token), 14)
 	hashedToken := string(hash)
@@ -287,5 +298,61 @@ func (hawk *App) resetPassword(w http.ResponseWriter, r *http.Request) {
 	tx.Commit()
 	fmt.Println("Password updated successfully")
 	ResponseWriter(true, "Password updated successfully", nil, http.StatusOK, w)
+	return
+}
+
+func (hawk *App) checkUsername(w http.ResponseWriter, r *http.Request) {
+	checkUsername := CheckUsername{}
+	err := json.NewDecoder(r.Body).Decode(&checkUsername)
+	if err != nil {
+		fmt.Println("Error in decoding")
+		ResponseWriter(false, "Error in decoding", nil, http.StatusInternalServerError, w)
+		return
+	}
+	//look for username in string
+	checkUsername.Username = Sanitize(checkUsername.Username)
+	err = hawk.DB.Where("Username = ?", checkUsername.Username).Find(&User{}).Error
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			fmt.Println("Username available")
+			ResponseWriter(true, "Username available", nil, http.StatusOK, w)
+			return
+		} else {
+			fmt.Println("Database error")
+			ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
+			return
+		}
+	}
+	//username exists
+	fmt.Println("Username taken")
+	ResponseWriter(false, "Username taken", nil, http.StatusOK, w)
+	return
+}
+
+func (hawk *App) checkEmail(w http.ResponseWriter, r *http.Request) {
+	checkEmail := CheckEmail{}
+	err := json.NewDecoder(r.Body).Decode(&checkEmail)
+	if err != nil {
+		fmt.Println("Error in decoding")
+		ResponseWriter(false, "Error in decoding", nil, http.StatusInternalServerError, w)
+		return
+	}
+	//look for email in DB
+	checkEmail.Email = Sanitize(checkEmail.Email)
+	err = hawk.DB.Where("Email = ?", checkEmail.Email).Select("email").Find(&User{}).Error
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			fmt.Println("Email available")
+			ResponseWriter(true, "Email available", nil, http.StatusOK, w)
+			return
+		} else {
+			fmt.Println("Database error")
+			ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
+			return
+		}
+	}
+	//username exists
+	fmt.Println("Email registered")
+	ResponseWriter(false, "Email registered", nil, http.StatusOK, w)
 	return
 }

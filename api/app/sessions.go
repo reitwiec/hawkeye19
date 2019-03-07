@@ -41,11 +41,8 @@ func GetCurrUser(w http.ResponseWriter, r *http.Request) (CurrUser, error) {
 	}
 	value := CurrUser{}
 	if err = CookieHandler.Decode("session", c.Value, &value); err == nil {
-		//ResponseWriter(true, "Returning current user", value, http.StatusOK, w)
-		fmt.Println("Returning curruser")
 		return value, nil
 	} else {
-		//ResponseWriter(false, "Could not read cookie data", nil, http.StatusInternalServerError, w)
 		fmt.Println("Could not read cookie data\n" + err.Error())
 		return CurrUser{}, err
 	}

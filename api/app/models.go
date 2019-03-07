@@ -56,14 +56,15 @@ type User struct {
 	College string `gorm:"not null" json:"college" validate:"alpha,required"`
 
 	//Gameplay status
-	Region1   int    `json:"Region1"`
-	Region2   int    `json:"Region2"`
-	Region3   int    `json:"Region3"`
-	Region4   int    `json:"Region4"`
-	Region5   int    `json:"Region5"`
-	Banned    int    `json:"banned"`
-	Points    int    `json:"points"`
-	Sidequest string `json:"sidequest"`
+	Region1     int    `json:"region1"`
+	Region2     int    `json:"region2"`
+	Region3     int    `json:"region3"`
+	Region4     int    `json:"Region4"`
+	Region5     int    `json:"region5"`
+	Banned      int    `json:"banned"`
+	Points      int    `json:"points"`
+	SideQuest   string `json:"sideQuest"`
+	UnlockOrder string `json:"unlockOrder"`
 }
 
 type Attempt struct {
@@ -101,4 +102,12 @@ type ForgotPassReq struct {
 type ResetPassReq struct {
 	Token    string `json:"token"`
 	Password string `json:"password"`
+}
+
+type CheckUsername struct {
+	Username string
+}
+
+type CheckEmail struct {
+	Email string
 }
