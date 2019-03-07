@@ -18,6 +18,17 @@ class UserStore {
 		this.region4 = user.region4;
 		this.region5 = user.region5;
 	};
+
+	@action clear = () => {
+		this.username = '';
+		this.email = '';
+		this.region1 = '';
+		this.region2 = '';
+		this.region3 = '';
+		this.region4 = '';
+		this.region5 = '';
+	};
 }
 
 export default new UserStore();
+export { UserStore };

@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import { inject, observer } from 'mobx-react';
 
-import { UserStore } from '../stores';
+import { UserStore } from '../stores/User';
 
 const regions = [
 	'Installation 09',
@@ -15,7 +15,7 @@ const regions = [
 
 type Props = {
 	className: string;
-	UserStore: typeof UserStore;
+	UserStore: UserStore;
 };
 
 @inject('UserStore')

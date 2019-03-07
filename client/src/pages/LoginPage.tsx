@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import { observer, inject } from 'mobx-react';
-import { UserStore } from '../stores';
+import { UserStore } from '../stores/User';
 
 import { Link, Redirect } from 'react-router-dom';
 
@@ -9,7 +9,7 @@ import { Button, TextField } from '../components';
 
 type Props = {
 	className: string;
-	UserStore: typeof UserStore;
+	UserStore: UserStore;
 };
 
 @inject('UserStore')
