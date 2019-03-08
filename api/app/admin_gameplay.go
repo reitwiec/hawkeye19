@@ -2,6 +2,7 @@ package app
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/jinzhu/gorm"
 	"net/http"
 	"strconv"
@@ -10,6 +11,7 @@ import (
 
 const quesPerPage = 15
 const quesLogsPerPage = 15
+
 
 func (hawk *App) addQuestion(w http.ResponseWriter, r *http.Request) {
 	newQues := Question{}
@@ -299,4 +301,32 @@ func (hawk *App) listHints(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ResponseWriter(true, "List of hints", hints, http.StatusOK, w)
+}
+
+
+func (hawk *App) questionLogs(w http.ResponseWriter, r *http.Request) {
+	keys := r.URL.Query()
+	if len(keys) < 2 {
+		ResponseWriter(false, "Cannot log answers.", nil, http.StatusBadRequest, w)
+		return
+	}
+	page, err := strconv.Atoi(keys["page"][0])
+	if err != nil {
+		ResponseWriter(false, "Parameters not valid.Cannot list answers", nil, http.StatusBadRequest, w)
+		return
+	}
+	id, err := strconv.Atoi(keys["question"][0])
+	if err != nil {
+		ResponseWriter(false, "Parameters not valid. Cannot list answers.", nil, http.StatusBadRequest, w)
+		return
+	}
+	var answers []Attempt
+	offset := (page - 1) * perPage
+	err = hawk.DB.Where("question = ?", id).Order("timestamp desc").Offset(offset).Limit(perPage).Find(&answers).Error
+	if err != nil {
+		fmt.Println("Database error")
+		ResponseWriter(false, "Cannot log answers", nil, http.StatusInternalServerError, w)
+		return
+	}
+	ResponseWriter(true, "Requested answer logs", answers, http.StatusOK, w)
 }

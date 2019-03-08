@@ -44,6 +44,7 @@ func (hawk *App) LoadRoutes() {
 	hawk.router.HandleFunc("/api/deactivateHint", hawk.createContext(hawk.deactivateHint, true)).Methods("PUT")
 	hawk.router.HandleFunc("/api/listQuestions", hawk.createContext(hawk.listQuestions, true)).Methods("GET")
 	hawk.router.HandleFunc("/api/listHints", hawk.createContext(hawk.listHints, true)).Methods("GET")
+	hawk.router.HandleFunc("/api/questionLogs", hawk.createContext(hawk.questionLogs, true)).Methods("GET")
 
 	//Admin User routes
 	hawk.router.HandleFunc("/api/editUser", hawk.createContext(hawk.editUser, true)).Methods("POST")
