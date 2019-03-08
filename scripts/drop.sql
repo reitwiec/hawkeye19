@@ -4,3 +4,4 @@ DROP TABLE users;
 DROP TABLE attempts;
 DROP TABLE hints;
 DROP TABLE questions;
+DROP TABLE forgot_pass_reqs;
