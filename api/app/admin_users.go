@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	"net/http"
+	"strconv"
 	"strings"
 )
+
+const perPage = 10
 
 func (hawk *App) editUser(w http.ResponseWriter, r *http.Request) {
 	userData := User{}
@@ -175,4 +178,81 @@ func (hawk *App) revokeAdmin(w http.ResponseWriter, r *http.Request) {
 	}
 	tx.Commit()
 	ResponseWriter(true, "Admin revoked", nil, http.StatusOK, w)
+}
+
+
+func (hawk *App) listUsers(w http.ResponseWriter, r *http.Request) {
+	pgs, ok := r.URL.Query()["page"]
+	if !ok || len(pgs[0]) < 1 {
+		ResponseWriter(false, "Cant list users", nil, http.StatusBadRequest, w)
+		return
+	}
+	page, err := strconv.Atoi(pgs[0])
+	var users []User
+	offset := (page - 1) * perPage
+	err = hawk.DB.Select("id, username, name, email, tel, college, banned, points, region1, region2, region3, region4, region5, unlock_order, side_quest").Limit(perPage).Offset(offset).Order("region5 desc").Find(&users).Error
+	if err != nil {
+		fmt.Println ("Error in database")
+		ResponseWriter(false, "Cannot list users", nil, http.StatusInternalServerError, w)
+		return
+	}
+	ResponseWriter(true, "List of users", users, http.StatusOK, w)
+}
+
+
+func (hawk *App) searchUser(w http.ResponseWriter, r *http.Request) {
+	user, ok := r.URL.Query()["user"]
+	if !ok || len(user[0]) < 1 {
+		ResponseWriter(false, "Cant find user", nil, http.StatusBadRequest, w)
+		return
+	}
+	user[0] = strings.TrimSpace(user[0])
+	var users []User
+	arg := "%" + user[0] + "%"
+	err := hawk.DB.Select("id, username, name, email, tel, college, banned, points, region1, region2, region3, region4, region5, unlock_order, side_quest").Where("username LIKE ? OR name LIKE ?", arg, arg).Find(&users).Error
+	if err != nil {
+		fmt.Println("Cannot find user")
+		ResponseWriter(false, "Cannot find user", nil, http.StatusInternalServerError, w)
+		return
+	}
+	/*
+	var nameMatches []User
+	err = hawk.DB.Select("id, username, name, email, tel, college, banned, points, region1, region2, region3, region4, region5").Where("name LIKE ?", "%"+user[0]+"%").Find(&nameMatches).Error
+	if err != nil {
+		fmt.Println ("Cannot find user")
+		ResponseWriter(false, "Cannot find user", nil, http.StatusInternalServerError, w)
+		return
+	}
+
+	users = append(users, nameMatches...)
+	*/
+	ResponseWriter(true, "User found", users, http.StatusOK, w)
+}
+
+func (hawk *App) userLogs(w http.ResponseWriter, r *http.Request) {
+	keys := r.URL.Query()
+	if len(keys) < 2 {
+		ResponseWriter(false, "Cannot log questions. Less Parame", nil, http.StatusBadRequest, w)
+		return
+	}
+	page, err := strconv.Atoi(keys["page"][0])
+	if err != nil {
+		ResponseWriter(false, "Parameters not valid. Cannot log answers.", nil, http.StatusBadRequest, w)
+		return
+	}
+	id, err := strconv.Atoi(keys["id"][0])
+	if err != nil {
+		ResponseWriter(false, "Parameters not valid. Cannot log answers.", nil, http.StatusBadRequest, w)
+		return
+	}
+	var answers []Attempt
+	offset := (page - 1) * perPage
+
+	err = hawk.DB.Where("user = ? ", id).Order("id desc").Offset(offset).Limit(perPage).Find(&answers).Error
+	if err != nil {
+		fmt.Println ("Cannot log questions")
+		ResponseWriter(false, "Cannot log questions", nil, http.StatusInternalServerError, w)
+		return
+	}
+	ResponseWriter(true, "Requested answer logs", answers, http.StatusOK, w)
 }

@@ -52,7 +52,9 @@ func (hawk *App) LoadRoutes() {
 	hawk.router.HandleFunc("/api/unbanUser", hawk.createContext(hawk.unbanUser, true)).Methods("GET")
 	hawk.router.HandleFunc("/api/makeAdmin", hawk.createContext(hawk.makeAdmin, true)).Methods("GET")
 	hawk.router.HandleFunc("/api/revokeAdmin", hawk.createContext(hawk.revokeAdmin, true)).Methods("GET")
-
+	hawk.router.HandleFunc("/api/listUsers", hawk.createContext(hawk.listUsers, true)).Methods("GET")
+	hawk.router.HandleFunc("/api/searchUser", hawk.createContext(hawk.searchUser, true)).Methods("GET")
+	hawk.router.HandleFunc("/api/userLogs", hawk.createContext(hawk.userLogs, true)).Methods("GET")
 }
 
 func (hawk *App) createContext(next http.HandlerFunc, isAdmin bool) http.HandlerFunc {
