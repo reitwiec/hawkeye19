@@ -12,7 +12,6 @@ import (
 const quesPerPage = 15
 const quesLogsPerPage = 15
 
-
 func (hawk *App) addQuestion(w http.ResponseWriter, r *http.Request) {
 	newQues := Question{}
 
@@ -302,7 +301,6 @@ func (hawk *App) listHints(w http.ResponseWriter, r *http.Request) {
 	}
 	ResponseWriter(true, "List of hints", hints, http.StatusOK, w)
 }
-
 
 func (hawk *App) questionLogs(w http.ResponseWriter, r *http.Request) {
 	keys := r.URL.Query()

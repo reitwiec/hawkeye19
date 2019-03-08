@@ -180,7 +180,6 @@ func (hawk *App) revokeAdmin(w http.ResponseWriter, r *http.Request) {
 	ResponseWriter(true, "Admin revoked", nil, http.StatusOK, w)
 }
 
-
 func (hawk *App) listUsers(w http.ResponseWriter, r *http.Request) {
 	pgs, ok := r.URL.Query()["page"]
 	if !ok || len(pgs[0]) < 1 {
@@ -192,13 +191,12 @@ func (hawk *App) listUsers(w http.ResponseWriter, r *http.Request) {
 	offset := (page - 1) * perPage
 	err = hawk.DB.Select("id, username, name, email, tel, college, banned, points, region1, region2, region3, region4, region5, unlock_order, side_quest").Limit(perPage).Offset(offset).Order("region5 desc").Find(&users).Error
 	if err != nil {
-		fmt.Println ("Error in database")
+		fmt.Println("Error in database")
 		ResponseWriter(false, "Cannot list users", nil, http.StatusInternalServerError, w)
 		return
 	}
 	ResponseWriter(true, "List of users", users, http.StatusOK, w)
 }
-
 
 func (hawk *App) searchUser(w http.ResponseWriter, r *http.Request) {
 	user, ok := r.URL.Query()["user"]
@@ -216,15 +214,15 @@ func (hawk *App) searchUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	/*
-	var nameMatches []User
-	err = hawk.DB.Select("id, username, name, email, tel, college, banned, points, region1, region2, region3, region4, region5").Where("name LIKE ?", "%"+user[0]+"%").Find(&nameMatches).Error
-	if err != nil {
-		fmt.Println ("Cannot find user")
-		ResponseWriter(false, "Cannot find user", nil, http.StatusInternalServerError, w)
-		return
-	}
+		var nameMatches []User
+		err = hawk.DB.Select("id, username, name, email, tel, college, banned, points, region1, region2, region3, region4, region5").Where("name LIKE ?", "%"+user[0]+"%").Find(&nameMatches).Error
+		if err != nil {
+			fmt.Println ("Cannot find user")
+			ResponseWriter(false, "Cannot find user", nil, http.StatusInternalServerError, w)
+			return
+		}
 
-	users = append(users, nameMatches...)
+		users = append(users, nameMatches...)
 	*/
 	ResponseWriter(true, "User found", users, http.StatusOK, w)
 }
@@ -250,7 +248,7 @@ func (hawk *App) userLogs(w http.ResponseWriter, r *http.Request) {
 
 	err = hawk.DB.Where("user = ? ", id).Order("id desc").Offset(offset).Limit(perPage).Find(&answers).Error
 	if err != nil {
-		fmt.Println ("Cannot log questions")
+		fmt.Println("Cannot log questions")
 		ResponseWriter(false, "Cannot log questions", nil, http.StatusInternalServerError, w)
 		return
 	}

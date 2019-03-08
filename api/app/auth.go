@@ -45,22 +45,6 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "Error in hash and salt", nil, http.StatusInternalServerError, w)
 		return
 	}
-	/*
-		unlockOrder := ""
-		count := 1
-
-		perm := rand.Perm(3)
-		fmt.Println(perm)
-		for i := range perm {
-			fmt.Println(i)
-			i = perm[i] + 2
-			unlockOrder += strconv.Itoa(i)
-			if count != len(perm) {
-				unlockOrder += ":"
-			}
-			count++
-		}
-	*/
 
 	newUser := User{
 		Username:    strings.TrimSpace(user.Username),
@@ -82,7 +66,6 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println("Unlock order " + newUser.UnlockOrder)
 	//load newUser to database
-	//begin transaction
 	tx := hawk.DB.Begin()
 	err = tx.Create(&newUser).Error
 	if err != nil {
@@ -164,7 +147,7 @@ func (hawk *App) forgotPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	formData.Email = Sanitize(formData.Email)
-	/*
+
 	err = validate.Struct(formData)
 	if err != nil {
 		if _, ok := err.(*validator.InvalidValidationError); ok {
@@ -179,7 +162,6 @@ func (hawk *App) forgotPassword(w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "Bad Request", fields, http.StatusBadRequest, w)
 		return
 	}
-	*/
 
 	user := User{}
 	//check if email exists in database
@@ -195,6 +177,7 @@ func (hawk *App) forgotPassword(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	//id in forgot_pass_reqs = id in users
 	formData.ID = user.ID
 	formData.Timestamp = time.Now()
 	//generate token for password reset
@@ -209,8 +192,8 @@ func (hawk *App) forgotPassword(w http.ResponseWriter, r *http.Request) {
 	formData.Token = string(hashedToken)
 	tx := hawk.DB.Begin()
 	//err = tx.Create(&formData).Error
-	err = tx.Save(&formData).Error
 	//err = tx.Model (&ForgotPassReq{}).Where("email = ?", formData.Email).Update("token, timestamp", formData.Token, formData.Timestamp).Error
+	err = tx.Save(&formData).Error
 	if err != nil {
 		fmt.Println("Database error")
 		ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
@@ -227,8 +210,8 @@ func (hawk *App) forgotPassword(w http.ResponseWriter, r *http.Request) {
 func (hawk *App) resetPassword(w http.ResponseWriter, r *http.Request) {
 	//obtain email from request
 	//check if it exists in database
-	//compare hashes of token and database token
-	//if it is same ask for new password and update in db, and delete from password reset table
+	//compare hash of token and database token
+	//if it is same ask for new password and update in db, and delete from forgot_pass_reqs table
 	//else abort
 	formData := ResetPassReq{}
 	err := json.NewDecoder(r.Body).Decode(&formData)
@@ -241,9 +224,7 @@ func (hawk *App) resetPassword(w http.ResponseWriter, r *http.Request) {
 	formData.Token = strings.TrimSpace(formData.Token)
 	formData.Password = strings.TrimSpace(formData.Password)
 	formData.Email = strings.TrimSpace(formData.Email)
-	//hash the token
-	//hash, err := bcrypt.GenerateFromPassword([]byte(formData.Token), 14)
-	//hashedToken := string(hash)
+
 	forgotPassReqUser := ForgotPassReq{}
 	//check if email token exists in database and obtain the associated token
 	err = hawk.DB.Where("email = ?", formData.Email).First(&forgotPassReqUser).Error
@@ -288,21 +269,17 @@ func (hawk *App) resetPassword(w http.ResponseWriter, r *http.Request) {
 	//create hash for new password
 	hash, err := bcrypt.GenerateFromPassword([]byte(formData.Password), 14)
 	//update the users database
-	//forgotPassUser := User{}
-	//hawk.DB.Where("Email = ? ", forgotPassReqUser.Email).First(&forgotPassUser)
 	tx := hawk.DB.Begin()
-	err = tx.Model(&User{}).Where ("email = ?", forgotPassReqUser.Email).Update("Password", string(hash)).Error
+	err = tx.Model(&User{}).Where("email = ?", forgotPassReqUser.Email).Update("Password", string(hash)).Error
 	if err != nil {
 		fmt.Println("Could not update password")
 		ResponseWriter(false, "Could not update password", nil, http.StatusInternalServerError, w)
 		tx.Rollback()
 		return
 	}
-	//tx.Commit()
-	//tx.Begin()
-	//delete token entry from forgotpassrequser
-	//err = tx.Delete(&forgotPassReqUser).Error
-	err = tx.Where("email = ?", forgotPassReqUser.Email).Delete(ForgotPassReq{}).Error
+	//delete token entry from forgot_pass_reqs
+	err = tx.Delete(&forgotPassReqUser).Error
+	//err = tx.Where("email = ?", forgotPassReqUser.Email).Delete(ForgotPassReq{}).Error
 	if err != nil {
 		fmt.Println("Could not delete token entry")
 		ResponseWriter(false, "Could not delete token entry", nil, http.StatusInternalServerError, w)
