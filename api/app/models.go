@@ -94,8 +94,9 @@ type Hint struct {
 }
 
 type ForgotPassReq struct {
-	ID        string    `gorm:"primary_key" json:"id"`
-	Email     string    `gorm:"not null" json:"email" validate:"email"`
+	ID        int    	`gorm:"primary_key" json:"id"`
+	Token 	  string	`gorm:"not null" json:"token"`
+	Email     string    `gorm:"not null;unique" json:"email" validate:"email"`
 	Timestamp time.Time `json:"timestamp"`
 }
 

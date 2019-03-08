@@ -164,6 +164,7 @@ func (hawk *App) forgotPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	formData.Email = Sanitize(formData.Email)
+	/*
 	err = validate.Struct(formData)
 	if err != nil {
 		if _, ok := err.(*validator.InvalidValidationError); ok {
@@ -178,9 +179,11 @@ func (hawk *App) forgotPassword(w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "Bad Request", fields, http.StatusBadRequest, w)
 		return
 	}
+	*/
 
+	user := User{}
 	//check if email exists in database
-	err = hawk.DB.Where("email = ?", formData.Email).First(&User{}).Error
+	err = hawk.DB.Where("email = ?", formData.Email).First(&user).Error
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			fmt.Println("Email not found")
@@ -192,7 +195,7 @@ func (hawk *App) forgotPassword(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-
+	formData.ID = user.ID
 	formData.Timestamp = time.Now()
 	//generate token for password reset
 	token := RandomString()
@@ -202,10 +205,12 @@ func (hawk *App) forgotPassword(w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "Could not hash token", nil, http.StatusInternalServerError, w)
 		return
 	}
-	//add to database
-	formData.ID = string(hashedToken)
+	//add to database //update if email already in database
+	formData.Token = string(hashedToken)
 	tx := hawk.DB.Begin()
-	err = tx.Create(&formData).Error
+	//err = tx.Create(&formData).Error
+	err = tx.Save(&formData).Error
+	//err = tx.Model (&ForgotPassReq{}).Where("email = ?", formData.Email).Update("token, timestamp", formData.Token, formData.Timestamp).Error
 	if err != nil {
 		fmt.Println("Database error")
 		ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
@@ -220,12 +225,11 @@ func (hawk *App) forgotPassword(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hawk *App) resetPassword(w http.ResponseWriter, r *http.Request) {
-	//obtain id from request
-	//hash it
+	//obtain email from request
 	//check if it exists in database
-	//if it does ask for new password and update in db, and delete from password reset table
+	//compare hashes of token and database token
+	//if it is same ask for new password and update in db, and delete from password reset table
 	//else abort
-	//obtain token from request
 	formData := ResetPassReq{}
 	err := json.NewDecoder(r.Body).Decode(&formData)
 	if err != nil {
@@ -256,7 +260,7 @@ func (hawk *App) resetPassword(w http.ResponseWriter, r *http.Request) {
 	}
 	//Email exists in database
 	//match tokens
-	err = bcrypt.CompareHashAndPassword([]byte(forgotPassReqUser.ID), []byte(formData.Token))
+	err = bcrypt.CompareHashAndPassword([]byte(forgotPassReqUser.Token), []byte(formData.Token))
 	if err != nil {
 		fmt.Println("Incorrect token")
 		ResponseWriter(false, "Incorrect token", nil, http.StatusOK, w)
@@ -284,10 +288,10 @@ func (hawk *App) resetPassword(w http.ResponseWriter, r *http.Request) {
 	//create hash for new password
 	hash, err := bcrypt.GenerateFromPassword([]byte(formData.Password), 14)
 	//update the users database
-	forgotPassUser := User{}
-	hawk.DB.Where("Email = ? ", forgotPassReqUser.Email).First(&forgotPassUser)
+	//forgotPassUser := User{}
+	//hawk.DB.Where("Email = ? ", forgotPassReqUser.Email).First(&forgotPassUser)
 	tx := hawk.DB.Begin()
-	err = tx.Model(&forgotPassUser).Update("Password", string(hash)).Error
+	err = tx.Model(&User{}).Where ("email = ?", forgotPassReqUser.Email).Update("Password", string(hash)).Error
 	if err != nil {
 		fmt.Println("Could not update password")
 		ResponseWriter(false, "Could not update password", nil, http.StatusInternalServerError, w)
