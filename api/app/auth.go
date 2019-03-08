@@ -124,7 +124,7 @@ func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//compare passwords
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(Sanitize(formData.Password)))
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(strings.TrimSpace(formData.Password)))
 	if err != nil {
 		fmt.Println("Cannot log in, incorrect password")
 		ResponseWriter(false, "Incorrect password, cannot log in", nil, http.StatusUnauthorized, w)
@@ -180,7 +180,7 @@ func (hawk *App) forgotPassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//check if email exists in database
-	err = hawk.DB.Where("email = ?", formData.Email).First(&formData).Error
+	err = hawk.DB.Where("email = ?", formData.Email).First(&User{}).Error
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			fmt.Println("Email not found")
@@ -234,18 +234,19 @@ func (hawk *App) resetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//trim spaces
-	formData.Token = Sanitize(formData.Token)
-	formData.Password = Sanitize(formData.Password)
+	formData.Token = strings.TrimSpace(formData.Token)
+	formData.Password = strings.TrimSpace(formData.Password)
+	formData.Email = strings.TrimSpace(formData.Email)
 	//hash the token
-	hash, err := bcrypt.GenerateFromPassword([]byte(formData.Token), 14)
-	hashedToken := string(hash)
+	//hash, err := bcrypt.GenerateFromPassword([]byte(formData.Token), 14)
+	//hashedToken := string(hash)
 	forgotPassReqUser := ForgotPassReq{}
-	//check if hashed token exists in database
-	err = hawk.DB.Where("ID = ?", hashedToken).First(&forgotPassReqUser).Error
+	//check if email token exists in database and obtain the associated token
+	err = hawk.DB.Where("email = ?", formData.Email).First(&forgotPassReqUser).Error
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			fmt.Println("Incorrect token")
-			ResponseWriter(false, "Incorrect token", nil, http.StatusOK, w)
+			fmt.Println("Incorrect email")
+			ResponseWriter(false, "Incorrect email", nil, http.StatusOK, w)
 			return
 		} else {
 			fmt.Println("Database error")
@@ -253,7 +254,15 @@ func (hawk *App) resetPassword(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	//hashed token exists in database
+	//Email exists in database
+	//match tokens
+	err = bcrypt.CompareHashAndPassword([]byte(forgotPassReqUser.ID), []byte(formData.Token))
+	if err != nil {
+		fmt.Println("Incorrect token")
+		ResponseWriter(false, "Incorrect token", nil, http.StatusOK, w)
+		return
+	}
+	//tokens match
 	//if difference in time > 24 hours delete token and return
 	t24, _ := time.ParseDuration("24h")
 	if time.Since(forgotPassReqUser.Timestamp) >= t24 {
@@ -273,7 +282,7 @@ func (hawk *App) resetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//create hash for new password
-	hash, err = bcrypt.GenerateFromPassword([]byte(formData.Password), 14)
+	hash, err := bcrypt.GenerateFromPassword([]byte(formData.Password), 14)
 	//update the users database
 	forgotPassUser := User{}
 	hawk.DB.Where("Email = ? ", forgotPassReqUser.Email).First(&forgotPassUser)
@@ -285,13 +294,14 @@ func (hawk *App) resetPassword(w http.ResponseWriter, r *http.Request) {
 		tx.Rollback()
 		return
 	}
-	tx.Commit()
-	tx.Begin()
+	//tx.Commit()
+	//tx.Begin()
 	//delete token entry from forgotpassrequser
-	err = tx.Delete(&forgotPassReqUser).Error
+	//err = tx.Delete(&forgotPassReqUser).Error
+	err = tx.Where("email = ?", forgotPassReqUser.Email).Delete(ForgotPassReq{}).Error
 	if err != nil {
-		fmt.Println("Could not delete token entry but password updated")
-		ResponseWriter(false, "Could not delete token entry but password updated", nil, http.StatusInternalServerError, w)
+		fmt.Println("Could not delete token entry")
+		ResponseWriter(false, "Could not delete token entry", nil, http.StatusInternalServerError, w)
 		tx.Rollback()
 		return
 	}
