@@ -21,17 +21,14 @@ func (hawk *App) LoadRoutes() {
 	hawk.router.HandleFunc("/api/checkEmail", hawk.checkEmail).Methods("POST")
 
 	//Gameplay routes
-	hawk.router.HandleFunc("/api/checkAnswer", hawk.createContext(hawk.checkAnswer, false)).Methods("POST")
+	hawk.router.HandleFunc("/api/checkAnswer", hawk.createContext(hawk.checkRegionAnswer, false)).Methods("POST")
 	hawk.router.HandleFunc("/api/getQuestion", hawk.createContext(hawk.getQuestion, false)).Methods("GET")
 	hawk.router.HandleFunc("/api/getHints", hawk.createContext(hawk.getHints, false)).Methods("GET")
 	hawk.router.HandleFunc("/api/getStats", hawk.createContext(hawk.getStats, false)).Methods("GET")
 	hawk.router.HandleFunc("/api/getRecentTries", hawk.createContext(hawk.getRecentTries, false)).Methods("GET")
 	hawk.router.HandleFunc("/api/getSideQuestQuestion", hawk.createContext(hawk.getSideQuestQuestion, false)).Methods("GET")
-	hawk.router.HandleFunc("/api/checkAnswer", hawk.createContext(hawk.checkAnswer, false)).Methods("POST")
-	hawk.router.HandleFunc("/api/getQuestion", hawk.createContext(hawk.getQuestion, false)).Methods("GET")
-	hawk.router.HandleFunc("/api/getHints", hawk.createContext(hawk.getHints, false)).Methods("GET")
-	hawk.router.HandleFunc("/api/getStats", hawk.createContext(hawk.getStats, false)).Methods("GET")
-	hawk.router.HandleFunc("/api/getRecentTries", hawk.createContext(hawk.getRecentTries, false)).Methods("GET")
+	hawk.router.HandleFunc("/api/checkLinearAnswer", hawk.createContext(hawk.checkLinearAnswer, false)).Methods("POST")
+
 
 	//Admin gameplay routes
 	hawk.router.HandleFunc("/api/addQuestion", hawk.createContext(hawk.addQuestion, true)).Methods("POST")

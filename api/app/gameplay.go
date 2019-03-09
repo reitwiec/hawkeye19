@@ -24,9 +24,12 @@ type Stats struct {
 	Trailing       int
 }
 
-const RegionComplete = 4 //no of questions + 1
+const (
+	RegionComplete = 4 //no of questions + 1
+	LinearRegionId = 6
+)
 
-func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
+func (hawk *App) checkRegionAnswer(w http.ResponseWriter, r *http.Request) {
 	//obtain currUser from context
 	currUser := r.Context().Value("User").(User)
 	//obtain answer, regionId from request
@@ -114,6 +117,13 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 		case 5:
 			if currUser.Region5 == RegionComplete {
 				//unlock linear gameplay
+				err = tx.Model(&currUser).Update("Linear", 1).Error
+				if err != nil {
+					fmt.Println("Could not unlock linear region")
+					ResponseWriter(false, "Could not unlock linear region", nil, http.StatusInternalServerError, w)
+					tx.Rollback()
+					return
+				}
 
 			}
 		}
@@ -207,7 +217,7 @@ func (hawk *App) getQuestion(w http.ResponseWriter, r *http.Request) {
 
 	question := Question{}
 
-	err := hawk.DB.Select("id, question, level, region, add_info").Where("level=? AND region = ?", level, key).First(&question).Error
+	err := hawk.DB.Select("id, question, level, region, add_info").Where("level = ? AND region = ?", level, key).First(&question).Error
 	if err != nil {
 		ResponseWriter(false, "Could not fetch question.", nil, http.StatusInternalServerError, w)
 		return
@@ -229,7 +239,7 @@ func (hawk *App) getHints(w http.ResponseWriter, r *http.Request) {
 
 	err := hawk.DB.Model(&Hint{}).Where("question=? AND active=1", key).Pluck("hint", &hints).Error
 	if err != nil {
-		ResponseWriter(false, "Could not fetch hint.", hints, http.StatusInternalServerError, w)
+		ResponseWriter(false, "Could not fetch hint.", nil, http.StatusInternalServerError, w)
 		return
 	}
 
@@ -305,4 +315,41 @@ func (hawk *App) getSideQuestQuestion(w http.ResponseWriter, r *http.Request) {
 	}
 	question.Answer = ""
 	ResponseWriter(true, "Question fetched", question, http.StatusOK, w)
+}
+
+func (hawk *App) checkLinearAnswer(w http.ResponseWriter, r *http.Request) {
+	currUser := r.Context().Value("User").(User)
+	checkAns := CheckAnswer{}
+	err := json.NewDecoder(r.Body).Decode(&checkAns)
+	if err != nil {
+		fmt.Println("Could not decode checkAnswer struct " + err.Error())
+		ResponseWriter(false, "Could not decode check answer struct", nil, http.StatusBadRequest, w)
+		return
+	}
+	checkAns.Level = currUser.Linear
+	checkAns.Answer = Sanitize(checkAns.Answer)
+	//get actual answer
+	question := Question{}
+	err = hawk.DB.Where("region = ? AND level = ?", LinearRegionId, currUser.Linear).First(&question).Error
+	if err != nil {
+		fmt.Println("Database error, question not found")
+		ResponseWriter(false, "Database error, question not found", nil, http.StatusInternalServerError, w)
+		return
+	}
+	//match answers
+	status := CheckAnswerStatus(checkAns.Answer, question.Answer)
+	if status == CorrectAnswer {
+		//update level
+		tx := hawk.DB.Begin()
+		err = tx.Model(currUser).Update("linear", checkAns.Level+1).Error
+		if err != nil {
+			fmt.Println("Could not update level")
+			ResponseWriter(false, "Could not update level", nil, http.StatusInternalServerError, w)
+			tx.Rollback()
+			return
+		}
+		tx.Commit()
+		fmt.Println("Updated level in database")
+	}
+	ResponseWriter(true, "Answer status", status, http.StatusOK, w)
 }
