@@ -3,10 +3,8 @@ package app
 import (
 	"context"
 	"fmt"
-	"net/http"
-	"net/http/httputil"
-
 	"github.com/gorilla/mux"
+	"net/http"
 )
 
 func (hawk *App) LoadRoutes() {
@@ -58,13 +56,7 @@ func (hawk *App) LoadRoutes() {
 func (hawk *App) createContext(next http.HandlerFunc, isAdmin bool, isLoggedIn bool) http.HandlerFunc {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
-			//log request body
-			dump, err := httputil.DumpRequest(r, true)
-			if err != nil{
-				fmt.Println (err)
-				return
-			}
-			fmt.Println (Response(dump))
+			
 			if isLoggedIn {
 				//extract data from cookie
 				currUser, err := GetCurrUser(w, r)
