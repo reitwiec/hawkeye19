@@ -56,7 +56,7 @@ func (hawk *App) LoadRoutes() {
 func (hawk *App) createContext(next http.HandlerFunc, isAdmin bool, isLoggedIn bool) http.HandlerFunc {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
-			
+
 			if isLoggedIn {
 				//extract data from cookie
 				currUser, err := GetCurrUser(w, r)
