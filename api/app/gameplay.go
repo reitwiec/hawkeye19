@@ -316,3 +316,42 @@ func (hawk *App) getSideQuestQuestion(w http.ResponseWriter, r *http.Request) {
 	}
 	ResponseWriter(true, "Question fetched", question, http.StatusOK, w)
 }
+
+func (hawk *App) unlockRegion (w http.ResponseWriter, r *http.Request) {
+	currUser := r.Context().Value("User").(User)
+
+	//@TODO:Add points check
+
+	var err error
+	tx:=hawk.DB.Begin()
+
+	nextRegion := GetNextRegion(currUser.UnlockOrder)
+	currUser.UnlockOrder = UpdateUnlockOrder(currUser.UnlockOrder, int(nextRegion)-48)
+
+	switch nextRegion {
+	case '2':
+		err = tx.Model(&currUser).Update("Region2", 1).Error
+	case '3':
+		err = tx.Model(&currUser).Update("Region3", 1).Error
+	case '4':
+		err = tx.Model(&currUser).Update("Region4", 1).Error
+	case '5':
+		err = tx.Model(&currUser).Update("Region5", 1).Error
+	}
+	if err != nil {
+		fmt.Println("Could not unlock region in DB")
+		ResponseWriter(false, "Could not unlock region in DB", nil, http.StatusInternalServerError, w)
+		tx.Rollback()
+		return
+	}
+
+	err = tx.Model(&currUser).Update("unlock_order", currUser.UnlockOrder).Error
+	if err != nil {
+		fmt.Println("Could not unlock region in DB")
+		ResponseWriter(false, "Could not unlock region in DB", nil, http.StatusInternalServerError, w)
+		tx.Rollback()
+		return
+	}
+	tx.Commit()
+	ResponseWriter(true, "Region unlocked", nil, http.StatusOK, w)
+}
