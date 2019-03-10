@@ -301,7 +301,7 @@ func (hawk *App) getSideQuestQuestion(w http.ResponseWriter, r *http.Request) {
 	level := currUser.SideQuest[index] - 48 //ascii to int
 	fmt.Println(level)
 	question := Question{}
-	err = hawk.DB.Where("region = ? AND level = ?", 0, level).First(&question).Error
+	err = hawk.DB.Select("id, question, level, region, add_info").Where("region = ? AND level = ?", 0, level).First(&question).Error
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			fmt.Println("Question does not exist")
@@ -314,6 +314,5 @@ func (hawk *App) getSideQuestQuestion(w http.ResponseWriter, r *http.Request) {
 		}
 
 	}
-	question.Answer = ""
 	ResponseWriter(true, "Question fetched", question, http.StatusOK, w)
 }
