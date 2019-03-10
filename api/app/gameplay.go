@@ -24,7 +24,9 @@ type Stats struct {
 	Trailing       int
 }
 
-const RegionComplete = 4 //no of questions + 1
+const (
+	RegionComplete = 4 //no of questions + 1
+)
 
 func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 	//obtain currUser from context
@@ -49,6 +51,8 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 		checkAns.Level = currUser.Region4
 	case 5:
 		checkAns.Level = currUser.Region5
+	case 6:
+		checkAns.Level = currUser.Region6
 
 	}
 
@@ -114,6 +118,14 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 		case 5:
 			if currUser.Region5 == RegionComplete {
 				//unlock linear gameplay
+				err = tx.Model(&currUser).Update("Region6", 1).Error
+				if err != nil {
+					fmt.Println("Could not unlock linear region")
+					ResponseWriter(false, "Could not unlock linear region", nil, http.StatusInternalServerError, w)
+					tx.Rollback()
+					return
+				}
+
 			}
 		}
 		if isRegionComplete {
@@ -206,7 +218,7 @@ func (hawk *App) getQuestion(w http.ResponseWriter, r *http.Request) {
 
 	question := Question{}
 
-	err := hawk.DB.Select("id, question, add_info").Where("level=? AND region = ?", level, key).First(&question).Error
+	err := hawk.DB.Select("id, question, level, region, add_info").Where("level = ? AND region = ?", level, key).First(&question).Error
 	if err != nil {
 		ResponseWriter(false, "Could not fetch question.", nil, http.StatusInternalServerError, w)
 		return
@@ -228,7 +240,7 @@ func (hawk *App) getHints(w http.ResponseWriter, r *http.Request) {
 
 	err := hawk.DB.Model(&Hint{}).Where("question=? AND active=1", key).Pluck("hint", &hints).Error
 	if err != nil {
-		ResponseWriter(false, "Could not fetch hint.", hints, http.StatusInternalServerError, w)
+		ResponseWriter(false, "Could not fetch hint.", nil, http.StatusInternalServerError, w)
 		return
 	}
 
@@ -289,7 +301,7 @@ func (hawk *App) getSideQuestQuestion(w http.ResponseWriter, r *http.Request) {
 	level := currUser.SideQuest[index] - 48 //ascii to int
 	fmt.Println(level)
 	question := Question{}
-	err = hawk.DB.Where("region = ? AND level = ?", 0, level).First(&question).Error
+	err = hawk.DB.Select("id, question, level, region, add_info").Where("region = ? AND level = ?", 0, level).First(&question).Error
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			fmt.Println("Question does not exist")
@@ -302,6 +314,5 @@ func (hawk *App) getSideQuestQuestion(w http.ResponseWriter, r *http.Request) {
 		}
 
 	}
-	question.Answer = ""
 	ResponseWriter(true, "Question fetched", question, http.StatusOK, w)
 }
