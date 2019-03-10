@@ -2,13 +2,13 @@ package app
 
 import (
 	"fmt"
-	"log"
-	"net/http"
-
 	"github.com/gorilla/securecookie"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"gopkg.in/go-playground/validator.v9"
+	"log"
+	"net/http"
+	"os"
 )
 
 var (
@@ -42,6 +42,18 @@ Block Key: %s
 	//create securecookie instance
 	CookieHandler = securecookie.New([]byte(Configuration.HashKey), []byte(Configuration.BlockKey))
 
+	//initialise logger
+	//create your file with desired read/write permissions
+	var err error
+	hawk.logFile, err = os.OpenFile("info.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	//set output of logs to f
+	log.SetOutput(hawk.logFile)
+	//test case
+	log.Println("Logging to file")
+
 }
 
 func (hawk *App) migrate() {
@@ -62,7 +74,7 @@ func (hawk *App) Run(Args []string) {
 		log.Fatalf("Could not establish database connection, shutting down\n\t" + err.Error())
 		return
 	}
-	fmt.Println("Database connection established")
+	log.Println("Database connection established")
 	defer hawk.DB.Close()
 
 	for _, arg := range Args {
@@ -75,7 +87,9 @@ func (hawk *App) Run(Args []string) {
 	fmt.Println("Server started")
 	err = http.ListenAndServe(Configuration.ServerAddr, hawk.router)
 	if err != nil {
-		fmt.Println("Could not start server, shutting down")
+		log.Fatalf("Could not start server, shutting down")
 	}
+
+	defer hawk.logFile.Close()
 
 }

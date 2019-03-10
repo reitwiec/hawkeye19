@@ -29,7 +29,7 @@ const (
 	LinearRegionId = 6
 )
 
-func (hawk *App) checkRegionAnswer(w http.ResponseWriter, r *http.Request) {
+func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 	//obtain currUser from context
 	currUser := r.Context().Value("User").(User)
 	//obtain answer, regionId from request
@@ -52,6 +52,8 @@ func (hawk *App) checkRegionAnswer(w http.ResponseWriter, r *http.Request) {
 		checkAns.Level = currUser.Region4
 	case 5:
 		checkAns.Level = currUser.Region5
+	case 6:
+		checkAns.Level = currUser.Region6
 
 	}
 
@@ -316,6 +318,7 @@ func (hawk *App) getSideQuestQuestion(w http.ResponseWriter, r *http.Request) {
 	question.Answer = ""
 	ResponseWriter(true, "Question fetched", question, http.StatusOK, w)
 }
+/*
 
 func (hawk *App) checkLinearAnswer(w http.ResponseWriter, r *http.Request) {
 	currUser := r.Context().Value("User").(User)
@@ -353,3 +356,4 @@ func (hawk *App) checkLinearAnswer(w http.ResponseWriter, r *http.Request) {
 	}
 	ResponseWriter(true, "Answer status", status, http.StatusOK, w)
 }
+*/
