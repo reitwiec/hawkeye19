@@ -126,7 +126,7 @@ func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "Error in setting session, user not logged in", nil, http.StatusInternalServerError, w)
 		return
 	}
-	fmt.Println("User logged in and session set")
+	log.Println("User logged in and session set")
 	ResponseWriter(true, "User logged in and session is set", currUser, http.StatusOK, w)
 }
 

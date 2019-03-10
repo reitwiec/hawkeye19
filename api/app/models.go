@@ -1,6 +1,7 @@
 package app
 
 import (
+	"os"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -44,6 +45,7 @@ type App struct {
 	DB       *gorm.DB
 	router   *mux.Router
 	currUser CurrUser
+	logFile  *os.File
 }
 
 type User struct {
@@ -65,7 +67,7 @@ type User struct {
 	Region3     int    `json:"region3"`
 	Region4     int    `json:"Region4"`
 	Region5     int    `json:"region5"`
-	Linear      int    `json:"linear"`
+	Region6      int    `json:"region6"`
 	Points      int    `json:"points"`
 	SideQuest   string `json:"sideQuest"`
 	UnlockOrder string `json:"unlockOrder"`
