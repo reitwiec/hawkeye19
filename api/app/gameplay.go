@@ -26,7 +26,6 @@ type Stats struct {
 
 const (
 	RegionComplete = 4 //no of questions + 1
-	LinearRegionId = 6
 )
 
 func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
@@ -119,7 +118,7 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 		case 5:
 			if currUser.Region5 == RegionComplete {
 				//unlock linear gameplay
-				err = tx.Model(&currUser).Update("Linear", 1).Error
+				err = tx.Model(&currUser).Update("Region6", 1).Error
 				if err != nil {
 					fmt.Println("Could not unlock linear region")
 					ResponseWriter(false, "Could not unlock linear region", nil, http.StatusInternalServerError, w)
