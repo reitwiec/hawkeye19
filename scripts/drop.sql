@@ -1,0 +1,6 @@
+
+SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE users;
+DROP TABLE attempts;
+DROP TABLE hints;
+DROP TABLE questions;

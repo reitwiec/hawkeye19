@@ -1,0 +1,7 @@
+.env
+.env.keys
+config.json
+
+/.idea
+/.vscode
+/node_modules
