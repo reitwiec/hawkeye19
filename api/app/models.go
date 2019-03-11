@@ -47,11 +47,12 @@ type User struct {
 	Timestamp time.Time `gorm:"not null" json:"timestamp"`
 
 	//general info
-	Email   string `gorm:"unique;not null" json:"email" validate:"email,required"`
-	Tel     string `gorm:"not null;unique" json:"tel" validate:"len=10,required"`
-	College string `gorm:"not null" json:"college" validate:"alpha,required"`
-	Country string `gorm:"not null" json:"country"`
-	isMAHE  int    `gorm:"not null" json:"isMAHE"` //1 if MAHE else, 0
+	Email      string `gorm:"unique;not null" json:"email" validate:"email,required"`
+	Tel        string `gorm:"not null;unique" json:"tel" validate:"len=10,required"`
+	College    string `gorm:"not null" json:"college" validate:"alpha,required"`
+	Country    string `gorm:"not null" json:"country"`
+	isMAHE     int    `gorm:"not null" json:"isMAHE"` //1 if MAHE else, 0
+	isVerified int    `json:"isVerified"`
 
 	//Gameplay status
 	Region1         int    `json:"region1"`

@@ -343,7 +343,7 @@ func (hawk *App) unlockRegion(w http.ResponseWriter, r *http.Request) {
 	nextRegion := GetNextRegion(currUser.UnlockOrder)
 	currUser.UnlockOrder = UpdateUnlockOrder(currUser.UnlockOrder, int(nextRegion)-48)
 
-	err = tx.Model(&currUser).Update("SideQuestPoints", currUser.SideQuestPoints + 1).Error
+	err = tx.Model(&currUser).Update("SideQuestPoints", currUser.SideQuestPoints+1).Error
 	if err != nil {
 		fmt.Println("Could not unlock region in DB")
 		ResponseWriter(false, "Could not unlock region in DB", nil, http.StatusInternalServerError, w)

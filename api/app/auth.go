@@ -64,6 +64,8 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 		Points:      0,
 		SideQuest:   SideQuestOrder(),
 		UnlockOrder: UnlockOrder(),
+		Timestamp:   time.Now(),
+		Country:     strings.TrimSpace(user.Country),
 	}
 	fmt.Println("Unlock order " + newUser.UnlockOrder)
 	//load newUser to database
@@ -127,7 +129,8 @@ func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Println("User logged in and session set")
-	ResponseWriter(true, "User logged in and session is set", currUser, http.StatusOK, w)
+	user.Password = ""
+	ResponseWriter(true, "User logged in and session is set", user, http.StatusOK, w)
 }
 
 func (hawk *App) logout(w http.ResponseWriter, r *http.Request) {
