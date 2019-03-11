@@ -21,7 +21,6 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "Bad Request", nil, http.StatusBadRequest, w)
 		return
 	}
-
 	err = validate.Struct(user)
 	if err != nil {
 		if _, ok := err.(*validator.InvalidValidationError); ok {
@@ -66,6 +65,8 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 		UnlockOrder: UnlockOrder(),
 		Timestamp:   time.Now(),
 		Country:     strings.TrimSpace(user.Country),
+		IsVerified: 0,
+		IsMahe: user.IsMahe,
 	}
 	fmt.Println("Unlock order " + newUser.UnlockOrder)
 	//load newUser to database
@@ -78,6 +79,7 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tx.Commit()
+	//@TODO: send verification email
 	fmt.Println("New user registered")
 	ResponseWriter(true, "New user registered", nil, http.StatusOK, w)
 }
@@ -98,7 +100,6 @@ func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 	}
 	user := User{}
 	//check if username exists
-	// @TODO: add recordnotfound to other DB queries as well
 	err = hawk.DB.Where("username = ?", strings.TrimSpace(formData.Username)).First(&user).Error
 	if gorm.IsRecordNotFoundError(err) {
 		fmt.Println("User not registered")
