@@ -16,10 +16,6 @@ func (hawk *App) addQuestion(w http.ResponseWriter, r *http.Request) {
 	newQues := Question{}
 
 	currUser := r.Context().Value("User").(User)
-	if (currUser == User{}) {
-		ResponseWriter(false, "User not logged in.", nil, http.StatusNetworkAuthenticationRequired, w)
-		return
-	}
 
 	err := json.NewDecoder(r.Body).Decode(&newQues)
 	if err != nil {
@@ -48,6 +44,7 @@ func (hawk *App) addQuestion(w http.ResponseWriter, r *http.Request) {
 
 func (hawk *App) addHint(w http.ResponseWriter, r *http.Request) {
 	newHint := Hint{}
+	currUser := r.Context().Value("User").(User)
 
 	err := json.NewDecoder(r.Body).Decode(&newHint)
 	if err != nil {
@@ -57,6 +54,7 @@ func (hawk *App) addHint(w http.ResponseWriter, r *http.Request) {
 
 	newHint.Hint = strings.TrimSpace(newHint.Hint)
 	newHint.Active = 0
+	newHint.AddedBy = currUser.Username
 
 	tx := hawk.DB.Begin()
 	err = tx.Create(&newHint).Error

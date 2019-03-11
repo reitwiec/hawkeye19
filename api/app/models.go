@@ -84,6 +84,7 @@ type Question struct {
 	Answer   string `gorm:"not null" sql:"DEFAULT:NULL" json:"answer,omitempty" validate:"required"`
 	AddInfo  string `json:"addinfo"`
 	AddedBy  string `gorm:"not null" json:"addedBy" validate:"required"`
+	Timestamp time.Time `gorm:"not null" json:"timestamp"`
 }
 
 type Hint struct {
@@ -91,6 +92,8 @@ type Hint struct {
 	Question int    `gorm:"not null" json:"questionID" validate:"required"`
 	Active   int    `gorm:"not null" json:"active"`
 	Hint     string `json:"hint" validate:"required"`
+	Timestamp time.Time `gorm:"not null" json:"timestamp"`
+	AddedBy  string `gorm:"not null" json:"addedBy" validate:"required"`
 }
 
 type ForgotPassReq struct {
