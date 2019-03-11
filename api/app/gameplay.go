@@ -28,6 +28,8 @@ const (
 	RegionComplete = 4 //no of questions + 1
 )
 
+//@TODO:Add seperate route for checking side quest answers
+
 func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 	//obtain currUser from context
 	currUser := r.Context().Value("User").(User)
@@ -94,6 +96,16 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 			ResponseWriter(false, "Could not update level", nil, http.StatusInternalServerError, w)
 			tx.Rollback()
 		}
+
+		////add SideQuestPoints
+		//if (status == CorrectAnswer && checkAns.RegionId == 0) {
+		//	err = tx.Model(&currUser).Update("SideQuestPoints", currUser.SideQuestPoints + 2).Error
+		//	if err != nil {
+		//		fmt.Println("Could not update level")
+		//		ResponseWriter(false, "Could not update level", nil, http.StatusInternalServerError, w)
+		//		tx.Rollback()
+		//	}
+		//}
 
 		//unlock region
 		isRegionComplete := false
@@ -320,13 +332,24 @@ func (hawk *App) getSideQuestQuestion(w http.ResponseWriter, r *http.Request) {
 func (hawk *App) unlockRegion(w http.ResponseWriter, r *http.Request) {
 	currUser := r.Context().Value("User").(User)
 
-	//@TODO:Add points check
+	if currUser.SideQuestPoints < 2 {
+		ResponseWriter(false, "Not enough points to unlock region", nil, http.StatusForbidden, w)
+		return
+	}
 
 	var err error
 	tx := hawk.DB.Begin()
 
 	nextRegion := GetNextRegion(currUser.UnlockOrder)
 	currUser.UnlockOrder = UpdateUnlockOrder(currUser.UnlockOrder, int(nextRegion)-48)
+
+	err = tx.Model(&currUser).Update("SideQuestPoints", currUser.SideQuestPoints + 1).Error
+	if err != nil {
+		fmt.Println("Could not unlock region in DB")
+		ResponseWriter(false, "Could not unlock region in DB", nil, http.StatusInternalServerError, w)
+		tx.Rollback()
+		return
+	}
 
 	switch nextRegion {
 	case '2':
