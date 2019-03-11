@@ -219,7 +219,13 @@ func (hawk *App) getQuestion(w http.ResponseWriter, r *http.Request) {
 
 	err := hawk.DB.Select("id, question, level, region, add_info").Where("level = ? AND region = ?", level, key).First(&question).Error
 	if err != nil {
-		ResponseWriter(false, "Could not fetch question.", nil, http.StatusInternalServerError, w)
+		if gorm.IsRecordNotFoundError(err){
+			ResponseWriter(false, "Question doesn't exist", nil, http.StatusInternalServerError, w)
+			fmt.Println (err)
+		}else {
+			ResponseWriter(false, "Could not fetch question.", nil, http.StatusInternalServerError, w)
+			fmt.Println(err)
+		}
 		return
 	}
 
