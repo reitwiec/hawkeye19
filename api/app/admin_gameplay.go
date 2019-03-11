@@ -36,7 +36,8 @@ func (hawk *App) addQuestion(w http.ResponseWriter, r *http.Request) {
 	err = tx.Create(&newQues).Error
 
 	if err != nil {
-		ResponseWriter(false, "Database error", err.Error(), http.StatusInternalServerError, w)
+		fmt.Println(err.Error())
+		ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
 		tx.Rollback()
 		return
 	}
@@ -61,7 +62,8 @@ func (hawk *App) addHint(w http.ResponseWriter, r *http.Request) {
 	err = tx.Create(&newHint).Error
 
 	if err != nil {
-		ResponseWriter(false, "Database error", err.Error(), http.StatusInternalServerError, w)
+		fmt.Println(err.Error())
+		ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
 		tx.Rollback()
 		return
 	}
