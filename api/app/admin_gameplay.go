@@ -328,5 +328,3 @@ func (hawk *App) questionLogs(w http.ResponseWriter, r *http.Request) {
 	}
 	ResponseWriter(true, "Requested answer logs", answers, http.StatusOK, w)
 }
-
-

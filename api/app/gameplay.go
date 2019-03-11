@@ -317,13 +317,13 @@ func (hawk *App) getSideQuestQuestion(w http.ResponseWriter, r *http.Request) {
 	ResponseWriter(true, "Question fetched", question, http.StatusOK, w)
 }
 
-func (hawk *App) unlockRegion (w http.ResponseWriter, r *http.Request) {
+func (hawk *App) unlockRegion(w http.ResponseWriter, r *http.Request) {
 	currUser := r.Context().Value("User").(User)
 
 	//@TODO:Add points check
 
 	var err error
-	tx:=hawk.DB.Begin()
+	tx := hawk.DB.Begin()
 
 	nextRegion := GetNextRegion(currUser.UnlockOrder)
 	currUser.UnlockOrder = UpdateUnlockOrder(currUser.UnlockOrder, int(nextRegion)-48)

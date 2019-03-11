@@ -59,7 +59,7 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 		Region3:     0,
 		Region4:     0,
 		Region5:     0,
-		Region6:      0,
+		Region6:     0,
 		Banned:      0,
 		Points:      0,
 		SideQuest:   SideQuestOrder(),

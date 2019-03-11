@@ -13,9 +13,9 @@ func (hawk *App) LoadRoutes() {
 	//Auth routes
 	hawk.router.HandleFunc("/api/addUser", hawk.createContext(hawk.addUser, false, false)).Methods("POST")
 	hawk.router.HandleFunc("/api/login", hawk.createContext(hawk.login, false, false)).Methods("POST")
-	hawk.router.HandleFunc("/api/logout",  hawk.createContext(hawk.logout, false, false)).Methods("POST")
-	hawk.router.HandleFunc("/api/forgotPassword",  hawk.createContext(hawk.forgotPassword, false, false)).Methods("POST")
-	hawk.router.HandleFunc("/api/resetPassword",  hawk.createContext(hawk.resetPassword, false, false)).Methods("POST")
+	hawk.router.HandleFunc("/api/logout", hawk.createContext(hawk.logout, false, false)).Methods("POST")
+	hawk.router.HandleFunc("/api/forgotPassword", hawk.createContext(hawk.forgotPassword, false, false)).Methods("POST")
+	hawk.router.HandleFunc("/api/resetPassword", hawk.createContext(hawk.resetPassword, false, false)).Methods("POST")
 	hawk.router.HandleFunc("/api/checkUsername", hawk.createContext(hawk.checkUsername, false, false)).Methods("POST")
 	hawk.router.HandleFunc("/api/checkEmail", hawk.createContext(hawk.checkEmail, false, false)).Methods("POST")
 
@@ -26,7 +26,7 @@ func (hawk *App) LoadRoutes() {
 	hawk.router.HandleFunc("/api/getStats", hawk.createContext(hawk.getStats, false, true)).Methods("GET")
 	hawk.router.HandleFunc("/api/getRecentTries", hawk.createContext(hawk.getRecentTries, false, true)).Methods("GET")
 	hawk.router.HandleFunc("/api/getSideQuestQuestion", hawk.createContext(hawk.getSideQuestQuestion, false, true)).Methods("GET")
-	hawk.router.HandleFunc("/api/unlockRegion", hawk.createContext(hawk.unlockRegion,false, true)).Methods("POST")
+	hawk.router.HandleFunc("/api/unlockRegion", hawk.createContext(hawk.unlockRegion, false, true)).Methods("POST")
 
 	//Admin gameplay routes
 	hawk.router.HandleFunc("/api/addQuestion", hawk.createContext(hawk.addQuestion, true, true)).Methods("POST")

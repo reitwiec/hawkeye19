@@ -51,15 +51,16 @@ type User struct {
 	College string `gorm:"not null" json:"college" validate:"alpha,required"`
 
 	//Gameplay status
-	Region1     int    `json:"region1"`
-	Region2     int    `json:"region2"`
-	Region3     int    `json:"region3"`
-	Region4     int    `json:"Region4"`
-	Region5     int    `json:"region5"`
-	Region6      int    `json:"region6"`
-	Points      int    `json:"points"`
-	SideQuest   string `json:"sideQuest"`
-	UnlockOrder string `json:"unlockOrder"`
+	Region1         int    `json:"region1"`
+	Region2         int    `json:"region2"`
+	Region3         int    `json:"region3"`
+	Region4         int    `json:"Region4"`
+	Region5         int    `json:"region5"`
+	Region6         int    `json:"region6"`
+	Points          int    `json:"points"`
+	SideQuest       string `json:"sideQuest"`
+	UnlockOrder     string `json:"unlockOrder"`
+	SideQuestPoints int    `json:"sideQuestPoints"`
 }
 
 type Attempt struct {
@@ -75,8 +76,8 @@ type Question struct {
 	ID       int    `gorm:"primary_key;auto_increment" json:"questionID"`
 	Level    int    `gorm:"not null" json:"level" validate:"required"`
 	Region   int    `gorm:"not null" json:"region" validate:"required"`
-	Question string `gorm:"not null" json:"question" validate:"required"`
-	Answer   string `gorm:"not null" json:"answer,omitempty" validate:"required"`
+	Question string `gorm:"not null" sql:"DEFAULT:NULL" json:"question" validate:"required"`
+	Answer   string `gorm:"not null" sql:"DEFAULT:NULL" json:"answer,omitempty" validate:"required"`
 	AddInfo  string `json:"addinfo"`
 	AddedBy  string `gorm:"not null" json:"addedBy" validate:"required"`
 }
