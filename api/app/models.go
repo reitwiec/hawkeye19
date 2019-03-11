@@ -38,17 +38,20 @@ type App struct {
 }
 
 type User struct {
-	ID       int    `gorm:"primary_key;auto_increment" json:"userID"`
-	Name     string `gorm:"not null" json:"name" validate:"required"`
-	Username string `gorm:"not null;unique" json:"username" validate:"alphanum,required"`
-	Password string `gorm:"not null" json:"password" validate:"min=8,max=24,required"`
-	Access   int    `json:"access"`
-	Banned   int    `json:"banned"`
+	ID        int       `gorm:"primary_key;auto_increment" json:"userID"`
+	Name      string    `gorm:"not null" json:"name" validate:"required"`
+	Username  string    `gorm:"not null;unique" json:"username" validate:"alphanum,required"`
+	Password  string    `gorm:"not null" json:"password" validate:"min=8,max=24,required"`
+	Access    int       `json:"access"`
+	Banned    int       `json:"banned"`
+	Timestamp time.Time `gorm:"not null" json:"timestamp"`
 
 	//general info
 	Email   string `gorm:"unique;not null" json:"email" validate:"email,required"`
 	Tel     string `gorm:"not null;unique" json:"tel" validate:"len=10,required"`
 	College string `gorm:"not null" json:"college" validate:"alpha,required"`
+	Country string `gorm:"not null" json:"country"`
+	isMAHE  int    `gorm:"not null" json:"isMAHE"` //1 if MAHE else, 0
 
 	//Gameplay status
 	Region1         int    `json:"region1"`

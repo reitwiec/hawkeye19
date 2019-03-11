@@ -97,7 +97,7 @@ func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 	user := User{}
 	//check if username exists
 	// @TODO: add recordnotfound to other DB queries as well
-	err = hawk.DB.Where("username = ?", Sanitize(formData.Username)).First(&user).Error
+	err = hawk.DB.Where("username = ?", strings.TrimSpace(formData.Username)).First(&user).Error
 	if gorm.IsRecordNotFoundError(err) {
 		fmt.Println("User not registered")
 		ResponseWriter(false, "User not registered", nil, http.StatusOK, w)
