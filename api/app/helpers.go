@@ -1,9 +1,11 @@
 package app
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/texttheater/golang-levenshtein/levenshtein"
+	"log"
 	"math/rand"
 	"net/http"
 	"os"
@@ -260,4 +262,24 @@ func UpdateUnlockOrder(unlockOrder string, region int) string {
 		}
 	}
 	return updatedUO
+}
+
+func SendEmail (email string, token string) error{
+	url := "https://iecsemailer.iecsemanipal.com/send/hawkForgotPass"
+	//data := []byte (`{"email:"` + formData.Email + `,"token:"` + formData.Token)
+	message := map[string]interface{}{
+		"email": email,
+		"token": token,
+	}
+	bytesRepresentation, err := json.Marshal(message)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(bytesRepresentation))
+	if err != nil {
+		log.Println(err)
+	}
+	defer resp.Body.Close ()
+	return err
 }

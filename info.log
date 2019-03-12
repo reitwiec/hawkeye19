@@ -60,3 +60,24 @@
 2019/03/12 15:45:44 Database connection established
 2019/03/12 15:49:02 Logging to file
 2019/03/12 15:49:02 Database connection established
+2019/03/12 16:08:25 Logging to file
+2019/03/12 16:08:25 Database connection established
+2019/03/12 16:08:51 Post https://iecsemailer.iecsemanipal.com/send/hawkForgotPass: dial tcp: lookup iecsemailer.iecsemanipal.com on 127.0.1.1:53: no such host
+2019/03/12 16:08:57 Logging to file
+2019/03/12 16:08:57 Database connection established
+2019/03/12 16:09:15 Post https://iecsemailer.iecsemanipal.com/send/hawkForgotPass: dial tcp: lookup iecsemailer.iecsemanipal.com on 127.0.1.1:53: no such host
+2019/03/12 16:19:03 Logging to file
+2019/03/12 16:19:03 Database connection established
+2019/03/12 16:19:11 Post https://iecsemailer.iecsemanipal.com/send/hawkForgotPass: dial tcp: lookup iecsemailer.iecsemanipal.com on 127.0.1.1:53: no such host
+2019/03/12 16:19:48 Logging to file
+2019/03/12 16:19:48 Database connection established
+2019/03/12 16:19:52 Post https://iecsemailer.iecsemanipal.com/send/hawkForgotPass: dial tcp: lookup iecsemailer.iecsemanipal.com on 127.0.1.1:53: no such host
+2019/03/12 16:20:34 Logging to file
+2019/03/12 16:20:34 Database connection established
+2019/03/12 16:20:38 Post https://iecsemailer.com/send/hawkForgotPass: dial tcp: lookup iecsemailer.com on 127.0.1.1:53: no such host
+2019/03/12 22:37:13 Logging to file
+2019/03/12 22:37:13 Database connection established
+2019/03/12 22:40:18 Logging to file
+2019/03/12 22:40:18 Database connection established
+2019/03/12 22:41:49 Logging to file
+2019/03/12 22:41:49 Database connection established

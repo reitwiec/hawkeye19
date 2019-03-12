@@ -116,3 +116,8 @@ type CheckUsername struct {
 type CheckEmail struct {
 	Email string
 }
+
+type Verification struct {
+	Email string
+	Token string
+}
