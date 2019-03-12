@@ -47,27 +47,28 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	newUser := User{
-		Username:    strings.TrimSpace(user.Username),
-		Name:        strings.TrimSpace(user.Name),
-		Password:    string(hash),
-		Access:      0,
-		Email:       Sanitize(user.Email),
-		Tel:         Sanitize(user.Tel),
-		College:     strings.TrimSpace(user.College),
-		Region1:     1,
-		Region2:     0,
-		Region3:     0,
-		Region4:     0,
-		Region5:     0,
-		Region6:     0,
-		Banned:      0,
-		Points:      0,
-		SideQuest:   SideQuestOrder(),
-		UnlockOrder: UnlockOrder(),
-		Timestamp:   time.Now(),
-		Country:     strings.TrimSpace(user.Country),
-		IsVerified: 0,
-		IsMahe: user.IsMahe,
+		Username:       strings.TrimSpace(user.Username),
+		Name:           strings.TrimSpace(user.Name),
+		Password:       string(hash),
+		Access:         0,
+		Email:          Sanitize(user.Email),
+		Tel:            Sanitize(user.Tel),
+		College:        strings.TrimSpace(user.College),
+		Region0:        1,
+		Region1:        1,
+		Region2:        0,
+		Region3:        0,
+		Region4:        0,
+		Region5:        0,
+		Region6:        0,
+		Banned:         0,
+		Points:         0,
+		SidequestOrder: SideQuestOrder(),
+		UnlockOrder:    UnlockOrder(),
+		Timestamp:      time.Now(),
+		Country:        strings.TrimSpace(user.Country),
+		IsVerified:     0,
+		IsMahe:         user.IsMahe,
 	}
 	fmt.Println("Unlock order " + newUser.UnlockOrder)
 	//load newUser to database
@@ -78,7 +79,7 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 		if ok {
 			//duplicate entry
 			if mysqlErr.Number == 1062 {
-				fmt.Println ("Duplicate entry")
+				fmt.Println("Duplicate entry")
 				ResponseWriter(false, "Duplicate Entry", nil, http.StatusBadRequest, w)
 				return
 			}
@@ -90,15 +91,15 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 	}
 	token := RandomString()
 	//@TODO: send verification email and remove print token statement
-	fmt.Println (token)
+	fmt.Println(token)
 	verification := Verification{
-		Email:	user.Email,
-		Token:	token,
+		Email: user.Email,
+		Token: token,
 	}
 	//create entry for verification
 	err = tx.Create(&verification).Error
 	if err != nil {
-		fmt.Println ("Database error")
+		fmt.Println("Database error")
 		ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
 		tx.Rollback()
 		return
@@ -232,12 +233,12 @@ func (hawk *App) forgotPassword(w http.ResponseWriter, r *http.Request) {
 	tx.Commit()
 	//@TODO: Email the token
 	/*
-	err = SendEmail (formData.Email, formData.Token)
-	if err != nil {
-		fmt.Println ("Could not email token" + err.Error())
-		ResponseWriter(false, "Could not email token", nil, http.StatusInternalServerError, w)
-		return
-	}
+		err = SendEmail (formData.Email, formData.Token)
+		if err != nil {
+			fmt.Println ("Could not email token" + err.Error())
+			ResponseWriter(false, "Could not email token", nil, http.StatusInternalServerError, w)
+			return
+		}
 	*/
 	fmt.Println(token)
 	ResponseWriter(true, "Password reset link sent", nil, http.StatusOK, w)
@@ -385,38 +386,38 @@ func (hawk *App) checkEmail(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func (hawk *App) verifyUser (w http.ResponseWriter, r *http.Request){
+func (hawk *App) verifyUser(w http.ResponseWriter, r *http.Request) {
 	keys, ok := r.URL.Query()["email"]
-	if !ok || len (keys) < 1 {
+	if !ok || len(keys) < 1 {
 		fmt.Println("Bad request")
 		ResponseWriter(false, "Bad request", nil, http.StatusBadRequest, w)
 		return
 	}
 	email := keys[0]
 	keys, ok = r.URL.Query()["token"]
-	if !ok || len (keys) < 1 {
+	if !ok || len(keys) < 1 {
 		fmt.Println("Bad request")
 		ResponseWriter(false, "Bad request", nil, http.StatusBadRequest, w)
 		return
 	}
-	token := keys [0]
+	token := keys[0]
 	//verificationData := Verification{}
-	err := hawk.DB.Where("email = ? AND token = ? ", email, token).First (&Verification{}).Error
+	err := hawk.DB.Where("email = ? AND token = ? ", email, token).First(&Verification{}).Error
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			fmt.Println ("Wrong data")
+			fmt.Println("Wrong data")
 			ResponseWriter(false, "Wrong data", nil, http.StatusOK, w)
 			return
 		}
-		fmt.Println ("Database error")
+		fmt.Println("Database error")
 		ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
 		return
 	}
 	//token exists
-	tx := hawk.DB.Begin ()
-	err = tx.Where("email = ?", email).First (&User{}).Update("is_verified", 1).Error
-	if err != nil{
-		fmt.Println ("Database error")
+	tx := hawk.DB.Begin()
+	err = tx.Where("email = ?", email).First(&User{}).Update("is_verified", 1).Error
+	if err != nil {
+		fmt.Println("Database error")
 		ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
 		tx.Rollback()
 		return

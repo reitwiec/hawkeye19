@@ -24,24 +24,24 @@ func (hawk *App) editUser(w http.ResponseWriter, r *http.Request) {
 	userData.Email = strings.TrimSpace(userData.Email)
 	userData.Tel = strings.TrimSpace(userData.Tel)
 	userData.College = strings.TrimSpace(userData.College)
-	userData.SideQuest = strings.TrimSpace(userData.SideQuest)
+	userData.SidequestOrder = strings.TrimSpace(userData.SidequestOrder)
 	userData.UnlockOrder = strings.TrimSpace(userData.UnlockOrder)
 
 	tx := hawk.DB.Begin()
 	err = tx.Where("id = ? ", userData.ID).First(&User{}).Updates(User{
-		Name:        userData.Name,
-		Access:      userData.Access,
-		Email:       userData.Email,
-		Tel:         userData.Tel,
-		College:     userData.College,
-		Region1:     userData.Region1,
-		Region2:     userData.Region2,
-		Region3:     userData.Region3,
-		Region4:     userData.Region4,
-		Region5:     userData.Region5,
-		Banned:      userData.Banned,
-		SideQuest:   userData.SideQuest,
-		UnlockOrder: userData.UnlockOrder,
+		Name:           userData.Name,
+		Access:         userData.Access,
+		Email:          userData.Email,
+		Tel:            userData.Tel,
+		College:        userData.College,
+		Region1:        userData.Region1,
+		Region2:        userData.Region2,
+		Region3:        userData.Region3,
+		Region4:        userData.Region4,
+		Region5:        userData.Region5,
+		Banned:         userData.Banned,
+		SidequestOrder: userData.SidequestOrder,
+		UnlockOrder:    userData.UnlockOrder,
 	}).Error
 	if err != nil {
 		tx.Rollback()

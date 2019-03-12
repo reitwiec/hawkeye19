@@ -55,14 +55,15 @@ type User struct {
 	IsVerified int    `gorm:"not null" json:"isVerified"`
 
 	//Gameplay status
+	Region0         int    `json:"region0"` //sidequest
 	Region1         int    `json:"region1"`
 	Region2         int    `json:"region2"`
 	Region3         int    `json:"region3"`
 	Region4         int    `json:"Region4"`
 	Region5         int    `json:"region5"`
-	Region6         int    `json:"region6"`
+	Region6         int    `json:"region6"` //linear
 	Points          int    `json:"points"`
-	SideQuest       string `json:"sideQuest"`
+	SidequestOrder  string `json:"sidequestOrder"`
 	UnlockOrder     string `json:"unlockOrder"`
 	SideQuestPoints int    `json:"sideQuestPoints"`
 }
@@ -77,23 +78,23 @@ type Attempt struct {
 }
 
 type Question struct {
-	ID       int    `gorm:"primary_key;auto_increment" json:"questionID"`
-	Level    int    `gorm:"not null" json:"level" validate:"required"`
-	Region   int    `gorm:"not null" json:"region" validate:"required"`
-	Question string `gorm:"not null" sql:"DEFAULT:NULL" json:"question" validate:"required"`
-	Answer   string `gorm:"not null" sql:"DEFAULT:NULL" json:"answer,omitempty" validate:"required"`
-	AddInfo  string `json:"addinfo"`
-	AddedBy  string `gorm:"not null" json:"addedBy" validate:"required"`
+	ID        int       `gorm:"primary_key;auto_increment" json:"questionID"`
+	Level     int       `gorm:"not null" json:"level" validate:"required"`
+	Region    int       `gorm:"not null" json:"region" validate:"required"`
+	Question  string    `gorm:"not null" sql:"DEFAULT:NULL" json:"question" validate:"required"`
+	Answer    string    `gorm:"not null" sql:"DEFAULT:NULL" json:"answer,omitempty" validate:"required"`
+	AddInfo   string    `json:"addinfo"`
+	AddedBy   string    `gorm:"not null" json:"addedBy" validate:"required"`
 	Timestamp time.Time `gorm:"not null" json:"timestamp"`
 }
 
 type Hint struct {
-	ID       int    `gorm:"primary_key; autoincrement" json:"hintID"`
-	Question int    `gorm:"not null" json:"questionID" validate:"required"`
-	Active   int    `gorm:"not null" json:"active"`
-	Hint     string `json:"hint" validate:"required"`
+	ID        int       `gorm:"primary_key; autoincrement" json:"hintID"`
+	Question  int       `gorm:"not null" json:"questionID" validate:"required"`
+	Active    int       `gorm:"not null" json:"active"`
+	Hint      string    `json:"hint" validate:"required"`
 	Timestamp time.Time `gorm:"not null" json:"timestamp"`
-	AddedBy  string `gorm:"not null" json:"addedBy" validate:"required"`
+	AddedBy   string    `gorm:"not null" json:"addedBy" validate:"required"`
 }
 
 type ForgotPassReq struct {
@@ -118,6 +119,7 @@ type CheckEmail struct {
 }
 
 type Verification struct {
+	ID    int `gorm:"primary_key" json:"id"`
 	Email string
 	Token string
 }
