@@ -3,6 +3,7 @@ package app
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/go-sql-driver/mysql"
 	"log"
 	"net/http"
 	"strings"
@@ -73,6 +74,15 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 	tx := hawk.DB.Begin()
 	err = tx.Create(&newUser).Error
 	if err != nil {
+		mysqlErr, ok := err.(*mysql.MySQLError)
+		if ok {
+			//duplicate entry
+			if mysqlErr.Number == 1062 {
+				fmt.Println ("Duplicate entry")
+				ResponseWriter(false, "Duplicate Entry", nil, http.StatusBadRequest, w)
+				return
+			}
+		}
 		fmt.Println("Database error, new user not created")
 		ResponseWriter(false, "Database error, new user not created", nil, http.StatusInternalServerError, w)
 		tx.Rollback()

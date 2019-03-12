@@ -33,7 +33,7 @@ const (
 func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 	//obtain currUser from context
 	currUser := r.Context().Value("User").(User)
-	/*@TODO check if verified
+	/*@TODO check if verified and not banned
 	if user.isVerified != 1 {
 		ResponseWriter (false, "Not verified", nil, http.statusOK, w)
 		//log
