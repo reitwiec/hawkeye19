@@ -119,7 +119,7 @@ type CheckEmail struct {
 }
 
 type Verification struct {
-	ID    int `gorm:"primary_key" json:"id"`
+	ID    int `gorm:"primary_key;auto_increment" json:"id"`
 	Email string
 	Token string
 }

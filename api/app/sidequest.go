@@ -42,7 +42,16 @@ func (hawk *App) getSidequestQuestion(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hawk *App) checkSidequestAnswer(w http.ResponseWriter, r *http.Request) {
+
 	currUser := r.Context().Value("User").(User)
+	if currUser.IsVerified != 1 {
+		ResponseWriter (false, "Not verified", nil, http.StatusOK, w)
+		return
+	}
+	if currUser.Banned == 1 {
+		ResponseWriter (false, "User banned", nil, http.StatusOK, w)
+		return
+	}
 	//obtain answer from request, region is Region0 by default for sidequest
 	checkAns := CheckAnswer{}
 	err := json.NewDecoder(r.Body).Decode(&checkAns)

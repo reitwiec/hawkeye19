@@ -33,13 +33,15 @@ const (
 func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 	//obtain currUser from context
 	currUser := r.Context().Value("User").(User)
-	/*@TODO check if verified and not banned
-	if user.isVerified != 1 {
-		ResponseWriter (false, "Not verified", nil, http.statusOK, w)
-		//log
+	// check if verified and not banned
+	if currUser.IsVerified != 1 {
+		ResponseWriter (false, "Not verified", nil, http.StatusOK, w)
 		return
 	}
-	*/
+	if currUser.Banned == 1 {
+		ResponseWriter (false, "User banned", nil, http.StatusOK, w)
+		return
+	}
 	//obtain answer, regionId from request
 	checkAns := CheckAnswer{}
 	err := json.NewDecoder(r.Body).Decode(&checkAns)

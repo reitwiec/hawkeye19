@@ -15,6 +15,7 @@ import (
 )
 
 func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
+	hawk.DB.CreateTable(&Verification{})
 	user := User{}
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
@@ -70,7 +71,6 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 		IsVerified:     0,
 		IsMahe:         user.IsMahe,
 	}
-	fmt.Println("Unlock order " + newUser.UnlockOrder)
 	//load newUser to database
 	tx := hawk.DB.Begin()
 	err = tx.Create(&newUser).Error
