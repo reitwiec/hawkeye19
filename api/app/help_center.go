@@ -21,7 +21,7 @@ func (hawk *App) submitHelpRequest(w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "Could not decode check answer struct", nil, http.StatusBadRequest, w)
 		return
 	}
-	
+
 	newHelp.User = currUser.ID
 	newHelp.Username = currUser.Username
 	newHelp.Email = currUser.Email
@@ -39,7 +39,7 @@ func (hawk *App) submitHelpRequest(w http.ResponseWriter, r *http.Request) {
 	ResponseWriter(true, "Help request added.", nil, http.StatusOK, w)
 }
 
-func (hawk *App) getHelpRequests (w http.ResponseWriter, r *http.Request) {
+func (hawk *App) getHelpRequests(w http.ResponseWriter, r *http.Request) {
 	pgs, ok := r.URL.Query()["page"]
 	if !ok || len(pgs[0]) < 1 {
 		ResponseWriter(false, "Cant list help requests.", nil, http.StatusBadRequest, w)
