@@ -62,8 +62,6 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 		checkAns.Level = currUser.Region4
 	case 5:
 		checkAns.Level = currUser.Region5
-	case 6:
-		checkAns.Level = currUser.Region6
 
 	}
 
@@ -136,6 +134,7 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 			if currUser.Region4 == RegionComplete {
 				isRegionComplete = true
 			}
+		/*
 		case 5:
 			if currUser.Region5 == RegionComplete {
 				//unlock linear gameplay
@@ -148,21 +147,23 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 				}
 
 			}
+		*/
 		}
 		if isRegionComplete {
 
 			//get next region
-			nextRegion := GetNextRegion(currUser.UnlockOrder)
-			currUser.UnlockOrder = UpdateUnlockOrder(currUser.UnlockOrder, int(nextRegion)-48)
+			nextRegion := int (GetNextRegion(currUser.UnlockOrder))-48
+			//if next region is 5 unlock linear region
+			currUser.UnlockOrder = UpdateUnlockOrder(currUser.UnlockOrder, nextRegion)
 			//update DB with unlocked region
 			switch nextRegion {
-			case '2':
+			case 2:
 				err = tx.Model(&currUser).Update("Region2", 1).Error
-			case '3':
+			case 3:
 				err = tx.Model(&currUser).Update("Region3", 1).Error
-			case '4':
+			case 4:
 				err = tx.Model(&currUser).Update("Region4", 1).Error
-			case '5':
+			case 5: //linear
 				err = tx.Model(&currUser).Update("Region5", 1).Error
 			}
 			if err != nil {

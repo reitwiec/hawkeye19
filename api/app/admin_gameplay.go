@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const quesPerPage = 15
@@ -27,6 +28,7 @@ func (hawk *App) addQuestion(w http.ResponseWriter, r *http.Request) {
 	newQues.AddInfo = strings.TrimSpace(newQues.AddInfo)
 	newQues.AddedBy = currUser.Username
 	newQues.Answer = Sanitize(newQues.Answer)
+	newQues.Timestamp = time.Now()
 
 	tx := hawk.DB.Begin()
 	err = tx.Create(&newQues).Error

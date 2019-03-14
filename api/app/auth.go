@@ -15,7 +15,6 @@ import (
 )
 
 func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
-	hawk.DB.CreateTable(&Verification{})
 	user := User{}
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
@@ -61,7 +60,6 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 		Region3:        0,
 		Region4:        0,
 		Region5:        0,
-		Region6:        0,
 		Banned:         0,
 		Points:         0,
 		SidequestOrder: SideQuestOrder(),
@@ -401,8 +399,11 @@ func (hawk *App) verifyUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	token := keys[0]
-	//verificationData := Verification{}
-	err := hawk.DB.Where("email = ? AND token = ? ", email, token).First(&Verification{}).Error
+	verificationData := Verification{}
+	err := hawk.DB.Where("email = ? AND token = ? ", email, token).First(&verificationData).Error
+	if err == nil {
+		fmt.Println(verificationData)
+	}
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			fmt.Println("Wrong data")
