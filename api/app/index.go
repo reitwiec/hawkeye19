@@ -59,6 +59,7 @@ Block Key: %s
 func (hawk *App) migrate() {
 	fmt.Println("Creating Tables")
 	hawk.DB.CreateTable(
+		&Help{},
 		&User{},
 		&Attempt{},
 		&Question{},

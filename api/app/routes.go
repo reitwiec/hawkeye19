@@ -28,11 +28,14 @@ func (hawk *App) LoadRoutes() {
 	hawk.router.HandleFunc("/api/getStats", hawk.createContext(hawk.getStats, false, true)).Methods("GET")
 	hawk.router.HandleFunc("/api/getRecentTries", hawk.createContext(hawk.getRecentTries, false, true)).Methods("GET")
 
+	//Help center routes
+	hawk.router.HandleFunc("/api/submitHelpRequest", hawk.createContext(hawk.submitHelpRequest, false, true)).Methods("POST")
+	hawk.router.HandleFunc("/api/getHelpRequests", hawk.createContext(hawk.getHelpRequests, false, true)).Methods("GET")
+
 	//Sidequest routes
 	hawk.router.HandleFunc("/api/getSidequestQuestion", hawk.createContext(hawk.getSidequestQuestion, false, true)).Methods("GET")
 	hawk.router.HandleFunc("/api/checkSidequestAnswer", hawk.createContext(hawk.checkSidequestAnswer, false, true)).Methods("POST")
 	hawk.router.HandleFunc("/api/unlockRegion", hawk.createContext(hawk.unlockRegion, false, true)).Methods("GET")
-
 
 	//Admin gameplay routes
 	hawk.router.HandleFunc("/api/addQuestion", hawk.createContext(hawk.addQuestion, true, true)).Methods("POST")
@@ -69,7 +72,7 @@ func (hawk *App) createContext(next http.HandlerFunc, isAdmin bool, isLoggedIn b
 				return
 			}
 			sdump := string(dump)
-			fmt.Println (sdump)
+			fmt.Println(sdump)
 			if isLoggedIn {
 				//extract data from cookie
 				currUser, err := GetCurrUser(w, r)

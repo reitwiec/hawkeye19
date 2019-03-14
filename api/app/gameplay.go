@@ -35,11 +35,11 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 	currUser := r.Context().Value("User").(User)
 	// check if verified and not banned
 	if currUser.IsVerified != 1 {
-		ResponseWriter (false, "Not verified", nil, http.StatusOK, w)
+		ResponseWriter(false, "Not verified", nil, http.StatusOK, w)
 		return
 	}
 	if currUser.Banned == 1 {
-		ResponseWriter (false, "User banned", nil, http.StatusOK, w)
+		ResponseWriter(false, "User banned", nil, http.StatusOK, w)
 		return
 	}
 	//obtain answer, regionId from request
@@ -241,10 +241,10 @@ func (hawk *App) getQuestion(w http.ResponseWriter, r *http.Request) {
 
 	err := hawk.DB.Select("id, question, level, region, add_info").Where("level = ? AND region = ?", level, key).First(&question).Error
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err){
+		if gorm.IsRecordNotFoundError(err) {
 			ResponseWriter(false, "Question doesn't exist", nil, http.StatusInternalServerError, w)
-			fmt.Println (err)
-		}else {
+			fmt.Println(err)
+		} else {
 			ResponseWriter(false, "Could not fetch question.", nil, http.StatusInternalServerError, w)
 			fmt.Println(err)
 		}

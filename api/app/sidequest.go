@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	PointsPerQuestion  = 1
-	UnlockRegionPoints = 2
+	PointsPerQuestion       = 1
+	UnlockRegionPoints      = 2
 	TotalSidequestQuestions = 6
 )
 
@@ -45,11 +45,11 @@ func (hawk *App) checkSidequestAnswer(w http.ResponseWriter, r *http.Request) {
 
 	currUser := r.Context().Value("User").(User)
 	if currUser.IsVerified != 1 {
-		ResponseWriter (false, "Not verified", nil, http.StatusOK, w)
+		ResponseWriter(false, "Not verified", nil, http.StatusOK, w)
 		return
 	}
 	if currUser.Banned == 1 {
-		ResponseWriter (false, "User banned", nil, http.StatusOK, w)
+		ResponseWriter(false, "User banned", nil, http.StatusOK, w)
 		return
 	}
 	//obtain answer from request, region is Region0 by default for sidequest
@@ -62,7 +62,7 @@ func (hawk *App) checkSidequestAnswer(w http.ResponseWriter, r *http.Request) {
 	} //sanitize answer
 	checkAns.Answer = Sanitize(checkAns.Answer)
 	//actual level
-	acutalLevel := currUser.SidequestOrder[(currUser.Region0-1)*2]-48
+	acutalLevel := currUser.SidequestOrder[(currUser.Region0-1)*2] - 48
 	//find actual answer
 	question := Question{}
 	err = hawk.DB.Where("level = ? AND region = ?", acutalLevel, 0).First(&question).Error

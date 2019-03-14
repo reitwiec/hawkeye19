@@ -68,6 +68,15 @@ type User struct {
 	SideQuestPoints int    `json:"sideQuestPoints"`
 }
 
+type Help struct {
+	ID        int       `gorm:"primary_key;auto_increment" json:"helpID"`
+	User      int       `gorm:"not null" json:"userID" validate:"required"`
+	Username  string    `gorm:"not null" json:"username" validate:"required"`
+	Message   string    `gorm:"not null" validate:"required"`
+	Email     string    `gorm:"not null" validate:"email,required"`
+	Timestamp time.Time `gorm:"not null" json:"timestamp"`
+}
+
 type Attempt struct {
 	ID        int       `gorm:"primary_key;auto_increment" json:"attemptID"`
 	User      int       `gorm:"not null" json:"userID" validate:"required"`
