@@ -15,7 +15,7 @@ func (hawk *App) LoadRoutes() {
 	//Auth routes
 	hawk.router.HandleFunc("/api/addUser", hawk.createContext(hawk.addUser, false, false)).Methods("POST")
 	hawk.router.HandleFunc("/api/login", hawk.createContext(hawk.login, false, false)).Methods("POST")
-	hawk.router.HandleFunc("/api/logout", hawk.createContext(hawk.logout, false, false)).Methods("POST")
+	hawk.router.HandleFunc("/api/logout", hawk.createContext(hawk.logout, false, false)).Methods("GET")
 	hawk.router.HandleFunc("/api/forgotPassword", hawk.createContext(hawk.forgotPassword, false, false)).Methods("POST")
 	hawk.router.HandleFunc("/api/resetPassword", hawk.createContext(hawk.resetPassword, false, false)).Methods("POST")
 	hawk.router.HandleFunc("/api/checkUsername", hawk.createContext(hawk.checkUsername, false, false)).Methods("POST")

@@ -55,13 +55,12 @@ type User struct {
 	IsVerified int    `gorm:"not null" json:"isVerified"`
 
 	//Gameplay status
-	Region0         int    `json:"region0"` //sidequest
-	Region1         int    `json:"region1"`
-	Region2         int    `json:"region2"`
-	Region3         int    `json:"region3"`
-	Region4         int    `json:"Region4"`
+	Region0         int    `json:"region0" ` //sidequest
+	Region1         int    `json:"region1" `
+	Region2         int    `json:"region2" `
+	Region3         int    `json:"region3" `
+	Region4         int    `json:"Region4" `
 	Region5         int    `json:"region5"`  //linear
-	//Region6         int    `json:"region6"`
 	Points          int    `json:"points"`
 	SidequestOrder  string `json:"sidequestOrder"`
 	UnlockOrder     string `json:"unlockOrder"`

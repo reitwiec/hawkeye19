@@ -10,9 +10,8 @@ import (
 )
 
 type CheckAnswer struct {
-	Answer   string
-	RegionId int
-	Level    int
+	Answer   string `json:"answer"`
+	RegionID int `json:"regionID" validate:"min=0,max=5"`
 }
 
 type Stats struct {
@@ -27,8 +26,6 @@ type Stats struct {
 const (
 	RegionComplete = 4 //no of questions + 1
 )
-
-//@TODO:Add seperate route for checking side quest answers
 
 func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 	//obtain currUser from context
@@ -50,18 +47,21 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "Could not decode check answer struct", nil, http.StatusBadRequest, w)
 		return
 	}
+
+	level := -1
+
 	//get level from currUser
-	switch checkAns.RegionId {
+	switch checkAns.RegionID {
 	case 1:
-		checkAns.Level = currUser.Region1
+		level = currUser.Region1
 	case 2:
-		checkAns.Level = currUser.Region2
+		level = currUser.Region2
 	case 3:
-		checkAns.Level = currUser.Region3
+		level = currUser.Region3
 	case 4:
-		checkAns.Level = currUser.Region4
+		level = currUser.Region4
 	case 5:
-		checkAns.Level = currUser.Region5
+		level = currUser.Region5
 
 	}
 
@@ -70,7 +70,7 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 
 	//find actual answer
 	question := Question{}
-	err = hawk.DB.Where("level = ? AND region = ?", checkAns.Level, checkAns.RegionId).First(&question).Error
+	err = hawk.DB.Where("level = ? AND region = ?", level, checkAns.RegionID).First(&question).Error
 	actualAns := question.Answer
 	//check if same, close or wrong
 	status := CheckAnswerStatus(checkAns.Answer, actualAns)
@@ -90,33 +90,24 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 		tx.Rollback()
 		return
 	}
-	tx.Commit()
+
 	//if answer is correct
 	if status == CorrectAnswer {
 		//answer is correct
 		//update currUser level
-		tx := hawk.DB.Begin()
-		region := "Region" + strconv.Itoa(checkAns.RegionId)
-		err = tx.Model(&currUser).Update(region, checkAns.Level+1).Error
+
+		region := "Region" + strconv.Itoa(checkAns.RegionID)
+		err = tx.Model(&currUser).Update(region, level+1).Error
 		if err != nil {
 			fmt.Println("Could not update level")
 			ResponseWriter(false, "Could not update level", nil, http.StatusInternalServerError, w)
 			tx.Rollback()
 		}
 
-		////add SideQuestPoints
-		//if (status == CorrectAnswer && checkAns.RegionId == 0) {
-		//	err = tx.Model(&currUser).Update("SideQuestPoints", currUser.SideQuestPoints + 2).Error
-		//	if err != nil {
-		//		fmt.Println("Could not update level")
-		//		ResponseWriter(false, "Could not update level", nil, http.StatusInternalServerError, w)
-		//		tx.Rollback()
-		//	}
-		//}
 
 		//unlock region
 		isRegionComplete := false
-		switch checkAns.RegionId {
+		switch checkAns.RegionID{
 		case 1:
 			if currUser.Region1 == RegionComplete {
 				isRegionComplete = true
