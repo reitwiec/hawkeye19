@@ -20,6 +20,8 @@ const (
 	CloseAnswer        = 2
 	IncorrectAnswer    = 3
 	LevelCount         = 6
+	ERROR              = "ERROR"
+	INFO               = "INFO"
 )
 
 func ResponseWriter(flag bool, msg string, data interface{}, status int, w http.ResponseWriter) {
@@ -38,6 +40,11 @@ func ResponseWriter(flag bool, msg string, data interface{}, status int, w http.
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(payload)
+	/*
+		//if status == 500 error, log it
+		log.Printf("ERROR\nSuccess: %t\nMessage: %s\nData: %s\n\n",
+			response.Success, response.Message, response.Data)
+	*/
 
 }
 
@@ -285,17 +292,18 @@ func SendEmail(email string, token string) error {
 	return err
 }
 
-func LogRequest (r *http.Request){
+func LogRequest(r *http.Request, status string, err string) {
 
 	body, _ := ioutil.ReadAll(r.Body)
 	logInfo := LogInfo{
 		Timestamp: time.Now(),
 		Method:    r.Method,
 		URL:       r.URL.Path,
-		Body:      string (body),
+		Body:      string(body),
 		User:      r.Context().Value("User"),
 	}
 	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
-	log.Printf ("INFO\nTimestamp: %s\nMethod: %s\nURL: %s\nBody: %s\nUser: %v\n\n",
-		logInfo.Timestamp.Format("Mon Jan _2 15:04:05 2006"), logInfo.Method, logInfo.URL, logInfo.Body, logInfo.User)
+	log.Printf("%s\nTimestamp: %s\nMethod: %s\nURL: %s\nBody: %s\nUser: %v\nError: %s\n\n", status,
+		logInfo.Timestamp.Format("Mon Jan _2 15:04:05 2006"), logInfo.Method, logInfo.URL, logInfo.Body, logInfo.User,
+		err)
 }

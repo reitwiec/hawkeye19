@@ -93,7 +93,7 @@ func (hawk *App) createContext(next http.HandlerFunc, isAdmin bool, isLoggedIn b
 				ctx := context.WithValue(r.Context(), "User", user)
 				r = r.WithContext(ctx)
 			}
-			LogRequest (r)
+			LogRequest(r, INFO, "Nil")
 			next.ServeHTTP(w, r)
 		})
 }
