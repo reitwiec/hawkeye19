@@ -4,9 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gorilla/mux"
-	"log"
 	"net/http"
-	"net/http/httputil"
 )
 
 func (hawk *App) LoadRoutes() {
@@ -66,16 +64,6 @@ func (hawk *App) LoadRoutes() {
 func (hawk *App) createContext(next http.HandlerFunc, isAdmin bool, isLoggedIn bool) http.HandlerFunc {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
-
-			//log request body
-			dump, err := httputil.DumpRequest(r, true)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			sdump := string(dump)
-			log.Println(sdump)
-
 			if isLoggedIn {
 				//extract data from cookie
 				currUser, err := GetCurrUser(w, r)
@@ -105,6 +93,7 @@ func (hawk *App) createContext(next http.HandlerFunc, isAdmin bool, isLoggedIn b
 				ctx := context.WithValue(r.Context(), "User", user)
 				r = r.WithContext(ctx)
 			}
+			LogRequest (r)
 			next.ServeHTTP(w, r)
 		})
 }

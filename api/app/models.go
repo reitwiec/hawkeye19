@@ -61,6 +61,7 @@ type User struct {
 	Region3         int    `json:"region3" `
 	Region4         int    `json:"Region4" `
 	Region5         int    `json:"region5"`  //linear
+
 	Points          int    `json:"points"`
 	SidequestOrder  string `json:"sidequestOrder"`
 	UnlockOrder     string `json:"unlockOrder"`
@@ -130,4 +131,13 @@ type Verification struct {
 	ID    int `gorm:"primary_key;auto_increment" json:"id"`
 	Email string
 	Token string
+}
+
+type LogInfo struct {
+	Timestamp time.Time
+	Method    string
+	URL       string
+	Body      string
+	User      interface {}
+	Response	*Response
 }

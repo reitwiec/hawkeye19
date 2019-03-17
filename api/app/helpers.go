@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/texttheater/golang-levenshtein/levenshtein"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
@@ -282,4 +283,19 @@ func SendEmail(email string, token string) error {
 	}
 	defer resp.Body.Close()
 	return err
+}
+
+func LogRequest (r *http.Request){
+
+	body, _ := ioutil.ReadAll(r.Body)
+	logInfo := LogInfo{
+		Timestamp: time.Now(),
+		Method:    r.Method,
+		URL:       r.URL.Path,
+		Body:      string (body),
+		User:      r.Context().Value("User"),
+	}
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+	log.Printf ("INFO\nTimestamp: %s\nMethod: %s\nURL: %s\nBody: %s\nUser: %v\n\n",
+		logInfo.Timestamp.Format("Mon Jan _2 15:04:05 2006"), logInfo.Method, logInfo.URL, logInfo.Body, logInfo.User)
 }

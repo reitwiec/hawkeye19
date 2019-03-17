@@ -71,6 +71,16 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 	//find actual answer
 	question := Question{}
 	err = hawk.DB.Where("level = ? AND region = ?", level, checkAns.RegionID).First(&question).Error
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			fmt.Println("Question not found")
+			ResponseWriter(false, "Question not found", nil, http.StatusNotFound, w)
+			return
+		}
+		fmt.Println("Database error ", err.Error())
+		ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
+		return
+	}
 	actualAns := question.Answer
 	//check if same, close or wrong
 	status := CheckAnswerStatus(checkAns.Answer, actualAns)
@@ -125,25 +135,25 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 			if currUser.Region4 == RegionComplete {
 				isRegionComplete = true
 			}
-		/*
-		case 5:
-			if currUser.Region5 == RegionComplete {
-				//unlock linear gameplay
-				err = tx.Model(&currUser).Update("Region6", 1).Error
-				if err != nil {
-					fmt.Println("Could not unlock linear region")
-					ResponseWriter(false, "Could not unlock linear region", nil, http.StatusInternalServerError, w)
-					tx.Rollback()
-					return
-				}
+			/*
+				case 5:
+					if currUser.Region5 == RegionComplete {
+						//unlock linear gameplay
+						err = tx.Model(&currUser).Update("Region6", 1).Error
+						if err != nil {
+							fmt.Println("Could not unlock linear region")
+							ResponseWriter(false, "Could not unlock linear region", nil, http.StatusInternalServerError, w)
+							tx.Rollback()
+							return
+						}
 
-			}
-		*/
+					}
+			*/
 		}
 		if isRegionComplete {
 
 			//get next region
-			nextRegion := int (GetNextRegion(currUser.UnlockOrder))-48
+			nextRegion := int(GetNextRegion(currUser.UnlockOrder)) - 48
 			//if next region is 5 unlock linear region
 			currUser.UnlockOrder = UpdateUnlockOrder(currUser.UnlockOrder, nextRegion)
 			//update DB with unlocked region
