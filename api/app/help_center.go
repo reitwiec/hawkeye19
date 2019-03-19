@@ -17,6 +17,7 @@ func (hawk *App) submitHelpRequest(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&newHelp)
 	if err != nil {
+		LogRequest(r, ERROR, err.Error())
 		fmt.Println("Could not decode checkAnswer struct " + err.Error())
 		ResponseWriter(false, "Could not decode check answer struct", nil, http.StatusBadRequest, w)
 		return
@@ -31,6 +32,7 @@ func (hawk *App) submitHelpRequest(w http.ResponseWriter, r *http.Request) {
 
 	err = tx.Create(&newHelp).Error
 	if err != nil {
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Could not add help request.", nil, http.StatusInternalServerError, w)
 		return
 	}
@@ -47,6 +49,7 @@ func (hawk *App) getHelpRequests(w http.ResponseWriter, r *http.Request) {
 	}
 	page, err := strconv.Atoi(pgs[0])
 	if err != nil {
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Parameters not valid. Cannot list help requests.", nil, http.StatusBadRequest, w)
 		return
 	}
@@ -55,6 +58,7 @@ func (hawk *App) getHelpRequests(w http.ResponseWriter, r *http.Request) {
 	offset := (page - 1) * requestsPerPage
 	err = hawk.DB.Find(&helpRequests).Offset(offset).Limit(requestsPerPage).Error
 	if err != nil {
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Cannot list questions.", nil, http.StatusInternalServerError, w)
 		return
 	}

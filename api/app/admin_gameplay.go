@@ -20,6 +20,7 @@ func (hawk *App) addQuestion(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&newQues)
 	if err != nil {
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Could not parse request body", nil, http.StatusInternalServerError, w)
 		return
 	}
@@ -34,7 +35,7 @@ func (hawk *App) addQuestion(w http.ResponseWriter, r *http.Request) {
 	err = tx.Create(&newQues).Error
 
 	if err != nil {
-		fmt.Println(err.Error())
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
 		tx.Rollback()
 		return
@@ -50,6 +51,7 @@ func (hawk *App) addHint(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&newHint)
 	if err != nil {
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Could not parse request body", nil, http.StatusInternalServerError, w)
 		return
 	}
@@ -89,8 +91,10 @@ func (hawk *App) editQuestion(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		tx.Rollback()
 		if gorm.IsRecordNotFoundError(err) {
+			LogRequest(r, ERROR, err.Error())
 			ResponseWriter(false, "Question not found", nil, http.StatusBadRequest, w)
 		} else {
+			LogRequest(r, ERROR, err.Error())
 			ResponseWriter(false, "Question not updated", nil, http.StatusInternalServerError, w)
 		}
 		return
@@ -98,6 +102,7 @@ func (hawk *App) editQuestion(w http.ResponseWriter, r *http.Request) {
 	err = tx.Model(&q).Updates(Question{Question: newQues.Question, Answer: newQues.Answer, AddInfo: newQues.AddInfo}).Error
 	if err != nil {
 		tx.Rollback()
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Question not updated", nil, http.StatusInternalServerError, w)
 		return
 	}
@@ -119,6 +124,7 @@ func (hawk *App) editHint(w http.ResponseWriter, r *http.Request) {
 	err = tx.Model(&Hint{}).Where("id = ?", newHint.ID).First(&h).Error
 	if err != nil {
 		tx.Rollback()
+		LogRequest(r, ERROR, err.Error())
 		if gorm.IsRecordNotFoundError(err) {
 			ResponseWriter(false, "Hint not found", nil, http.StatusBadRequest, w)
 		} else {
@@ -129,6 +135,7 @@ func (hawk *App) editHint(w http.ResponseWriter, r *http.Request) {
 	err = tx.Model(&h).Updates(Hint{Hint: newHint.Hint, Question: newHint.Question, Active: newHint.Active}).Error
 	if err != nil {
 		tx.Rollback()
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Hint not updated", nil, http.StatusInternalServerError, w)
 		return
 	}
@@ -149,6 +156,7 @@ func (hawk *App) deleteQuestion(w http.ResponseWriter, r *http.Request) {
 	err := tx.Where("id=?", key).First(&q).Error
 	if err != nil {
 		tx.Rollback()
+		LogRequest(r, ERROR, err.Error())
 		if gorm.IsRecordNotFoundError(err) {
 			ResponseWriter(false, "Question not found", nil, http.StatusBadRequest, w)
 		} else {
@@ -181,6 +189,7 @@ func (hawk *App) deleteHint(w http.ResponseWriter, r *http.Request) {
 	err := tx.Where("id = ?", key).First(&h).Error
 	if err != nil {
 		tx.Rollback()
+		LogRequest(r, ERROR, err.Error())
 		if gorm.IsRecordNotFoundError(err) {
 			ResponseWriter(false, "Hint not found", nil, http.StatusBadRequest, w)
 		} else {
@@ -212,6 +221,7 @@ func (hawk *App) activateHint(w http.ResponseWriter, r *http.Request) {
 	err := tx.Where("ID = ?", key).First(&h).Error
 	if err != nil {
 		tx.Rollback()
+		LogRequest(r, ERROR, err.Error())
 		if gorm.IsRecordNotFoundError(err) {
 			ResponseWriter(false, "Hint not found", nil, http.StatusBadRequest, w)
 		} else {
@@ -223,6 +233,7 @@ func (hawk *App) activateHint(w http.ResponseWriter, r *http.Request) {
 
 	err = tx.Model(h).Update("Active", 1).Error
 	if err != nil {
+		LogRequest(r, ERROR, err.Error())
 		tx.Rollback()
 		ResponseWriter(false, "Hint not activated", nil, http.StatusInternalServerError, w)
 		return
@@ -243,6 +254,7 @@ func (hawk *App) deactivateHint(w http.ResponseWriter, r *http.Request) {
 	err := tx.Where("ID = ?", key).First(&h).Error
 	if err != nil {
 		tx.Rollback()
+		LogRequest(r, ERROR, err.Error())
 		if gorm.IsRecordNotFoundError(err) {
 			ResponseWriter(false, "Hint not found", nil, http.StatusBadRequest, w)
 		} else {
@@ -255,6 +267,7 @@ func (hawk *App) deactivateHint(w http.ResponseWriter, r *http.Request) {
 	err = tx.Model(h).Update("Active", 0).Error
 	if err != nil {
 		tx.Rollback()
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Hint not deactivated", nil, http.StatusInternalServerError, w)
 		return
 	}
@@ -270,6 +283,7 @@ func (hawk *App) listQuestions(w http.ResponseWriter, r *http.Request) {
 	}
 	page, err := strconv.Atoi(pgs[0])
 	if err != nil {
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Parameters not valid. Cannot list questions.", nil, http.StatusBadRequest, w)
 		return
 	}
@@ -277,6 +291,7 @@ func (hawk *App) listQuestions(w http.ResponseWriter, r *http.Request) {
 	offset := (page - 1) * quesPerPage
 	err = hawk.DB.Find(&questions).Offset(offset).Order("level asc").Limit(quesPerPage).Error
 	if err != nil {
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Cannot list questions", nil, http.StatusInternalServerError, w)
 		return
 	}
@@ -292,12 +307,14 @@ func (hawk *App) listHints(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := strconv.Atoi(keys[0])
 	if err != nil {
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Parameters not valid Cannot display hints.", nil, http.StatusBadRequest, w)
 		return
 	}
 	var hints []Hint
 	err = hawk.DB.Where(" id = ?", id).Find(&hints).Error
 	if err != nil {
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Cannot list hints", nil, http.StatusInternalServerError, w)
 		return
 	}
@@ -312,11 +329,13 @@ func (hawk *App) questionLogs(w http.ResponseWriter, r *http.Request) {
 	}
 	page, err := strconv.Atoi(keys["page"][0])
 	if err != nil {
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Parameters not valid.Cannot list answers", nil, http.StatusBadRequest, w)
 		return
 	}
 	id, err := strconv.Atoi(keys["question"][0])
 	if err != nil {
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Parameters not valid. Cannot list answers.", nil, http.StatusBadRequest, w)
 		return
 	}
@@ -324,7 +343,7 @@ func (hawk *App) questionLogs(w http.ResponseWriter, r *http.Request) {
 	offset := (page - 1) * perPage
 	err = hawk.DB.Where("question = ?", id).Order("timestamp desc").Offset(offset).Limit(perPage).Find(&answers).Error
 	if err != nil {
-		fmt.Println("Database error")
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Cannot log answers", nil, http.StatusInternalServerError, w)
 		return
 	}

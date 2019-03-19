@@ -27,6 +27,7 @@ func (hawk *App) getSidequestQuestion(w http.ResponseWriter, r *http.Request) {
 	question := Question{}
 	err := hawk.DB.Select("id, level, region, question, add_info").Where("region = ? AND level = ?", 0, level).First(&question).Error
 	if err != nil {
+		LogRequest(r, ERROR, err.Error())
 		if gorm.IsRecordNotFoundError(err) {
 			fmt.Println("Question does not exist")
 			ResponseWriter(false, "Question does not exist", nil, http.StatusNotFound, w)
@@ -56,6 +57,7 @@ func (hawk *App) checkSidequestAnswer(w http.ResponseWriter, r *http.Request) {
 	checkAns := CheckAnswer{}
 	err := json.NewDecoder(r.Body).Decode(&checkAns)
 	if err != nil {
+		LogRequest(r, ERROR, err.Error())
 		fmt.Println("Could not decode checkAnswer struct " + err.Error())
 		ResponseWriter(false, "Could not decode check answer struct", nil, http.StatusBadRequest, w)
 		return
@@ -67,6 +69,7 @@ func (hawk *App) checkSidequestAnswer(w http.ResponseWriter, r *http.Request) {
 	question := Question{}
 	err = hawk.DB.Where("level = ? AND region = ?", acutalLevel, 0).First(&question).Error
 	if err != nil {
+		LogRequest(r, ERROR, err.Error())
 		if gorm.IsRecordNotFoundError(err) {
 			fmt.Println("Question does not exist")
 			ResponseWriter(false, "Question does not exist", nil, http.StatusNotFound, w)
@@ -90,6 +93,7 @@ func (hawk *App) checkSidequestAnswer(w http.ResponseWriter, r *http.Request) {
 	tx := hawk.DB.Begin()
 	err = tx.Create(&attempt).Error
 	if err != nil {
+		LogRequest(r, ERROR, err.Error())
 		fmt.Println("Could not log answer attempt")
 		ResponseWriter(false, "Could not log answer", nil, http.StatusInternalServerError, w)
 		tx.Rollback()
@@ -105,6 +109,7 @@ func (hawk *App) checkSidequestAnswer(w http.ResponseWriter, r *http.Request) {
 		//err = tx.Model(&currUser).Updates(map[string]interface{}{"Region0": currUser.Region0+1, "side_quest_points": currUser.SideQuestPoints+PointsPerQuestion}).Error
 
 		if err != nil {
+			LogRequest(r, ERROR, err.Error())
 			fmt.Println("Could not update database")
 			ResponseWriter(false, "Could not update database", nil, http.StatusInternalServerError, w)
 			tx.Rollback()
@@ -132,6 +137,7 @@ func (hawk *App) unlockRegion(w http.ResponseWriter, r *http.Request) {
 
 	err = tx.Model(&currUser).Update("SideQuestPoints", currUser.SideQuestPoints-UnlockRegionPoints).Error
 	if err != nil {
+		LogRequest(r, ERROR, err.Error())
 		fmt.Println("Could not unlock region in DB")
 		ResponseWriter(false, "Could not unlock region in DB", nil, http.StatusInternalServerError, w)
 		tx.Rollback()
@@ -149,6 +155,7 @@ func (hawk *App) unlockRegion(w http.ResponseWriter, r *http.Request) {
 		err = tx.Model(&currUser).Update("Region5", 1).Error
 	}
 	if err != nil {
+		LogRequest(r, ERROR, err.Error())
 		fmt.Println("Could not unlock region in DB")
 		ResponseWriter(false, "Could not unlock region in DB", nil, http.StatusInternalServerError, w)
 		tx.Rollback()
@@ -157,6 +164,7 @@ func (hawk *App) unlockRegion(w http.ResponseWriter, r *http.Request) {
 
 	err = tx.Model(&currUser).Update("unlock_order", currUser.UnlockOrder).Error
 	if err != nil {
+		LogRequest(r, ERROR, err.Error())
 		fmt.Println("Could not unlock region in DB")
 		ResponseWriter(false, "Could not unlock region in DB", nil, http.StatusInternalServerError, w)
 		tx.Rollback()

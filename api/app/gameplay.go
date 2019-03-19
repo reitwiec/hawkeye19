@@ -73,11 +73,11 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 	err = hawk.DB.Where("level = ? AND region = ?", level, checkAns.RegionID).First(&question).Error
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			fmt.Println("Question not found")
+			LogRequest(r, ERROR, err.Error())
 			ResponseWriter(false, "Question not found", nil, http.StatusNotFound, w)
 			return
 		}
-		fmt.Println("Database error ", err.Error())
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
 		return
 	}
@@ -95,7 +95,7 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 	tx := hawk.DB.Begin()
 	err = tx.Create(&attempt).Error
 	if err != nil {
-		fmt.Println("Could not log answer attempt")
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Could not log answer", nil, http.StatusInternalServerError, w)
 		tx.Rollback()
 		return
@@ -109,7 +109,7 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 		region := "Region" + strconv.Itoa(checkAns.RegionID)
 		err = tx.Model(&currUser).Update(region, level+1).Error
 		if err != nil {
-			fmt.Println("Could not update level")
+			LogRequest(r, ERROR, err.Error())
 			ResponseWriter(false, "Could not update level", nil, http.StatusInternalServerError, w)
 			tx.Rollback()
 		}
@@ -167,7 +167,7 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 				err = tx.Model(&currUser).Update("Region5", 1).Error
 			}
 			if err != nil {
-				fmt.Println("Could not unlock region in DB")
+				LogRequest(r, ERROR, err.Error())
 				ResponseWriter(false, "Could not unlock region in DB", nil, http.StatusInternalServerError, w)
 				tx.Rollback()
 				return
@@ -175,7 +175,7 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 			//update UnlockOrder string in DB
 			err = tx.Model(&currUser).Update("unlock_order", currUser.UnlockOrder).Error
 			if err != nil {
-				fmt.Println("Could not unlock region in DB")
+				LogRequest(r, ERROR, err.Error())
 				ResponseWriter(false, "Could not unlock region in DB", nil, http.StatusInternalServerError, w)
 				tx.Rollback()
 				return
@@ -200,7 +200,7 @@ func (hawk *App) getRecentTries(w http.ResponseWriter, r *http.Request) {
 	//query db for answers
 	err := hawk.DB.Model(&Attempt{}).Where("question = ? AND user = ?", keys[0], currUser.ID).Order("timestamp desc").Pluck("answer", &answers).Error
 	if err != nil && !gorm.IsRecordNotFoundError(err) {
-		fmt.Println("Database error")
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
 		return
 	}
@@ -243,9 +243,11 @@ func (hawk *App) getQuestion(w http.ResponseWriter, r *http.Request) {
 	err := hawk.DB.Select("id, question, level, region, add_info").Where("level = ? AND region = ?", level, key).First(&question).Error
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
+			LogRequest(r, ERROR, err.Error())
 			ResponseWriter(false, "Question doesn't exist", nil, http.StatusInternalServerError, w)
 			fmt.Println(err)
 		} else {
+			LogRequest(r, ERROR, err.Error())
 			ResponseWriter(false, "Could not fetch question.", nil, http.StatusInternalServerError, w)
 			fmt.Println(err)
 		}
@@ -268,7 +270,15 @@ func (hawk *App) getHints(w http.ResponseWriter, r *http.Request) {
 
 	err := hawk.DB.Model(&Hint{}).Where("question=? AND active=1", key).Pluck("hint", &hints).Error
 	if err != nil {
-		ResponseWriter(false, "Could not fetch hint.", nil, http.StatusInternalServerError, w)
+		if gorm.IsRecordNotFoundError(err) {
+			LogRequest(r, ERROR, err.Error())
+			ResponseWriter(false, "Question doesn't exist", nil, http.StatusInternalServerError, w)
+			fmt.Println(err)
+		} else {
+			LogRequest(r, ERROR, err.Error())
+			ResponseWriter(false, "Could not fetch question.", nil, http.StatusInternalServerError, w)
+			fmt.Println(err)
+		}
 		return
 	}
 
@@ -286,18 +296,21 @@ func (hawk *App) getStats(w http.ResponseWriter, r *http.Request) {
 
 	err := hawk.DB.Model(&User{}).Count(&currStats.TotalPlayers).Error
 	if err != nil {
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Cant get total players", nil, http.StatusInternalServerError, w)
 		return
 	}
 
 	err = hawk.DB.Model(&User{}).Where("points = ?", currUser.Points).Count(&currStats.SameLevel).Error
 	if err != nil {
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Cant get players at par", nil, http.StatusInternalServerError, w)
 		return
 	}
 
 	err = hawk.DB.Model(&User{}).Where("points > ?", currUser.Points).Count(&currStats.Leading).Error
 	if err != nil {
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Cant get leading users", nil, http.StatusInternalServerError, w)
 		return
 	}
