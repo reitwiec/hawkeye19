@@ -6,8 +6,24 @@ import media from '../components/theme/media';
 import logo from '../components/assets/iecse_logo.png';
 import hawk from '../components/assets/hawk_logo.png';
 import pcb from '../components/assets/pcbdesign.png';
+import pcb1 from '../components/assets/pcbdesign1.png';
 
 import { Button, TextField } from '../components';
+
+const size = {
+	mobileS: '320px',
+	tablet: '768px',
+	laptop: '730px',
+	laptopL: '862px',
+	desktop: '1000px'
+};
+export const device = {
+	mobileS: `(min-width: ${size.mobileS})`,
+	tablet: `(min-width: ${size.tablet})`,
+	laptop: `(min-width: ${size.laptop})`,
+	laptopL: `(min-width: ${size.laptopL})`,
+	desktop: `(min-width: ${size.desktop})`
+};
 
 const RegisterPage = ({ className }) => {
 	const [formData, setformData] = useState({
@@ -77,6 +93,7 @@ const RegisterPage = ({ className }) => {
 			<div id="bg">
 				<img src={pcb} alt="" id="pcb1" />
 				<img src={pcb} alt="" id="pcb2" />
+				<img src={pcb1} alt="" id="pcbdesk" />
 			</div>
 		</div>
 	);
@@ -100,127 +117,365 @@ const flash = keyframes`
 `;
 
 export default styled(RegisterPage)`
-	${media.phone`
-	#hawk{
-		position:absolute;
-		z-index:-10;
-		left:10px;
-		top:10px;
-		/* transform: translate(-50%,0%); */
-		width:10%;
+	#pcbdesk {
+		display: none;
 	}
-	#logo{
-		position:absolute;
-		z-index:-10;
-		right:10px;
-		top:16px;
-		/* transform: translate(-50%,0%); */
-		width:8%;
-	}
-	#box{
-		padding-top:10px;
-		h1{
-			color:#FFD627;
-			margin:10px 0 3px 0;
+	@media ${device.mobileS} {
+		max-width: 768px;
+		#hawk {
+			position: absolute;
+			z-index: -10;
+			left: 10px;
+			top: 10px;
+			/* transform: translate(-50%,0%); */
+			width: 10%;
 		}
-		span{
-			color:white;
-			font-weight:300;
-			font-size:0.7em;
-			letter-spacing:3px;
+		#logo {
+			position: absolute;
+			z-index: -10;
+			right: 10px;
+			top: 16px;
+			/* transform: translate(-50%,0%); */
+			width: 8%;
 		}
-		border-radius:10px;
-
-		background:#1c1c1c;
-		filter: drop-shadow(0px 15px 15px #000);
-		width:80%;
-		position: absolute;
-		height:500px;
-		text-align:center;
-    left: 50%;
-    top: 50%;
-	transform: translate(-50%,-50%);
-	#inputs{
-		text-align:left;
-		width:100%;
-		margin-left:30px;
-		${TextField}{
-			input{
-				letter-spacing:1.25px;
-				display:block;
-				font-size:100%;
-				text-indent: 10px;
-				margin-top:10px;
-				font-weight:300;
-				width:80%;
-				color:#fff;
-				border: 0px;
-				border-radius: 4px;
-				box-shadow: none;
-				outline: none;
-				-webkit-appearance:none ;
-				-moz-appearance:none ;
-				appearance:none ;
-				height:25px;
-				border:none;
-				text-indent: 10px;
-				background: #333333;
+		#box {
+			padding-top: 10px;
+			h1 {
+				color: #ffd627;
+				margin: 10px 0 3px 0;
 			}
-			.error{
-				text-align:center;
-				width:34%;
-				padding:5px;
-				margin:10px;
+			span {
+				color: white;
+				font-weight: 300;
+				font-size: 0.7em;
+				letter-spacing: 3px;
+			}
+			border-radius: 10px;
+
+			background: #1c1c1c;
+			filter: drop-shadow(0px 15px 15px #000);
+			width: 80%;
+			position: absolute;
+			height: 500px;
+			text-align: center;
+			left: 50%;
+			top: 50%;
+			transform: translate(-50%, -50%);
+			#inputs {
+				${TextField} {
+					input {
+						letter-spacing: 1.25px;
+						font-size: 100%;
+						text-indent: 10px;
+						margin-top: 10px;
+						font-weight: 300;
+						width: 80%;
+						color: #fff;
+						border: 0px;
+						border-radius: 4px;
+						box-shadow: none;
+						outline: none;
+						-webkit-appearance: none;
+						-moz-appearance: none;
+						appearance: none;
+						height: 25px;
+						border: none;
+						text-indent: 10px;
+						background: #333333;
+					}
+					.error {
+						text-align: center;
+						width: 34%;
+						padding: 5px;
+						margin: 10px;
+					}
+				}
+			}
+			${Button} {
+				color: #1c1c1c;
+				font-weight: 500;
+				background: #ffd627;
+				width: 50%;
+				height: 35px;
+				padding: 10px;
+				padding-top: 7px;
+				border: none;
+				border-radius: 20px;
+				margin-top: 10px;
+				margin-bottom: 10px;
 			}
 		}
-	}
-	${Button}{
-		color: #1c1c1c;
-		font-weight: 500;
-		background: #FFD627;
-		width: 50%;
-		height: 35px;
-		padding: 10px;
-		padding-top: 7px;
-		border: none;
-		border-radius: 20px;
-		margin-top:10px;
-		margin-bottom:10px;
 
+		#pcb1 {
+			left: 50%;
+			top: 0%;
+			transform: translate(-50%, 0%);
+			width: 100%;
+			position: relative;
+		}
+		#pcb2 {
+			left: 50%;
+			bottom: 10px;
+			transform: translate(-50%, 0%);
+			width: 100%;
+			position: relative;
+		}
+		#bg {
+			animation: ${flash} 2s infinite 0s ease-in-out;
+			opacity: 0.1;
+			z-index: -100;
+			position: absolute;
+			overflow-y: hidden;
+			left: 50%;
+			top: 50%;
+			transform: translate(-50%, -50%);
+			width: 100vw;
+			height: 100%;
+			/* background:red; */
+		}
 	}
 
+	/*************tablettttt******************/
+	@media ${device.tablet} {
+		max-width: 1000px;
+		#hawk {
+			position: absolute;
+			z-index: -10;
+			left: 10px;
+			top: 10px;
+			/* transform: translate(-50%,0%); */
+			width: 7%;
+		}
+		#logo {
+			position: absolute;
+			z-index: -10;
+			right: 10px;
+			top: 16px;
+			/* transform: translate(-50%,0%); */
+			width: 5%;
+		}
+		#box {
+			padding-top: 10px;
+			h1 {
+				color: #ffd627;
+				margin: 10px 0 3px 0;
+			}
+			span {
+				color: white;
+				font-weight: 300;
+				font-size: 0.7em;
+				letter-spacing: 3px;
+			}
+			border-radius: 10px;
+
+			background: #1c1c1c;
+			filter: drop-shadow(0px 15px 15px #000);
+			width: 40%;
+			position: absolute;
+			height: 500px;
+			text-align: center;
+			left: 50%;
+			top: 50%;
+			transform: translate(-50%, -50%);
+			#inputs {
+				${TextField} {
+					input {
+						letter-spacing: 1.25px;
+						font-size: 100%;
+						text-indent: 10px;
+						margin-top: 10px;
+						font-weight: 300;
+						width: 80%;
+						color: #fff;
+						border: 0px;
+						border-radius: 4px;
+						box-shadow: none;
+						outline: none;
+						-webkit-appearance: none;
+						-moz-appearance: none;
+						appearance: none;
+						height: 25px;
+						border: none;
+						text-indent: 10px;
+						background: #333333;
+					}
+					.error {
+						text-align: center;
+						width: 34%;
+						padding: 5px;
+						margin: 10px;
+					}
+				}
+			}
+			${Button} {
+				color: #1c1c1c;
+				font-weight: 500;
+				background: #ffd627;
+				width: 50%;
+				height: 35px;
+				padding: 10px;
+				padding-top: 7px;
+				border: none;
+				border-radius: 20px;
+				margin-top: 10px;
+				margin-bottom: 10px;
+			}
+		}
+
+		#pcb1 {
+			left: 50%;
+			top: 0%;
+			transform: translate(-50%, 0%);
+			width: 100%;
+			position: relative;
+		}
+		#pcb2 {
+			left: 50%;
+			bottom: 10px;
+			transform: translate(-50%, 0%);
+			width: 100%;
+			position: relative;
+		}
+		#bg {
+			animation: ${flash} 2s infinite 0s ease-in-out;
+			opacity: 0.1;
+			z-index: -100;
+			position: absolute;
+			overflow-y: hidden;
+			left: 50%;
+			top: 50%;
+			transform: translate(-50%, -50%);
+			width: 100vw;
+			height: 100%;
+			/* background:red; */
+		}
 	}
 
+	/*************desktop******************/
+	@media ${device.desktop} {
+		#pcbdesk {
+			display: block;
+			left: 50%;
+			top: 0%;
+			transform: translate(-50%, 0%);
+			width: 100%;
+			position: relative;
+		}
+		#pcb1,
+		#pcb2 {
+			display: none;
+		}
+		max-width: 3000px;
+		#hawk {
+			position: absolute;
+			z-index: -10;
+			left: 10px;
+			top: 10px;
+			/* transform: translate(-50%,0%); */
+			width: 7%;
+		}
+		#logo {
+			position: absolute;
+			z-index: -10;
+			right: 10px;
+			top: 16px;
+			/* transform: translate(-50%,0%); */
+			width: 5%;
+		}
+		#box {
+			padding-top: 10px;
+			h1 {
+				color: #ffd627;
+				margin: 10px 0 3px 0;
+			}
+			span {
+				color: white;
+				font-weight: 300;
+				font-size: 0.7em;
+				letter-spacing: 3px;
+			}
+			border-radius: 10px;
 
-	#pcb1{
-		left: 50%;
-    top: 0%;
-	transform: translate(-50%,0%);
-	width:100%;
-		position:relative;
-		
-	}
-	#pcb2{
-		left: 50%;
-    bottom: 10px;
-	transform: translate(-50%,0%);
-	width:100%;
-		position:relative;
+			background: #1c1c1c;
+			filter: drop-shadow(0px 15px 15px #000);
+			width: 30%;
+			position: absolute;
+			height: 500px;
+			text-align: center;
+			left: 50%;
+			top: 50%;
+			transform: translate(-50%, -50%);
+			#inputs {
+				${TextField} {
+					input {
+						letter-spacing: 1.25px;
+						font-size: 100%;
+						text-indent: 10px;
+						margin-top: 10px;
+						font-weight: 300;
+						width: 80%;
+						color: #fff;
+						border: 0px;
+						border-radius: 4px;
+						box-shadow: none;
+						outline: none;
+						-webkit-appearance: none;
+						-moz-appearance: none;
+						appearance: none;
+						height: 25px;
+						border: none;
+						text-indent: 10px;
+						background: #333333;
+					}
+					.error {
+						text-align: center;
+						width: 34%;
+						padding: 5px;
+						margin: 10px;
+					}
+				}
+			}
+			${Button} {
+				color: #1c1c1c;
+				font-weight: 500;
+				background: #ffd627;
+				width: 50%;
+				height: 35px;
+				padding: 10px;
+				padding-top: 7px;
+				border: none;
+				border-radius: 20px;
+				margin-top: 10px;
+				margin-bottom: 10px;
+			}
+		}
 
+		#pcb1 {
+			left: 50%;
+			top: 0%;
+			transform: translate(-50%, 0%);
+			width: 100%;
+			position: relative;
+		}
+		#pcb2 {
+			left: 50%;
+			bottom: 10px;
+			transform: translate(-50%, 0%);
+			width: 100%;
+			position: relative;
+		}
+		#bg {
+			animation: ${flash} 2s infinite 0s ease-in-out;
+			opacity: 0.1;
+			z-index: -100;
+			position: absolute;
+			overflow-y: hidden;
+			left: 50%;
+			top: 50%;
+			transform: translate(-50%, -50%);
+			width: 100vw;
+			height: 100%;
+			/* background:red; */
+		}
 	}
-	#bg{
-		animation: ${flash} 2s infinite 0s ease-in-out;
-		opacity:0.1;
-		z-index:-100;
-		position:absolute;
-		overflow-y: hidden;
-		left: 50%;
-    top: 50%;
-	transform: translate(-50%,-50%);
-	width: 100vw;
-	
-	height: 100%;
-	/* background:red; */
-	}
-`}
 `;
