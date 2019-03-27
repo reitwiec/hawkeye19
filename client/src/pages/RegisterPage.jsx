@@ -38,10 +38,24 @@ const RegisterPage = ({ className }) => {
 
 	const onChange = useCallback((name, value, error) => {
 		setformData(Object.assign(formData, { [name]: { value, error } }));
-		console.log(formData);
 	}, []);
 
-	const onSubmit = useCallback(() => {}, []);
+	const onSubmit = useCallback(() => {
+		// Remove error keys from formData
+		const postData = Object.entries(formData)
+			.map(([k, v]) => {
+				return { [k]: v.value };
+			})
+			.reduce((acc, val) => Object.assign(acc, val));
+
+		fetch('/api/addUser', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(postData)
+		})
+			.then(res => res.json())
+			.then(json => console.log(json));
+	}, []);
 
 	return (
 		<div className={className}>
