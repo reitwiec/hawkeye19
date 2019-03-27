@@ -23,7 +23,7 @@ func (hawk *App) Initialise() {
 	fmt.Printf(`
 
 Configuration:
-DB Username: %s
+DB Usernameeeee: %s
 DB Password: %s
 DB Name: %s
 Hash Key: %s

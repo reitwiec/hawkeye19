@@ -16,10 +16,8 @@ func SetSession(w http.ResponseWriter, currUser CurrUser, age int) error {
 		}
 		http.SetCookie(w, cookie)
 	} else {
-		fmt.Println("Some error in setting session\n\t" + err.Error())
 		return err
 	}
-	fmt.Println("Cookie set!")
 	return nil
 }
 
@@ -32,7 +30,6 @@ func ClearSession(w http.ResponseWriter) {
 	}
 	http.SetCookie(w, cookie)
 }
-
 func GetCurrUser(w http.ResponseWriter, r *http.Request) (CurrUser, error) {
 	c, err := r.Cookie("session")
 	if err != nil {

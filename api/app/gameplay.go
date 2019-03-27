@@ -198,7 +198,7 @@ func (hawk *App) getRecentTries(w http.ResponseWriter, r *http.Request) {
 	}
 	var answers []string
 	//query db for answers
-	err := hawk.DB.Model(&Attempt{}).Where("question = ? AND user = ?", keys[0], currUser.ID).Order("timestamp desc").Pluck("answer", &answers).Error
+	err := hawk.DB.Model(&Attempt{}).Where("question = ? AND user = ?", keys[0], currUser.ID).Order("timestamp desc").Limit(7).Pluck("answer", &answers).Error
 	if err != nil && !gorm.IsRecordNotFoundError(err) {
 		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
