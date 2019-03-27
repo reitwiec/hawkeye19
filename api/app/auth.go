@@ -4,16 +4,28 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-sql-driver/mysql"
-	"net/http"
-	"strings"
-	"time"
-
 	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/go-playground/validator.v9"
+	"net/http"
+	"strings"
+	"time"
 )
 
 func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
+	/*
+	re := recaptcha.R{
+		Secret: "6LftZZoUAAAAAPXZ3nAqHd4jzIbHBNxfMFpuWfMe",
+	}
+	isValid := re.Verify(*r)
+	if isValid {
+		fmt.Fprintf(w, "Valid")
+	} else {
+		//fmt.Fprintf(w, "Invalid! These errors ocurred: %v", re.LastError())
+		ResponseWriter(false, "Captcha error", nil, http.StatusBadRequest, w)
+		return
+	}
+	*/
 	user := User{}
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
@@ -85,7 +97,14 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 	}
 	token := RandomString()
 	//@TODO: send verification email and remove print token statement
-	fmt.Println(token)
+	//fmt.Println(token)
+	err = SendEmail(newUser.Email, token, newUser.Name, "https://mail.iecsemanipal.com/hawkeye/emailverification")
+	if err != nil {
+		tx.Rollback()
+		ResponseWriter(false, "Error in sending verification email", nil, http.StatusInternalServerError, w)
+		LogRequest(r, ERROR, err.Error())
+		return
+	}
 	verification := Verification{
 		Email: user.Email,
 		Token: token,
@@ -202,6 +221,12 @@ func (hawk *App) forgotPassword(w http.ResponseWriter, r *http.Request) {
 	token := RandomString()
 	//@TODO: Email token and delete print statement
 	fmt.Println(token)
+	err = SendEmail(user.Email, token, user.Name, "https://mail.iecsemanipal.com/hawkeye/forgotpassword")
+	if err != nil {
+		ResponseWriter(false, "Error in sending forgot password email", nil, http.StatusInternalServerError, w)
+		LogRequest(r, ERROR, err.Error())
+		return
+	}
 	hashedToken, err := bcrypt.GenerateFromPassword([]byte(token), 14)
 	if err != nil {
 		LogRequest(r, ERROR, err.Error())

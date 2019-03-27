@@ -107,6 +107,7 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 		//update currUser level
 
 		region := "Region" + strconv.Itoa(checkAns.RegionID)
+
 		err = tx.Model(&currUser).Update(region, level+1).Error
 		if err != nil {
 			LogRequest(r, ERROR, err.Error())
@@ -344,7 +345,7 @@ func (hawk *App) getStats(w http.ResponseWriter, r *http.Request) {
 	currStats.TotalPlayers += 1
 	currStats.Leading += 1
 	currStats.Trailing = currStats.TotalPlayers - (currStats.Leading + currStats.SameLevel)
-	currStats.SameLevel -=1 //counts currUser also
+	currStats.SameLevel -= 1 //counts currUser also
 	ResponseWriter(true, "Current stats", currStats, http.StatusOK, w)
 
 }

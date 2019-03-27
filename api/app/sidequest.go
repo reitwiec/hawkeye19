@@ -64,10 +64,10 @@ func (hawk *App) checkSidequestAnswer(w http.ResponseWriter, r *http.Request) {
 	} //sanitize answer
 	checkAns.Answer = Sanitize(checkAns.Answer)
 	//actual level
-	acutalLevel := currUser.SidequestOrder[(currUser.Region0-1)*2] - 48
+	actualLevel := currUser.SidequestOrder[(currUser.Region0-1)*2] - 48
 	//find actual answer
 	question := Question{}
-	err = hawk.DB.Where("level = ? AND region = ?", acutalLevel, 0).First(&question).Error
+	err = hawk.DB.Where("level = ? AND region = ?", actualLevel, 0).First(&question).Error
 	if err != nil {
 		LogRequest(r, ERROR, err.Error())
 		if gorm.IsRecordNotFoundError(err) {
@@ -133,6 +133,10 @@ func (hawk *App) unlockRegion(w http.ResponseWriter, r *http.Request) {
 	tx := hawk.DB.Begin()
 
 	nextRegion := GetNextRegion(currUser.UnlockOrder)
+	if  nextRegion == '5' {
+		ResponseWriter(false, "Cannot unlock linear region from sidequest", nil, http.StatusOK, w)
+		return
+	}
 	currUser.UnlockOrder = UpdateUnlockOrder(currUser.UnlockOrder, int(nextRegion)-48)
 
 	err = tx.Model(&currUser).Update("SideQuestPoints", currUser.SideQuestPoints-UnlockRegionPoints).Error

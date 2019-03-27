@@ -272,26 +272,62 @@ func UpdateUnlockOrder(unlockOrder string, region int) string {
 	return updatedUO
 }
 
-func SendEmail(email string, token string) error {
-	url := "https://iecsemailer.iecsemanipal.com/send/hawkForgotPass"
-	//data := []byte (`{"email:"` + formData.Email + `,"token:"` + formData.Token)
+func SendEmail(email string, token string, name string, route string) error {
+	clickurl := "http://localhost:8080/api/verifyUser?email=" + email +"&token=" + token
+	data := []byte (`{"toEmail":` + `"` + email + `",` + `"url": "`+ clickurl +`",`+ `"name":"`+ name +`"}`)
+	/*
 	message := map[string]interface{}{
-		"email": email,
-		"token": token,
+		"toEmail": email,
+		"url": url,
+		"name": name,
 	}
+
 	bytesRepresentation, err := json.Marshal(message)
+
 	if err != nil {
 		log.Println(err)
 		return err
 	}
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(bytesRepresentation))
+	*/
+	req, err:= http.NewRequest("POST", route, bytes.NewBuffer(data))
+	req.Header.Add("content-type", "application/json")
+	req.Header.Add("authorization", "thehawkiswatching12345")
+
 	if err != nil {
-		log.Println(err)
+		return err
+	}
+
+	//resp, err := http.Post(url, "application/json", bytes.NewBuffer(bytesRepresentation))
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
 	}
 	defer resp.Body.Close()
 	return err
 }
 
+/*
+func SendEmail () {
+	url := "https://mail.iecsemanipal.com/hawkeye/forgotpassword"
+
+	payload := strings.NewReader("{\n    \"toEmail\": \"anshita_b@yahoo.co.in\",\n    \"url\": \"asdasd\",\n    \"name\": \"aasdasd\"\n}")
+
+	req, _ := http.NewRequest("POST", url, payload)
+
+	req.Header.Add("content-type", "application/json")
+	req.Header.Add("authorization", "thehawkiswatching12345")
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := ioutil.ReadAll(res.Body)
+
+	fmt.Println(res)
+	fmt.Println(string(body))
+
+}
+*/
 func LogRequest(r *http.Request, status string, err string) {
 
 	body, _ := ioutil.ReadAll(r.Body)
