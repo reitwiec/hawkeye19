@@ -201,7 +201,7 @@ func (hawk *App) forgotPassword(w http.ResponseWriter, r *http.Request) {
 	//generate token for password reset
 	token := RandomString()
 	//@TODO: Email token and delete print statement
-	fmt.Println (token)
+	fmt.Println(token)
 	hashedToken, err := bcrypt.GenerateFromPassword([]byte(token), 14)
 	if err != nil {
 		LogRequest(r, ERROR, err.Error())
@@ -380,9 +380,9 @@ func (hawk *App) verifyUser(w http.ResponseWriter, r *http.Request) {
 	verificationData := Verification{}
 	err := hawk.DB.Where("email = ? AND token = ? ", email, token).First(&verificationData).Error
 	/*
-	if err == nil {
-		fmt.Println(verificationData)
-	}
+		if err == nil {
+			fmt.Println(verificationData)
+		}
 	*/
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {

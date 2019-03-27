@@ -11,7 +11,7 @@ import (
 
 type CheckAnswer struct {
 	Answer   string `json:"answer"`
-	RegionID int `json:"regionID" validate:"min=0,max=5"`
+	RegionID int    `json:"regionID" validate:"min=0,max=5"`
 }
 
 type Stats struct {
@@ -114,10 +114,9 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 			tx.Rollback()
 		}
 
-
 		//unlock region
 		isRegionComplete := false
-		switch checkAns.RegionID{
+		switch checkAns.RegionID {
 		case 1:
 			if currUser.Region1 == RegionComplete {
 				isRegionComplete = true
@@ -288,13 +287,14 @@ func (hawk *App) getHints(w http.ResponseWriter, r *http.Request) {
 
 func (hawk *App) getStats(w http.ResponseWriter, r *http.Request) {
 	currUser := r.Context().Value("User").(User)
-	if (currUser == User{}) {
-		ResponseWriter(false, "User not logged in.", nil, http.StatusNetworkAuthenticationRequired, w)
-		return
-	}
-
+	/*
+		if (currUser == User{}) {
+			ResponseWriter(false, "User not logged in.", nil, http.StatusNetworkAuthenticationRequired, w)
+			return
+		}
+	*/
 	currStats := Stats{}
-
+	//Total players
 	err := hawk.DB.Model(&User{}).Count(&currStats.TotalPlayers).Error
 	if err != nil {
 		LogRequest(r, ERROR, err.Error())
@@ -302,24 +302,49 @@ func (hawk *App) getStats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = hawk.DB.Model(&User{}).Where("points = ?", currUser.Points).Count(&currStats.SameLevel).Error
+	//Total answer attempts
+	err = hawk.DB.Model(&Attempt{}).Count(&currStats.AnswerAttempts).Error
+	if err != nil {
+		LogRequest(r, ERROR, err.Error())
+		ResponseWriter(false, "Cant get total answer attempts", nil, http.StatusInternalServerError, w)
+		return
+	}
+
+	//on same level in linear gameplay
+	err = hawk.DB.Model(&User{}).Where("region5 = ?", currUser.Region5).Count(&currStats.SameLevel).Error
 	if err != nil {
 		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Cant get players at par", nil, http.StatusInternalServerError, w)
 		return
 	}
-
-	err = hawk.DB.Model(&User{}).Where("points > ?", currUser.Points).Count(&currStats.Leading).Error
+	//leading on linear gameplay
+	err = hawk.DB.Model(&User{}).Where("region5 > ?", currUser.Region5).Count(&currStats.Leading).Error
 	if err != nil {
 		LogRequest(r, ERROR, err.Error())
-		ResponseWriter(false, "Cant get leading users", nil, http.StatusInternalServerError, w)
+		ResponseWriter(false, "Cant get leading players at par", nil, http.StatusInternalServerError, w)
 		return
 	}
 
+	/*
+		err = hawk.DB.Model(&User{}).Where("points = ?", currUser.Points).Count(&currStats.SameLevel).Error
+		if err != nil {
+			LogRequest(r, ERROR, err.Error())
+			ResponseWriter(false, "Cant get players at par", nil, http.StatusInternalServerError, w)
+			return
+		}
+
+
+		err = hawk.DB.Model(&User{}).Where("points > ?", currUser.Points).Count(&currStats.Leading).Error
+		if err != nil {
+			LogRequest(r, ERROR, err.Error())
+			ResponseWriter(false, "Cant get leading users", nil, http.StatusInternalServerError, w)
+			return
+		}
+	*/
 	currStats.TotalPlayers += 1
 	currStats.Leading += 1
 	currStats.Trailing = currStats.TotalPlayers - (currStats.Leading + currStats.SameLevel)
-
+	currStats.SameLevel -=1 //counts currUser also
 	ResponseWriter(true, "Current stats", currStats, http.StatusOK, w)
 
 }
