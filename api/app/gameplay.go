@@ -11,7 +11,7 @@ import (
 
 type CheckAnswer struct {
 	Answer   string `json:"answer"`
-	RegionID int    `json:"regionID" validate:"min=0,max=5"`
+	RegionID int `json:"regionID" validate:"min=0,max=5"`
 }
 
 type Stats struct {
@@ -114,9 +114,10 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 			tx.Rollback()
 		}
 
+
 		//unlock region
 		isRegionComplete := false
-		switch checkAns.RegionID {
+		switch checkAns.RegionID{
 		case 1:
 			if currUser.Region1 == RegionComplete {
 				isRegionComplete = true
