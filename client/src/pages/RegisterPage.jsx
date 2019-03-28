@@ -90,9 +90,13 @@ class RegisterPage extends Component {
 						}), 1000);
 					} else {
 						this.openSnackbar('Registration failed')
+						this.captchaDemo.reset();
 					} 
 				})
-				.catch(() => this.openSnackbar('Registration failed'));
+				.catch(() => {
+					this.openSnackbar('Registration failed');
+					this.captchaDemo.reset();
+				});
 		} else {
 			this.openSnackbar('Please verify that you are a human')
 		}
