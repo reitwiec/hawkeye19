@@ -10,6 +10,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -19,7 +20,6 @@ const (
 	CorrectAnswer      = 1
 	CloseAnswer        = 2
 	IncorrectAnswer    = 3
-	LevelCount         = 6
 	ERROR              = "ERROR"
 	INFO               = "INFO"
 )
@@ -88,6 +88,16 @@ func Sanitize(s string) string {
 	return s
 }
 
+func SanitizeAnswer (s string) string {
+	s = Sanitize(s)
+	//remove special characters
+	reg, err := regexp.Compile("[^a-z0-9]+")
+	if err != nil {
+		log.Fatal(err)
+	}
+	processedString := reg.ReplaceAllString(s, "")
+	return processedString
+}
 /*
 func SideQuestOrdere () [LevelCount] int {
 	var index int
@@ -324,7 +334,7 @@ func LogRequest(r *http.Request, status string, err string) {
 }
 
 func (hawk *App) GetUser (w http.ResponseWriter, r *http.Request) {
-	currUser, err := GetCurrUser(w, r)
+	currUser, err := GetCurrUser(r)
 	if err != nil {
 		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Could not read cookie data", nil, http.StatusInternalServerError, w)
@@ -343,3 +353,5 @@ func (hawk *App) GetUser (w http.ResponseWriter, r *http.Request) {
 	user.Password=""
 	ResponseWriter(true, "User fetched", user, http.StatusOK, w)
 }
+//@TODO
+//func SanitizeAnswer

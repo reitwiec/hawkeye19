@@ -70,7 +70,7 @@ func (hawk *App) createContext(next http.HandlerFunc, isAdmin bool, isLoggedIn b
 		func(w http.ResponseWriter, r *http.Request) {
 			if isLoggedIn {
 				//extract data from cookie
-				currUser, err := GetCurrUser(w, r)
+				currUser, err := GetCurrUser(r)
 				if err != nil {
 					fmt.Println("Not logged in")
 					ResponseWriter(false, "Not logged in", nil, http.StatusForbidden, w)
