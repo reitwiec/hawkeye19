@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Attributes } from '../utils';
+import { Attributes, RegionKey } from '../utils';
 import { Link } from 'react-router-dom';
 import colors from '../colors';
 import { square } from '../mixins';
@@ -9,13 +9,14 @@ interface IRegionCardProps extends Attributes<'div'> {
 	name: string;
 	icon: string;
 	locked: boolean;
+	regionIndex: number;
 }
 
 const RegionCard: React.SFC<IRegionCardProps> = props => {
-	const { name, icon, ...restProps } = props;
+	const { name, icon, regionIndex, ...restProps } = props;
 	return (
 		<RegionCardWrapper className="region-card" {...restProps}>
-			<StyledLink to={{ pathname: '/questions', state: { name } }}>
+			<StyledLink to={{ pathname: '/question', state: { regionIndex, name } }}>
 				<img className="icon" src={icon} alt="" />
 				<span className="name">{name}</span>
 			</StyledLink>

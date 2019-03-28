@@ -26,12 +26,11 @@ interface IDashBoardProps {
 class Dashboard extends Component<IDashBoardProps> {
 	state = {
 		regions: [
-			{ key: RegionKey.region0, name: 'Installation 09', icon: Installation09Icon, locked: false, level: 1 },
-			{ key: RegionKey.region1, name: 'Panchea', icon: PancheaIcon, locked: true, level: 0 },
-			{ key: RegionKey.region2, name: 'City of Darwins', icon: CityOfDarwinsIcon, locked: true, level: 0 },
-			{ key: RegionKey.region3, name: 'Lakeside Ruins', icon: LakesideRuinsIcon, locked: true, level: 0 },
-			{ key: RegionKey.region4, name: 'Ash Valley', icon: AshValleyIcon, locked: true, level: 0 },
-			{ key: RegionKey.region5, name: 'Eden', icon: EdenIcon, locked: true, level: 0 }
+			{ key: RegionKey.region1, name: 'Installation 09', icon: Installation09Icon, locked: false, level: 1 },
+			{ key: RegionKey.region2, name: 'Panchea', icon: PancheaIcon, locked: true, level: 0 },
+			{ key: RegionKey.region3, name: 'City of Darwins', icon: CityOfDarwinsIcon, locked: true, level: 0 },
+			{ key: RegionKey.region4, name: 'Lakeside Ruins', icon: LakesideRuinsIcon, locked: true, level: 0 },
+			{ key: RegionKey.region5, name: 'Eden', icon: EdenIcon, locked: true, level: 0 },
 		]
 	};
 
@@ -55,7 +54,7 @@ class Dashboard extends Component<IDashBoardProps> {
 				<h5>Logged in as {this.props.UserStore.username}</h5>
 				<div className="regions-container">
 					{this.state.regions.map((region, i) => (
-						<RegionCard key={i} {...region} />
+						<RegionCard key={i} regionIndex={i+1} {...region} />
 					))}
 				</div>
 			</div>
@@ -68,7 +67,7 @@ export default styled(Dashboard)`
 	.regions-container {
 		margin: auto;
 		border: 5px solid ${`${colors.primaryYellow}aa`};
-		${onCircle(6, '300px', '90px', 270)}
+		${onCircle(5, '300px', '90px', 270)}
 	}
 
 	${media.phone`

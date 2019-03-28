@@ -4,6 +4,8 @@ import styled, { keyframes } from 'styled-components';
 import media from '../components/theme/media';
 import logo from '../components/assets/hawk_logo.png';
 import sideq from '../components/assets/sideq.svg';
+import { inject, observer } from 'mobx-react';
+import { Button } from '../components';
 
 const recent = [
 	'yes',
@@ -14,6 +16,7 @@ const recent = [
 	'surbhi pachnanda mom ',
 	'iecse'
 ];
+
 const size = {
 	mobileS: '320px',
 	mobileM: '375px',
@@ -23,6 +26,7 @@ const size = {
 	laptopL: '862px',
 	desktop: '1000px'
 };
+
 export const device = {
 	mobileS: `(min-width: ${size.mobileS})`,
 	mobileM: `(min-width: ${size.mobileM})`,
@@ -36,56 +40,105 @@ export const device = {
 const hint = ['lauda kuch milega'];
 const stats = ['Tries : 6969', 'On-par : 0', 'Leading : 1', 'Trailing : 69'];
 
-class QuestionPage extends Component {
-	constructor(props) {
-		super(props);
-		this.state = {
-			tryvisible: true,
-			hintvisible: false,
-			statsvisible: false,
-			level: 1
-		};
-		this.tries = this.tries.bind(this);
-		this.hints = this.hints.bind(this);
-		this.stats = this.stats.bind(this);
+interface IQuestionPageProps {
+	className: string;
+	location: { state: { name: string, regionIndex: number }};
+};
+
+interface IQuestionPageState {
+	tryvisible: boolean;
+	hintvisible: boolean;
+	statsvisible: boolean;
+	level: number;
+	question: string;
+	answer: string;
+	attempts: string[] | null;
+}
+
+@inject('UserStore')
+@observer
+class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
+	state = {
+		tryvisible: true,
+		hintvisible: false,
+		statsvisible: false,
+		level: 1,
+		question: '',
+		answer: '',
+		attempts: null,
+		region: this.props.location.state.name,
+		regionIndex: this.props.location.state.regionIndex
+	};
+
+	componentDidMount() {
+		this.getQuestion();
 	}
 
-	tries() {
+	getQuestion = () => {
+		fetch(`/api/getQuestion?region=${this.state.regionIndex}`)
+		.then(res => res.json())
+		.then(json => {
+			this.setState({
+			question: json.data.question,
+		})});
+	};
+
+	checkAnswer = ()  => {
+		fetch(`/api/checkAnswer`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ regionID: this.state.regionIndex, answer: this.state.answer }),
+		}).then(res => res.json()).then(json => console.log(json));
+	};
+
+	onEditAnswer = e => {
+		this.setState({ answer: e.target.value });
+	};
+
+	tries = () => {
 		this.setState({
 			tryvisible: true,
 			hintvisible: false,
 			statsvisible: false
 		});
 	}
-	stats() {
+
+	stats = () => {
 		this.setState({
 			tryvisible: false,
 			hintvisible: false,
 			statsvisible: true
 		});
 	}
-	hints() {
+
+	hints = () => {
 		this.setState({
 			tryvisible: false,
 			hintvisible: true,
 			statsvisible: false
 		});
 	}
+
 	render() {
-		const { region } = this.props.location.state || {
-			region: 'Installation 09'
-		};
+		// const { region } = this.props.location.state || {
+		// 	region: 'Installation 09'
+		// };
+
 		return (
 			<div className={this.props.className}>
 				<h1 id="name">HAWKEYE</h1>
+				<h2 id="region"></h2>
 				<div id="questionbox">
 					<div id="level">{`Level ${this.state.level}`}</div>
-					<div id="question">Can you beat the hawk?</div>
+					<div id="question">{this.state.question}</div>
 					<div id="answerbox">
-						<input type="text" id="answer" placeholder="Enter answer here..." />
+						<input type="text" id="answer" placeholder="Enter answer here..." onChange={this.onEditAnswer}/>
 					</div>
 				</div>
 
+						<Button onClick={this.checkAnswer}>SUBMIT</Button>
 				<div id="hint_try">
 					<div className="tab">
 						<button
@@ -158,33 +211,6 @@ class QuestionPage extends Component {
 					</div>
 					<img src={sideq} alt="" id="sideq" />
 				</div>
-
-				{/* <p>{region}</p> */}
-				{/* <p>Level:24</p>
-				<div id="question">
-					Lorem ipsum, dolor sit amet consectetur adipisicing elit. Deserunt
-					debitis est, vel accusamus aliquam eos pariatur laborum ratione ullam
-					quae ipsam ad ipsa, necessitatibus placeat assumenda veritatis maxime
-					excepturi repellat?
-				</div>
-				<textarea
-					className="form__input"
-					id="answer"
-					type="text"
-					placeholder="Write the answer here"
-					aria-invalid="false"
-				/>
-
-				<div>
-					<button onClick={this.check} id="submit">
-						Submit
-					</button>
-				</div>
-
-				<div id="hints">
-					<p>Hints:</p>
-					Muh mein le le
-				</div> */}
 			</div>
 		);
 	}
@@ -203,11 +229,20 @@ const drag = keyframes`
 }
 `;
 
-QuestionPage.propTypes = {
-	className: PropTypes.string
-};
-
 export default styled(QuestionPage)`
+			${Button} {
+				color: #1c1c1c;
+				font-weight: 500;
+				background: #ffd627;
+				width: 50%;
+				height: 35px;
+				padding: 10px;
+				padding-top: 7px;
+				border: none;
+				border-radius: 20px;
+				margin-top: 10px;
+				margin-bottom: 10px;
+			}
 	.hintnew{
   display:none;
 }
@@ -252,8 +287,9 @@ export default styled(QuestionPage)`
             bottom:0;
             height:60px;
             background:#FFD627;
-            width:100%;
-
+            width: 70%;
+						display: flex;
+						flex-flow: row nowrap;
         }
         #answer{
             position:absolute;
