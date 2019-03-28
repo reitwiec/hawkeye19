@@ -273,9 +273,9 @@ func UpdateUnlockOrder(unlockOrder string, region int) string {
 }
 
 func SendEmail(email string, token string, name string, route string) error {
-	clickurl := "http://localhost:8080/api/verifyUser?email=" + email +"&token=" + token
-	data := []byte (`{"toEmail":` + `"` + email + `",` + `"url": "`+ clickurl +`",`+ `"name":"`+ name +`"}`)
-	req, err:= http.NewRequest("POST", route, bytes.NewBuffer(data))
+	clickurl := "http://localhost:8080/api/verifyUser?email=" + email + "&token=" + token
+	data := []byte(`{"toEmail":` + `"` + email + `",` + `"url": "` + clickurl + `",` + `"name":"` + name + `"}`)
+	req, err := http.NewRequest("POST", route, bytes.NewBuffer(data))
 	req.Header.Add("content-type", "application/json")
 	req.Header.Add("authorization", "thehawkiswatching12345")
 

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -106,9 +105,23 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 		//answer is correct
 		//update currUser level
 
-		region := "Region" + strconv.Itoa(checkAns.RegionID)
+		switch checkAns.RegionID {
+		case 1:
+			err = tx.Model(&currUser).Updates(User{Region1: level + 1, Points: currUser.Points + 1}).Error
 
-		err = tx.Model(&currUser).Update(region, level+1).Error
+		case 2:
+			err = tx.Model(&currUser).Updates(User{Region2: level + 1, Points: currUser.Points + 1}).Error
+
+		case 3:
+			err = tx.Model(&currUser).Updates(User{Region3: level + 1, Points: currUser.Points + 1}).Error
+
+		case 4:
+			err = tx.Model(&currUser).Updates(User{Region4: level + 1, Points: currUser.Points + 1}).Error
+
+		case 5:
+			err = tx.Model(&currUser).Updates(User{Region5: level + 1, Points: currUser.Points + 1}).Error
+		}
+
 		if err != nil {
 			LogRequest(r, ERROR, err.Error())
 			ResponseWriter(false, "Could not update level", nil, http.StatusInternalServerError, w)
@@ -326,22 +339,20 @@ func (hawk *App) getStats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	/*
-		err = hawk.DB.Model(&User{}).Where("points = ?", currUser.Points).Count(&currStats.SameLevel).Error
-		if err != nil {
-			LogRequest(r, ERROR, err.Error())
-			ResponseWriter(false, "Cant get players at par", nil, http.StatusInternalServerError, w)
-			return
-		}
+	err = hawk.DB.Model(&User{}).Where("points = ?", currUser.Points).Count(&currStats.SameLevel).Error
+	if err != nil {
+		LogRequest(r, ERROR, err.Error())
+		ResponseWriter(false, "Cant get players at par", nil, http.StatusInternalServerError, w)
+		return
+	}
 
+	err = hawk.DB.Model(&User{}).Where("points > ?", currUser.Points).Count(&currStats.Leading).Error
+	if err != nil {
+		LogRequest(r, ERROR, err.Error())
+		ResponseWriter(false, "Cant get leading users", nil, http.StatusInternalServerError, w)
+		return
+	}
 
-		err = hawk.DB.Model(&User{}).Where("points > ?", currUser.Points).Count(&currStats.Leading).Error
-		if err != nil {
-			LogRequest(r, ERROR, err.Error())
-			ResponseWriter(false, "Cant get leading users", nil, http.StatusInternalServerError, w)
-			return
-		}
-	*/
 	currStats.TotalPlayers += 1
 	currStats.Leading += 1
 	currStats.Trailing = currStats.TotalPlayers - (currStats.Leading + currStats.SameLevel)
