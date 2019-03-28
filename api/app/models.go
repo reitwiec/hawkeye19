@@ -53,7 +53,7 @@ type User struct {
 	Country    string `gorm:"not null" json:"country"`
 	IsMahe     int    `gorm:"not null" json:"isMahe"` //1 if MAHE else, 0
 	IsVerified int    `gorm:"not null" json:"isVerified"`
-	FirstLogin	int		`gorm:"not null" json:"firstLogin"` //1 by default, sets to 0 on first login
+	FirstLogin int    `gorm:"not null" json:"firstLogin"` //1 by default, sets to 0 on first login
 
 	//Gameplay status
 	Region0 int `json:"region0" ` //sidequest

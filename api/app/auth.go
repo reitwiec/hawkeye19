@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-sql-driver/mysql"
+	"github.com/haisum/recaptcha"
 	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/go-playground/validator.v9"
@@ -13,19 +14,18 @@ import (
 )
 
 func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
-	/*
-		re := recaptcha.R{
-			Secret: "6LftZZoUAAAAAPXZ3nAqHd4jzIbHBNxfMFpuWfMe",
-		}
-		isValid := re.Verify(*r)
-		if isValid {
-			fmt.Fprintf(w, "Valid")
-		} else {
-			//fmt.Fprintf(w, "Invalid! These errors ocurred: %v", re.LastError())
-			ResponseWriter(false, "Captcha error", nil, http.StatusBadRequest, w)
-			return
-		}
-	*/
+	re := recaptcha.R{
+		Secret: "6LftZZoUAAAAAPXZ3nAqHd4jzIbHBNxfMFpuWfMe",
+	}
+	isValid := re.Verify(*r)
+	if isValid {
+		fmt.Fprintf(w, "Valid")
+	} else {
+		//fmt.Fprintf(w, "Invalid! These errors ocurred: %v", re.LastError())
+		ResponseWriter(false, "Captcha error", nil, http.StatusBadRequest, w)
+		return
+	}
+
 	user := User{}
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
@@ -77,7 +77,7 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 		Country:        strings.TrimSpace(user.Country),
 		IsVerified:     0,
 		IsMahe:         user.IsMahe,
-		FirstLogin:		1,
+		FirstLogin:     1,
 	}
 	//load newUser to database
 	tx := hawk.DB.Begin()
@@ -167,17 +167,17 @@ func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "Error in setting session, user not logged in", nil, http.StatusInternalServerError, w)
 		return
 	}
-	updatedUser:= user
+	updatedUser := user
 	user.Password = ""
 	if updatedUser.FirstLogin == 1 {
 		updatedUser.FirstLogin = 0
 	}
-	tx := hawk.DB.Begin ()
+	tx := hawk.DB.Begin()
 	err = tx.Model(&updatedUser).Update("first_login", 0).Error
 	updatedUser.Password = ""
 	if err != nil {
 		LogRequest(r, ERROR, err.Error())
-		ResponseWriter(true, "User logged in but login field not updated", updatedUser, http.StatusOK,w)
+		ResponseWriter(true, "User logged in but login field not updated", updatedUser, http.StatusOK, w)
 		tx.Rollback()
 		return
 	}
