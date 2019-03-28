@@ -98,7 +98,7 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 	token := RandomString()
 	//@TODO: send verification email and remove print token statement
 	//fmt.Println(token)
-	err = SendEmail(newUser.Email, token, newUser.Name, "https://mail.iecsemanipal.com/hawkeye/emailverification")
+	err = SendVUEmail(newUser.Email, token, newUser.Name)
 	if err != nil {
 		tx.Rollback()
 		ResponseWriter(false, "Error in sending verification email", nil, http.StatusInternalServerError, w)
@@ -221,7 +221,7 @@ func (hawk *App) forgotPassword(w http.ResponseWriter, r *http.Request) {
 	token := RandomString()
 	//@TODO: Email token and delete print statement
 	fmt.Println(token)
-	err = SendEmail(user.Email, token, user.Name, "https://mail.iecsemanipal.com/hawkeye/forgotpassword")
+	err = SendFPEmail(user.Email, token, user.Name)
 	if err != nil {
 		ResponseWriter(false, "Error in sending forgot password email", nil, http.StatusInternalServerError, w)
 		LogRequest(r, ERROR, err.Error())
@@ -300,18 +300,17 @@ func (hawk *App) resetPassword(w http.ResponseWriter, r *http.Request) {
 	//@TODO test this feature
 	t24, _ := time.ParseDuration("24h")
 	if time.Since(forgotPassReqUser.Timestamp) >= t24 {
-		ResponseWriter(false, "Token Expired", nil, http.StatusOK, w)
-		//delete token
+		//delete  expired token
 		tx := hawk.DB.Begin()
 		err = tx.Delete(forgotPassReqUser).Error
 		if err != nil {
 			LogRequest(r, ERROR, err.Error())
-			ResponseWriter(false, "Could not delete expired token", nil, http.StatusInternalServerError, w)
+			ResponseWriter(false, "Expired token, Could not delete expired token", nil, http.StatusInternalServerError, w)
 			tx.Rollback()
 			return
 		}
 		tx.Commit()
-		ResponseWriter(true, "Deleted expired token", nil, http.StatusOK, w)
+		ResponseWriter(true, "Expired token, deleted expired token", nil, http.StatusOK, w)
 		return
 	}
 	//create hash for new password

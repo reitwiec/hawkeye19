@@ -59,6 +59,10 @@ func (hawk *App) LoadRoutes() {
 	hawk.router.HandleFunc("/api/listUsers", hawk.createContext(hawk.listUsers, true, true)).Methods("GET")
 	hawk.router.HandleFunc("/api/searchUser", hawk.createContext(hawk.searchUser, true, true)).Methods("GET")
 	hawk.router.HandleFunc("/api/userLogs", hawk.createContext(hawk.userLogs, true, true)).Methods("GET")
+
+	//Helper routes
+	hawk.router.HandleFunc("/api/getUser", hawk.GetUser).Methods("GET")
+
 }
 
 func (hawk *App) createContext(next http.HandlerFunc, isAdmin bool, isLoggedIn bool) http.HandlerFunc {
