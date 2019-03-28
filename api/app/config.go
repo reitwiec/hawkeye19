@@ -17,7 +17,6 @@ func ConfigureInstance() {
 		DBName:     GetEnv("HAWK_DB_NAME", defaultConfig.DBName),
 		HashKey:    GetEnv("HAWK_HASH_KEY", defaultConfig.HashKey),
 		BlockKey:   GetEnv("HAWK_BLOCK_KEY", defaultConfig.BlockKey),
-		RecaptchaKey: GetEnv("HAWK_CAPTCHA", defaultConfig.RecaptchaKey),
 
 	}
 }
