@@ -324,7 +324,7 @@ func LogRequest(r *http.Request, status string, err string) {
 }
 
 func (hawk *App) GetUser (w http.ResponseWriter, r *http.Request) {
-	currUser, err := GetCurrUser(w, r)
+	currUser, err := GetCurrUser(r)
 	if err != nil {
 		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Could not read cookie data", nil, http.StatusInternalServerError, w)
@@ -343,3 +343,5 @@ func (hawk *App) GetUser (w http.ResponseWriter, r *http.Request) {
 	user.Password=""
 	ResponseWriter(true, "User fetched", user, http.StatusOK, w)
 }
+//@TODO
+//func SanitizeAnswer
