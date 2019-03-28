@@ -64,6 +64,7 @@ func (hawk *App) migrate() {
 		&Question{},
 		&Hint{},
 		&ForgotPassReq{},
+		&Verification{},
 	)
 }
 
@@ -80,6 +81,7 @@ func (hawk *App) Run(Args []string) {
 	for _, arg := range Args {
 		switch arg {
 		case "-m":
+			fmt.Println("migrate entered")
 			hawk.migrate()
 		}
 	}
