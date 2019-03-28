@@ -100,7 +100,9 @@ const RegisterPage = ({ className }) => {
 					/>
 					<TextField name="college" placeholder="College" onChange={onChange} />
 				</div>
-				<Button onClick={onSubmit}>Register</Button>
+				<Button onClick={onSubmit} id="regbtn">
+					Register
+				</Button>
 			</div>
 			<img src={hawk} alt="" id="hawk" />
 			<img src={logo} alt="" id="logo" />
@@ -198,10 +200,13 @@ export default styled(RegisterPage)`
 						background: #333333;
 					}
 					.error {
+						margin-left: auto;
+						margin-right: auto;
+						margin-top: 10px;
 						text-align: center;
 						width: 34%;
 						padding: 5px;
-						margin: 10px;
+						/* margin: 10px; */
 					}
 				}
 			}
@@ -314,10 +319,12 @@ export default styled(RegisterPage)`
 						background: #333333;
 					}
 					.error {
+						margin-left: auto;
+						margin-right: auto;
+						margin-top: 10px;
 						text-align: center;
 						width: 34%;
 						padding: 5px;
-						margin: 10px;
 					}
 				}
 			}
@@ -442,10 +449,12 @@ export default styled(RegisterPage)`
 						background: #333333;
 					}
 					.error {
+						margin-left: auto;
+						margin-right: auto;
+						margin-top: 10px;
 						text-align: center;
 						width: 34%;
 						padding: 5px;
-						margin: 10px;
 					}
 				}
 			}
@@ -461,6 +470,13 @@ export default styled(RegisterPage)`
 				border-radius: 20px;
 				margin-top: 10px;
 				margin-bottom: 10px;
+				transition: 0.5s;
+			}
+			${Button}:hover {
+				color: #fff;
+				background: #ff0000;
+				width: 60%;
+				cursor: pointer;
 			}
 		}
 
