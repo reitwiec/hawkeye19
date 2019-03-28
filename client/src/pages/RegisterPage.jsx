@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import styled, { keyframes } from 'styled-components';
 import validator from 'validator';
@@ -18,6 +18,7 @@ const size = {
 	laptopL: '862px',
 	desktop: '1000px'
 };
+
 export const device = {
 	mobileS: `(min-width: ${size.mobileS})`,
 	tablet: `(min-width: ${size.tablet})`,
@@ -26,108 +27,113 @@ export const device = {
 	desktop: `(min-width: ${size.desktop})`
 };
 
-const RegisterPage = ({ className }) => {
-	const [formData, setformData] = useState({
-		name: '',
-		username: '',
-		password: '',
-		confirm_password: '',
-		email: '',
-		tel: '',
-		college: ''
-	});
-
-	const [isVerified, setIsVerified] = useState(false);
-
-	const onChange = useCallback((name, value, error) => {
-		setformData(Object.assign(formData, { [name]: { value, error } }));
-	}, []);
-
-	const recaptchaLoaded = () => {
-		console.log('captcha has loaded');
+class RegisterPage extends Component {
+	state = {
+		formData: {
+			name: '',
+			username: '',
+			password: '',
+			confirm_password: '',
+			email: '',
+			tel: '',
+			college: ''
+		},
+		isVerified: false
 	};
 
-	const verifyCallback = useCallback(response => {
-		if (response) {
-			setIsVerified(true);
-			console.log('YOU ARE A HUMAN');
-		}
-	}, []);
+	onChange = (name, value, error) => {
+		this.setState({ formData: Object.assign(this.state.formData, { [name]: { value, error } })});
+	};
 
-	const onSubmit = useCallback(() => {
-		if (isVerified) {
-			console.log('human');
-		} else {
-			console.log('inhuman');
+	recaptchaLoaded = () => {
+		if (this.captchaDemo) {
+			this.captchaDemo.reset();
 		}
-		// Remove error keys from formData
-		const postData = Object.entries(formData)
-			.map(([k, v]) => {
-				return { [k]: v.value };
+	};
+
+	verifyCallback = token => {
+		if (token) {
+			this.setState({ isVerified: true });
+		}
+	};
+
+	onSubmit = () => {
+		if (this.state.isVerified) {
+			// Remove error keys from formData
+			const postData = Object.entries(this.state.formData)
+				.map(([k, v]) => {
+					return { [k]: v.value };
+				})
+				.reduce((acc, val) => Object.assign(acc, val));
+
+			fetch('/api/addUser', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(postData)
 			})
-			.reduce((acc, val) => Object.assign(acc, val));
+				.then(res => res.json())
+				.then(json => console.log(json));
+		}
+	};
 
-		fetch('/api/addUser', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(postData)
-		})
-			.then(res => res.json())
-			.then(json => console.log(json));
-	}, []);
+	render() {
 
 	return (
-		<div className={className}>
+		<div className={this.props.className}>
 			<div id="box">
 				<h1>HAWKEYE</h1>
 				<span>Create a new account</span>
 				<div id="inputs">
-					<TextField name="name" placeholder="Name" onChange={onChange} />
+					<TextField name="name" placeholder="Name" onChange={this.onChange} />
 					<TextField
 						name="username"
 						placeholder="Username"
-						onChange={onChange}
+						onChange={this.onChange}
 					/>
 					<TextField
 						name="password"
 						type="password"
 						placeholder="Password"
-						onChange={onChange}
+						onChange={this.onChange}
 					/>
 					<TextField
 						name="confirm_password"
 						type="password"
 						placeholder="Confirm password"
-						onChange={onChange}
+						onChange={this.onChange}
 					/>
 					<TextField
 						name="email"
 						type="email"
 						placeholder="Email"
-						onChange={onChange}
+						onChange={this.onChange}
 						validation={v => (validator.isEmail(v) ? '' : 'Invalid Email')}
 						validateOnChange
 					/>
 					<TextField
 						name="tel"
 						placeholder="Mobile Number"
-						onChange={onChange}
+						onChange={this.onChange}
 						validation={v =>
 							validator.isMobilePhone(v) ? '' : 'Invalid Number'
 						}
 						validateOnChange
 					/>
-					<TextField name="college" placeholder="College" onChange={onChange} />
+					<TextField name="college" placeholder="College" onChange={this.onChange} />
 				</div>
-				<Button onClick={onSubmit} id="regbtn">
+				<Button onClick={this.onSubmit} id="regbtn">
 					Register
 				</Button>
 			</div>
 			<Recaptcha
-				sitekey="6LftZZoUAAAAAJPGqjgVjZ0ZI9aPQ7RJWKvocH1g"
+				id="recap"
+				ref={(el) => {this.captchaDemo = el; }}
+				size="normal"
+				theme="dark"
 				render="explicit"
-				onloadCallback={recaptchaLoaded}
-				verifyCallback={verifyCallback}
+				sitekey="6LftZZoUAAAAAJPGqjgVjZ0ZI9aPQ7RJWKvocH1g"
+				onloadCallback={this.recaptchaLoaded}
+				verifyCallback={this.verifyCallback}
 			/>
 			<img src={hawk} alt="" id="hawk" />
 			<img src={logo} alt="" id="logo" />
@@ -138,6 +144,7 @@ const RegisterPage = ({ className }) => {
 			</div>
 		</div>
 	);
+	}
 };
 
 RegisterPage.propTypes = {
@@ -158,6 +165,10 @@ const flash = keyframes`
 `;
 
 export default styled(RegisterPage)`
+	#recap.rc-anchor-dark.rc-anchor-normal {
+		border: none !important;
+	}
+
 	#pcbdesk {
 		display: none;
 	}
