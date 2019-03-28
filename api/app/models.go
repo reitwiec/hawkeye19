@@ -59,11 +59,11 @@ type User struct {
 	Region1 int `json:"region1" `
 	Region2 int `json:"region2" `
 	Region3 int `json:"region3" `
-	Region4 int `json:"Region4" `
+	Region4 int `json:"region4" `
 	Region5 int `json:"region5"` //linear
 
 	Points          int    `json:"points"`
-	SidequestOrder  string `json:"sidequestOrder"`
+	SidequestOrder  string `json:"sideQuestOrder"`
 	UnlockOrder     string `json:"unlockOrder"`
 	SideQuestPoints int    `json:"sideQuestPoints"`
 }
