@@ -8,16 +8,6 @@ import { inject, observer } from 'mobx-react';
 import { Button } from '../components';
 import Logout from '../components/Logout';
 
-const recent = [
-	'yes',
-	'hello',
-	'hi ekam',
-	'is this working',
-	'reitwiec shandilya web',
-	'surbhi pachnanda mom ',
-	'iecse'
-];
-
 const size = {
 	mobileS: '320px',
 	mobileM: '375px',
@@ -44,7 +34,6 @@ export const device = {
 	desktop: `(min-width: ${size.desktop})`,
 	desktopL: `(min-width: ${size.desktop})`
 };
-const hint = ['lauda kuch milega'];
 const stats = ['Tries : 6969', 'On-par : 0', 'Leading : 1', 'Trailing : 69'];
 
 interface IQuestionPageProps {
@@ -86,6 +75,7 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 	componentDidMount() {
 		this.getQuestion();
 		this.getHints();
+		this.getAttempts();
 	}
 
 	getQuestion = () => {
@@ -108,13 +98,17 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 		fetch(`/api/getHints?question=${this.state.questionID}`)
 			.then(res => res.json())
 			.then(json => {
-				console.log(json);
 				this.setState({});
 			})
 	];
 
 	getAttempts = () => {
-		fetch(`/api/getRecentTries?question`);
+		fetch(`/api/getRecentTries?question=${this.state.questionID}`)
+		.then(res => res.json())
+		.then(json => {
+			console.log(json);
+			this.setState({ attempts: json.data? json.data : [] })
+		});
 	};
 
 	checkAnswer = () => {
@@ -130,12 +124,13 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 		})
 			.then(res => res.json())
 			.then(json => {
+				this.getAttempts();
+				this.clearAnswer();
 				this.setState({
 					hawkMessage: hawkResponses[json.data]
 				});
 				if (json.data == 1) {
 					this.getQuestion();
-					this.clearAnswer();
 				}
 			});
 	};
@@ -218,7 +213,7 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 						id="hints"
 						className={this.state.hintvisible ? 'available' : 'notavail'}
 					>
-						{hint.map(function(item, i) {
+						{this.state.hints.map(function(item, i) {
 							return <p key={i}>{item}</p>;
 						})}
 					</div>
@@ -227,9 +222,7 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 						id="tries"
 						className={this.state.tryvisible ? 'available' : 'notavail'}
 					>
-						{recent.map(function(item, i) {
-							return <p key={i}>{item}</p>;
-						})}
+						{this.state.attempts.map((item, i) => <p key={i}>{item}</p>)}
 					</div>
 					<div
 						id="stats"
@@ -248,7 +241,7 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 						</button>
 					</div>
 					<div id="hints" className="available">
-						{hint.map(function(item, i) {
+						{this.state.hints.map(function(item, i) {
 							return <p key={i}>{item}</p>;
 						})}
 					</div>
