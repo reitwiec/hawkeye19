@@ -8,6 +8,7 @@ import logo from '../components/assets/iecse_logo.png';
 import hawk from '../components/assets/hawk_logo.png';
 import pcb from '../components/assets/pcbdesign.png';
 import pcb1 from '../components/assets/pcbdesign1.png';
+import { Snackbar } from '../components';
 
 import { Button, TextField } from '../components';
 
@@ -39,7 +40,9 @@ class RegisterPage extends Component {
 			college: '',
 			token: ''
 		},
-		isVerified: false
+		isVerified: false,
+		snackbarMessage: '',
+		barOpen: false,
 	};
 
 	onChange = (name, value, error) => {
@@ -74,8 +77,20 @@ class RegisterPage extends Component {
 				body: JSON.stringify({ user: postData, captcha: this.state.token})
 			})
 				.then(res => res.json())
-				.then(json => console.log(json));
+				.then(json => { 
+					console.log(json);
+					((json.success)? this.openSnackbar('Registered successfully') : this.openSnackbar('Registration failed'));
+				})
+				.catch(() => this.openSnackbar('Registration failed'));
+		} else {
+			this.openSnackbar('Please verify that you are a human')
 		}
+	};
+
+	openSnackbar = (message) => {
+		console.log('opened');
+		this.setState({ barOpen: true, snackbarMessage: message });
+		setTimeout(() => this.setState({ barOpen: false, snackbarMessage: '' }), 1000);
 	};
 
 	render() {
@@ -144,6 +159,7 @@ class RegisterPage extends Component {
 				<img src={pcb} alt="" id="pcb2" />
 				<img src={pcb1} alt="" id="pcbdesk" />
 			</div>
+			<Snackbar open={this.state.barOpen} message={this.state.snackbarMessage}/>
 		</div>
 	);
 	}
@@ -159,7 +175,6 @@ const flash = keyframes`
 }
 50%{
 	opacity:0.3;
-
 }
 100%{
 	opacity:0.1
