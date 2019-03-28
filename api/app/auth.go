@@ -77,6 +77,7 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 		Country:        strings.TrimSpace(user.Country),
 		IsVerified:     0,
 		IsMahe:         user.IsMahe,
+		FirstLogin:		1,
 	}
 	//load newUser to database
 	tx := hawk.DB.Begin()
@@ -166,8 +167,23 @@ func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "Error in setting session, user not logged in", nil, http.StatusInternalServerError, w)
 		return
 	}
+	updatedUser:= user
 	user.Password = ""
+	fmt.Println(updatedUser)
+	if updatedUser.FirstLogin == 1 {
+		updatedUser.FirstLogin = 0
+	}
+	tx := hawk.DB.Begin ()
+	err = tx.Model(&updatedUser).Update("first_login", 0).Error
+	updatedUser.Password = ""
+	if err != nil {
+		LogRequest(r, ERROR, err.Error())
+		ResponseWriter(true, "User logged in but login field not updated", updatedUser, http.StatusOK,w)
+		tx.Rollback()
+		return
+	}
 	ResponseWriter(true, "User logged in and session is set", user, http.StatusOK, w)
+	tx.Commit()
 }
 
 func (hawk *App) logout(w http.ResponseWriter, r *http.Request) {
