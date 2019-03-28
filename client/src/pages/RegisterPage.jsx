@@ -91,7 +91,7 @@ const RegisterPage = ({ className }) => {
 					<TextField
 						name="password"
 						type="password"
-						placeholder="Password"
+						placeholder="Password (Min-char:8)"
 						onChange={onChange}
 					/>
 					<TextField

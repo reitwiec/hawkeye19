@@ -16,7 +16,7 @@ const PrivateRoute = ({
 		render={props =>
 			auth() ? (
 				<>
-					{showLogout ? <Logout /> : null}
+					{/* {showLogout ? <Logout /> : null} */}
 					<Component {...props} />
 				</>
 			) : (
