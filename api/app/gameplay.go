@@ -23,7 +23,7 @@ type Stats struct {
 }
 
 const (
-	RegionComplete = 4 //no of questions + 1
+	RegionComplete = 5 //no of questions + 1
 )
 
 func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
