@@ -10,7 +10,7 @@ import (
 
 const (
 	PointsPerQuestion       = 1
-	UnlockRegionPoints      = 2
+	UnlockRegionPoints      = 3
 	TotalSidequestQuestions = 6
 )
 
@@ -18,7 +18,6 @@ func (hawk *App) getSidequestQuestion(w http.ResponseWriter, r *http.Request) {
 	currUser := r.Context().Value("User").(User)
 	currLevel := currUser.Region0
 	if currLevel == TotalSidequestQuestions+1 {
-		fmt.Println("Sidequest over")
 		ResponseWriter(true, "Sidequest over", nil, http.StatusOK, w)
 		return
 	}
@@ -29,11 +28,10 @@ func (hawk *App) getSidequestQuestion(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		LogRequest(r, ERROR, err.Error())
 		if gorm.IsRecordNotFoundError(err) {
-			fmt.Println("Question does not exist")
 			ResponseWriter(false, "Question does not exist", nil, http.StatusNotFound, w)
 			return
 		} else {
-			fmt.Println("Database error")
+			LogRequest(r, ERROR, err.Error())
 			ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
 			return
 		}
@@ -57,8 +55,6 @@ func (hawk *App) checkSidequestAnswer(w http.ResponseWriter, r *http.Request) {
 	checkAns := CheckAnswer{}
 	err := json.NewDecoder(r.Body).Decode(&checkAns)
 	if err != nil {
-		LogRequest(r, ERROR, err.Error())
-		fmt.Println("Could not decode checkAnswer struct " + err.Error())
 		ResponseWriter(false, "Could not decode check answer struct", nil, http.StatusBadRequest, w)
 		return
 	} //sanitize answer
@@ -71,11 +67,10 @@ func (hawk *App) checkSidequestAnswer(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		LogRequest(r, ERROR, err.Error())
 		if gorm.IsRecordNotFoundError(err) {
-			fmt.Println("Question does not exist")
 			ResponseWriter(false, "Question does not exist", nil, http.StatusNotFound, w)
 			return
 		} else {
-			fmt.Println("Database error")
+			LogRequest(r, ERROR, err.Error ())
 			ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
 			return
 		}
@@ -94,7 +89,6 @@ func (hawk *App) checkSidequestAnswer(w http.ResponseWriter, r *http.Request) {
 	err = tx.Create(&attempt).Error
 	if err != nil {
 		LogRequest(r, ERROR, err.Error())
-		fmt.Println("Could not log answer attempt")
 		ResponseWriter(false, "Could not log answer", nil, http.StatusInternalServerError, w)
 		tx.Rollback()
 		return
@@ -110,7 +104,6 @@ func (hawk *App) checkSidequestAnswer(w http.ResponseWriter, r *http.Request) {
 
 		if err != nil {
 			LogRequest(r, ERROR, err.Error())
-			fmt.Println("Could not update database")
 			ResponseWriter(false, "Could not update database", nil, http.StatusInternalServerError, w)
 			tx.Rollback()
 			return
@@ -142,7 +135,6 @@ func (hawk *App) unlockRegion(w http.ResponseWriter, r *http.Request) {
 	err = tx.Model(&currUser).Update("SideQuestPoints", currUser.SideQuestPoints-UnlockRegionPoints).Error
 	if err != nil {
 		LogRequest(r, ERROR, err.Error())
-		fmt.Println("Could not unlock region in DB")
 		ResponseWriter(false, "Could not unlock region in DB", nil, http.StatusInternalServerError, w)
 		tx.Rollback()
 		return
