@@ -51,8 +51,10 @@ interface IQuestionPageState {
 	statsvisible: boolean;
 	level: number;
 	question: string;
+	questionID: number | null;
 	answer: string;
-	attempts: string[] | null;
+	attempts: string[];
+	hints: string[];
 }
 
 @inject('UserStore')
@@ -64,14 +66,17 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 		statsvisible: false,
 		level: 1,
 		question: '',
+		questionID: null,
 		answer: '',
-		attempts: null,
+		attempts: [],
+		hints: [],
 		region: this.props.location.state.name,
 		regionIndex: this.props.location.state.regionIndex
 	};
 
 	componentDidMount() {
 		this.getQuestion();
+		this.getHints();
 	}
 
 	getQuestion = () => {
@@ -80,7 +85,22 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 		.then(json => {
 			this.setState({
 			question: json.data.question,
+			questionID: json.data.questionID,
 		})});
+	};
+
+	getHints = () => [
+		fetch(`/api/getHints?question=${this.state.questionID}`)
+		.then(res => res.json())
+		.then(json => {
+			console.log(json);
+			this.setState({
+			});
+		})
+	];
+
+	getAttempts = () => {
+		fetch(`/api/getRecentTries?question`)
 	};
 
 	checkAnswer = ()  => {
