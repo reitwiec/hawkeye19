@@ -56,7 +56,6 @@ Block Key: %s
 }
 
 func (hawk *App) migrate() {
-	fmt.Println("Creating Tables")
 	hawk.DB.CreateTable(
 		&Help{},
 		&User{},
@@ -76,11 +75,6 @@ func (hawk *App) Run(Args []string) {
 		return
 	}
 	log.Println("Database connection established")
-	fmt.Println(" DBUsername:", Configuration.DBUsername,
-		"\n DBPassword:", Configuration.DBPassword,
-		"\n DBName:", Configuration.DBName,
-		"\n HashKey:", Configuration.HashKey,
-		"\n BlockKey:", Configuration.BlockKey)
 	defer hawk.DB.Close()
 
 	for _, arg := range Args {
