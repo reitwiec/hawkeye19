@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-sql-driver/mysql"
+	"github.com/haisum/recaptcha"
 	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/go-playground/validator.v9"
@@ -13,7 +14,6 @@ import (
 )
 
 func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
-	/*
 		re := recaptcha.R{
 			Secret: "6LftZZoUAAAAAPXZ3nAqHd4jzIbHBNxfMFpuWfMe",
 		}
@@ -25,7 +25,6 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 			ResponseWriter(false, "Captcha error", nil, http.StatusBadRequest, w)
 			return
 		}
-	*/
 	user := User{}
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
