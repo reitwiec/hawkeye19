@@ -9,6 +9,7 @@ import hawk from '../components/assets/hawk_logo.png';
 import pcb from '../components/assets/pcbdesign.png';
 import pcb1 from '../components/assets/pcbdesign1.png';
 import { Snackbar } from '../components';
+import { Redirect, Link } from 'react-router-dom';
 
 import { Button, TextField } from '../components';
 
@@ -43,6 +44,7 @@ class RegisterPage extends Component {
 		isVerified: false,
 		snackbarMessage: '',
 		barOpen: false,
+		redirect: false
 	};
 
 	onChange = (name, value, error) => {
@@ -81,8 +83,14 @@ class RegisterPage extends Component {
 			})
 				.then(res => res.json())
 				.then(json => { 
-					console.log(json);
-					((json.success)? this.openSnackbar('Registered successfully') : this.openSnackbar('Registration failed'));
+					if (json.success) {
+						this.openSnackbar('Registered successfully')
+						this.setState({
+							redirect: true
+						});
+					} else {
+						this.openSnackbar('Registration failed')
+					} 
 				})
 				.catch(() => this.openSnackbar('Registration failed'));
 		} else {
@@ -163,6 +171,7 @@ class RegisterPage extends Component {
 					<Button onClick={this.onSubmit} id="regbtn">
 						Register
 					</Button>
+					<span><br/><Link to="/" style={{ 'color': 'white', 'margin-top': '2em' }}>Already have an account? Log in </Link></span>
 				</div>
 
 				<img src={hawk} alt="" id="hawk" />
@@ -173,6 +182,7 @@ class RegisterPage extends Component {
 					<img src={pcb1} alt="" id="pcbdesk" />
 				</div>
 			<Snackbar open={this.state.barOpen} message={this.state.snackbarMessage}/>
+			{ this.state.redirect && <Redirect to="/"/>}
 			</div>
 	);
 	}
