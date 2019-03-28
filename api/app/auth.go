@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-sql-driver/mysql"
-	"github.com/haisum/recaptcha"
 	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/go-playground/validator.v9"
@@ -19,8 +18,10 @@ type RegisterUser struct {
 }
 
 func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
+	hawk.DB.AutoMigrate(&User{})
 	var captchaUser RegisterUser
 	err := json.NewDecoder(r.Body).Decode(&captchaUser)
+	/*
 	re := recaptcha.R{
 		Secret: "6LftZZoUAAAAAPXZ3nAqHd4jzIbHBNxfMFpuWfMe",
 	}
@@ -30,19 +31,20 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "Captcha failed. Please reload the page and try again", nil, http.StatusBadRequest, w)
 		return
 	}
+	*/
 	if err != nil {
 		ResponseWriter(false, "Bad Request", nil, http.StatusBadRequest, w)
 		return
 	}
 	user := captchaUser.User
 	if !hawk.checkEmail (user.Email) || !hawk.checkUsername(user.Username){
-		ResponseWriter(false, "User already exists", nil, http.StatusOK, w)
+		ResponseWriter(false, "Email or Username already exists", nil, http.StatusOK, w)
 		return
 	}
 	err = validate.Struct(user)
 	if err != nil {
 		if _, ok := err.(*validator.InvalidValidationError); ok {
-			ResponseWriter(false, "Invalid validation error ", nil, http.StatusBadRequest, w)
+			ResponseWriter(false, "Invalid Data", nil, http.StatusBadRequest, w)
 			return
 		}
 		var fields []string
@@ -95,6 +97,7 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 			//duplicate entry
 			if mysqlErr.Number == 1062 {
 				ResponseWriter(false, "Duplicate Entry", nil, http.StatusBadRequest, w)
+				tx.Rollback()
 				return
 			}
 		}
@@ -387,6 +390,7 @@ func (hawk *App) checkEmail(email string) bool {
 	}
 	return false
 }
+
 
 func (hawk *App) verifyUser(w http.ResponseWriter, r *http.Request) {
 	keys, ok := r.URL.Query()["email"]

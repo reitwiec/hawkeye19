@@ -326,7 +326,8 @@ func LogRequest(r *http.Request, status string, err string) {
 		Method:    r.Method,
 		URL:       r.URL.Path,
 		//@TODO add body after verified
-		Body:      "",
+		//Body:      string(body),
+		Body: "",
 		User:      r.Context().Value("User"),
 	}
 	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
