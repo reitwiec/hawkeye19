@@ -55,7 +55,6 @@ func (hawk *App) addHint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	
 	newHint.Hint = strings.TrimSpace(newHint.Hint)
 	newHint.Active = 0
 	newHint.AddedBy = currUser.Username

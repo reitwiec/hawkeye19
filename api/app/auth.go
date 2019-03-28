@@ -18,26 +18,25 @@ type RegisterUser struct {
 }
 
 func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
-	hawk.DB.AutoMigrate(&User{})
 	var captchaUser RegisterUser
 	err := json.NewDecoder(r.Body).Decode(&captchaUser)
 	/*
-	re := recaptcha.R{
-		Secret: "6LftZZoUAAAAAPXZ3nAqHd4jzIbHBNxfMFpuWfMe",
-	}
-	isValid := re.VerifyResponse(captchaUser.Captcha)
-	if !isValid {
-		LogRequest(r, INFO, "Captcha Invalid")
-		ResponseWriter(false, "Captcha failed. Please reload the page and try again", nil, http.StatusBadRequest, w)
-		return
-	}
+		re := recaptcha.R{
+			Secret: "6LftZZoUAAAAAPXZ3nAqHd4jzIbHBNxfMFpuWfMe",
+		}
+		isValid := re.VerifyResponse(captchaUser.Captcha)
+		if !isValid {
+			LogRequest(r, INFO, "Captcha Invalid")
+			ResponseWriter(false, "Captcha failed. Please reload the page and try again", nil, http.StatusBadRequest, w)
+			return
+		}
 	*/
 	if err != nil {
 		ResponseWriter(false, "Bad Request", nil, http.StatusBadRequest, w)
 		return
 	}
 	user := captchaUser.User
-	if !hawk.checkEmail (user.Email) || !hawk.checkUsername(user.Username){
+	if !hawk.checkEmail(user.Email) || !hawk.checkUsername(user.Username) {
 		ResponseWriter(false, "Email or Username already exists", nil, http.StatusOK, w)
 		return
 	}
@@ -390,7 +389,6 @@ func (hawk *App) checkEmail(email string) bool {
 	}
 	return false
 }
-
 
 func (hawk *App) verifyUser(w http.ResponseWriter, r *http.Request) {
 	keys, ok := r.URL.Query()["email"]
