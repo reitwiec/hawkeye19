@@ -28,6 +28,12 @@ const size = {
 	desktop: '1000px'
 };
 
+const hawkResponses = {
+	1: 'Hawk approves',
+	2: 'Hawk thinks you\'re close',
+	3: 'Hawk disapproves'
+};
+
 export const device = {
 	mobileS: `(min-width: ${size.mobileS})`,
 	mobileM: `(min-width: ${size.mobileM})`,
@@ -56,6 +62,7 @@ interface IQuestionPageState {
 	answer: string;
 	attempts: string[];
 	hints: string[];
+	hawkMessage: string;
 }
 
 @inject('UserStore')
@@ -71,6 +78,7 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 		answer: '',
 		attempts: [],
 		hints: [],
+		hawkMessage: '',
 		region: this.props.location.state.name,
 		regionIndex: this.props.location.state.regionIndex
 	};
@@ -90,6 +98,10 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 				});
 			})
 			.catch(() => {});
+	};
+
+	clearAnswer = () => {
+		this.setState({ answer: '' });
 	};
 
 	getHints = () => [
@@ -117,7 +129,15 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 			})
 		})
 			.then(res => res.json())
-			.then(json => console.log(json));
+			.then(json => {
+				this.setState({
+					hawkMessage: hawkResponses[json.data]
+				});
+				if (json.data == 1) {
+					this.getQuestion();
+					this.clearAnswer();
+				}
+			});
 	};
 
 	onEditAnswer = e => {
@@ -149,10 +169,6 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 	};
 
 	render() {
-		// const { region } = this.props.location.state || {
-		// 	region: 'Installation 09'
-		// };
-
 		return (
 			<div className={this.props.className}>
 				{/* <Logout /> */}
@@ -166,11 +182,11 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 							type="text"
 							id="answer"
 							placeholder="Enter answer here..."
+							value={this.state.answer}
 							onChange={this.onEditAnswer}
 						/>
 					</div>
 				</div>
-				<span id="status">Hawk thinks you're close</span>
 				<Button onClick={this.checkAnswer} id="submit">
 					SUBMIT
 				</Button>
@@ -237,7 +253,7 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 						})}
 					</div>
 				</div>
-				<span id="status">Hawk thinks you're close</span>
+				<span id="status">{this.state.hawkMessage}</span>
 
 				<div id="control">
 					<div id="signals">
