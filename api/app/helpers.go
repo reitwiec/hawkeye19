@@ -254,7 +254,7 @@ func UnlockOrder() string {
 		//"0,4,3,2,5",
 	}
 	rand.Seed(time.Now().UnixNano())
-	n := rand.Intn(6)
+	n := rand.Intn(2)
 	return permutations[n]
 }
 
