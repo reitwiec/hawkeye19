@@ -59,7 +59,7 @@ func (hawk *App) addHint(w http.ResponseWriter, r *http.Request) {
 	newHint.Hint = strings.TrimSpace(newHint.Hint)
 	newHint.Active = 0
 	newHint.AddedBy = currUser.Username
-
+	newHint.Timestamp = time.Now()
 	tx := hawk.DB.Begin()
 	err = tx.Create(&newHint).Error
 
