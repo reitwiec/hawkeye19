@@ -42,17 +42,17 @@ type User struct {
 	ID        int       `gorm:"primary_key;auto_increment" json:"userID"`
 	Name      string    `gorm:"not null" json:"name" validate:"required"`
 	Username  string    `gorm:"not null;unique" json:"username" validate:"alphanum,required"`
-	Password  string    `gorm:"not null" json:"password" validate:"min=8,max=24,required"`
+	Password  string    `gorm:"not null" json:"password;omitempty" validate:"min=8,max=24,required"`
 	Access    int       `json:"access"`
 	Banned    int       `json:"banned"`
 	Timestamp time.Time `gorm:"not null" json:"timestamp"`
 
 	//general info
 	Email      string `gorm:"unique;not null" json:"email" validate:"email,required"`
-	Tel        string `gorm:"not null;unique" json:"tel" validate:"len=10,required"`
+	Tel        string `gorm:"not null" json:"tel" validate:"required"`
 	College    string `gorm:"not null" json:"college" validate:"required"`
-	Country    string `gorm:"not null" json:"country"`
-	IsMahe     int    `gorm:"not null" json:"isMahe"` //1 if MAHE else, 0
+	Country    string `json:"country"`
+	IsMahe     int    `json:"isMahe"` //1 if MAHE else, 0
 	IsVerified int    `gorm:"not null" json:"isVerified"`
 	FirstLogin int    `gorm:"not null" json:"firstLogin"` //1 by default, sets to 0 on first login
 

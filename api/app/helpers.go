@@ -247,11 +247,11 @@ func SideQuestOrder() string {
 func UnlockOrder() string {
 	permutations := [6]string{
 		"0,2,3,4,5",
-		"0,2,4,3,5",
+		//"0,2,4,3,5",
 		"0,3,2,4,5",
-		"0,3,4,2,5",
-		"0,4,2,3,5",
-		"0,4,3,2,5",
+		//"0,3,4,2,5",
+		//"0,4,2,3,5",
+		//"0,4,3,2,5",
 	}
 	rand.Seed(time.Now().UnixNano())
 	n := rand.Intn(6)
@@ -282,7 +282,7 @@ func UpdateUnlockOrder(unlockOrder string, region int) string {
 	return updatedUO
 }
 func SendFPEmail(email string, token string, name string) error {
-	clickurl := "http://localhost:8080/api/forgotPassword?email=" + email + "&token=" + token
+	clickurl := "https://hawkeye.iecsemanipal.com/api/forgotPassword?email=" + email + "&token=" + token
 	data := []byte(`{"toEmail":` + `"` + email + `",` + `"url": "` + clickurl + `",` + `"name":"` + name + `"}`)
 	req, err := http.NewRequest("POST", "https://mail.iecsemanipal.com/hawkeye/forgotpassword", bytes.NewBuffer(data))
 	req.Header.Add("content-type", "application/json")
@@ -301,7 +301,7 @@ func SendFPEmail(email string, token string, name string) error {
 }
 
 func SendVUEmail(email string, token string, name string) error {
-	clickurl := "http://localhost:8080/api/verifyUser?email=" + email + "&token=" + token
+	clickurl := "https://hawkeye.iecsemanipal.com/api/verifyUser?email=" + email + "&token=" + token
 	data := []byte(`{"toEmail":` + `"` + email + `",` + `"url": "` + clickurl + `",` + `"name":"` + name + `"}`)
 	req, err := http.NewRequest("POST", "https://mail.iecsemanipal.com/hawkeye/emailverification", bytes.NewBuffer(data))
 	req.Header.Add("content-type", "application/json")
@@ -325,8 +325,10 @@ func LogRequest(r *http.Request, status string, err string) {
 		Timestamp: time.Now(),
 		Method:    r.Method,
 		URL:       r.URL.Path,
-		Body:      string(body),
-		User:      r.Context().Value("User"),
+		//@TODO add body after verified
+		//Body:      string(body),
+		Body: "",
+		User: r.Context().Value("User"),
 	}
 	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 	log.Printf("%s\nTimestamp: %s\nMethod: %s\nURL: %s\nBody: %s\nUser: %v\nError: %s\n\n", status,

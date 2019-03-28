@@ -16,8 +16,6 @@ func (hawk *App) LoadRoutes() {
 	hawk.router.HandleFunc("/api/logout", hawk.createContext(hawk.logout, false, false)).Methods("GET")
 	hawk.router.HandleFunc("/api/forgotPassword", hawk.createContext(hawk.forgotPassword, false, false)).Methods("POST")
 	hawk.router.HandleFunc("/api/resetPassword", hawk.createContext(hawk.resetPassword, false, false)).Methods("POST")
-	hawk.router.HandleFunc("/api/checkUsername", hawk.createContext(hawk.checkUsername, false, false)).Methods("POST")
-	hawk.router.HandleFunc("/api/checkEmail", hawk.createContext(hawk.checkEmail, false, false)).Methods("POST")
 	hawk.router.HandleFunc("/api/verifyUser", hawk.createContext(hawk.verifyUser, false, false)).Methods("GET")
 
 	//Gameplay routes
