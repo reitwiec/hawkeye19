@@ -245,7 +245,7 @@ func SideQuestOrder() string {
 }
 
 func UnlockOrder() string {
-	permutations := [6]string{
+	permutations := [2]string{
 		"0,2,3,4,5",
 		//"0,2,4,3,5",
 		"0,3,2,4,5",
@@ -260,6 +260,7 @@ func UnlockOrder() string {
 
 func GetNextRegion(unlockOrder string) uint8 {
 	//traverse till non 0 number is encountered
+
 	l := len(unlockOrder)
 	for i := 0; i < l; i++ {
 		if unlockOrder[i] != ',' && unlockOrder[i] != '0' {
