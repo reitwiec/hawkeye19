@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import { observer, inject } from 'mobx-react';
 import { UserStore } from '../stores/User';
 import media from '../components/theme/media';
+import { centerHV } from '../mixins';
+import * as colors from '../components/';
 import map from '../components/assets/mapbg.png';
 import logo from '../components/assets/iecse_logo.png';
 import hawk from '../components/assets/hawk_logo.png';

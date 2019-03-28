@@ -1,26 +1,37 @@
 import React, { Component } from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { Link } from 'react-router-dom';
 import { inject, observer } from 'mobx-react';
-
 import { UserStore } from '../stores/User';
+import { RegionCard } from '../components';
+import media from '../components/theme/media';
+import colors from '../colors';
+import { onCircle } from '../mixins';
+
+import Installation09Icon from '../components/assets/installation_09.svg';
+import PancheaIcon from '../components/assets/panchea.svg';
+import CityOfDarwinsIcon from '../components/assets/city_of_darwins.svg';
+import LakesideRuinsIcon from '../components/assets/lakeside_ruins.svg';
+import AshValleyIcon from '../components/assets/ash_valley.svg';
+import EdenIcon from '../components/assets/eden.svg';
 
 const regions = [
-	'Installation 09',
-	'Panchaea',
-	'City of Darwins',
-	'Lakeside Ruins',
-	'Ash Valley'
+	{ name: 'Installation 09', icon: Installation09Icon, locked: false },
+	{ name: 'Panchea', icon: PancheaIcon, locked: true },
+	{ name: 'City of Darwins', icon: CityOfDarwinsIcon, locked: true },
+	{ name: 'Lakeside Ruins', icon: LakesideRuinsIcon, locked: true },
+	{ name: 'Ash Valley', icon: AshValleyIcon, locked: true },
+	{ name: 'Eden', icon: EdenIcon, locked: true }
 ];
 
-type Props = {
+interface IDashBoardProps {
 	className: string;
 	UserStore: UserStore;
-};
+}
 
 @inject('UserStore')
 @observer
-class Dashboard extends Component<Props> {
+class Dashboard extends Component<IDashBoardProps> {
 	render() {
 		const { className } = this.props;
 		return (
@@ -29,14 +40,7 @@ class Dashboard extends Component<Props> {
 				<h5>Logged in as {this.props.UserStore.username}</h5>
 				<div className="regions-container">
 					{regions.map((region, i) => (
-						<span key={i}>
-							<Link
-								className="region-link"
-								to={{ pathname: '/question', state: { region } }}
-							>
-								{region}
-							</Link>
-						</span>
+						<RegionCard key={i} {...region} />
 					))}
 				</div>
 			</div>
@@ -45,18 +49,27 @@ class Dashboard extends Component<Props> {
 }
 
 export default styled(Dashboard)`
-	.regions-container,
-	.attempts-container {
-		display: flex;
-		flex-flow: column nowrap;
+	color: ${colors.mediumGrey};
+	.regions-container {
+		margin: auto;
+		border: 5px solid ${`${colors.primaryYellow}aa`};
+		${onCircle(6, '400px', '90px', 270)}
 	}
 
-	.attempts-container {
-		margin-top: 1em;
-	}
+	${media.phone`
+		.regions-container {
+			display: flex;
+			flex-flow: column nowrap;
+			border: none;
 
-	.region-link {
-		color: black;
-		text-decoration: none;
-	}
+			> .region-card {
+				transform: unset;
+				position: unset;
+				width: 60vw;
+				height: 60vw;
+				margin-top: 4em;
+				margin-left: 4em;
+			}
+		}
+	`}
 `;

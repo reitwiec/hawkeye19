@@ -1,6 +1,3 @@
-# hawkeye19
-
-Source code for HawkEye 2019
 
 ## Configuration
 
@@ -31,5 +28,6 @@ $ make serve
 make serve
 make keys
 make migrate
-mkae drop_all
+make drop_all
 ```
+

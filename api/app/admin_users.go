@@ -15,6 +15,7 @@ func (hawk *App) editUser(w http.ResponseWriter, r *http.Request) {
 	userData := User{}
 	err := json.NewDecoder(r.Body).Decode(&userData)
 	if err != nil {
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "User not edited.", nil, http.StatusBadRequest, w)
 		return
 	}
@@ -24,27 +25,28 @@ func (hawk *App) editUser(w http.ResponseWriter, r *http.Request) {
 	userData.Email = strings.TrimSpace(userData.Email)
 	userData.Tel = strings.TrimSpace(userData.Tel)
 	userData.College = strings.TrimSpace(userData.College)
-	userData.SideQuest = strings.TrimSpace(userData.SideQuest)
+	userData.SidequestOrder = strings.TrimSpace(userData.SidequestOrder)
 	userData.UnlockOrder = strings.TrimSpace(userData.UnlockOrder)
 
 	tx := hawk.DB.Begin()
 	err = tx.Where("id = ? ", userData.ID).First(&User{}).Updates(User{
-		Name:        userData.Name,
-		Access:      userData.Access,
-		Email:       userData.Email,
-		Tel:         userData.Tel,
-		College:     userData.College,
-		Region1:     userData.Region1,
-		Region2:     userData.Region2,
-		Region3:     userData.Region3,
-		Region4:     userData.Region4,
-		Region5:     userData.Region5,
-		Banned:      userData.Banned,
-		SideQuest:   userData.SideQuest,
-		UnlockOrder: userData.UnlockOrder,
+		Name:           userData.Name,
+		Access:         userData.Access,
+		Email:          userData.Email,
+		Tel:            userData.Tel,
+		College:        userData.College,
+		Region1:        userData.Region1,
+		Region2:        userData.Region2,
+		Region3:        userData.Region3,
+		Region4:        userData.Region4,
+		Region5:        userData.Region5,
+		Banned:         userData.Banned,
+		SidequestOrder: userData.SidequestOrder,
+		UnlockOrder:    userData.UnlockOrder,
 	}).Error
 	if err != nil {
 		tx.Rollback()
+		LogRequest(r, ERROR, err.Error())
 		if gorm.IsRecordNotFoundError(err) {
 			fmt.Println("User not found")
 			ResponseWriter(false, "User not found", nil, http.StatusBadRequest, w)
@@ -73,6 +75,7 @@ func (hawk *App) deleteUser(w http.ResponseWriter, r *http.Request) {
 	err := tx.Where("id = ?", key).First(&u).Delete(u).Error
 	if err != nil {
 		tx.Rollback()
+		LogRequest(r, ERROR, err.Error())
 		if gorm.IsRecordNotFoundError(err) {
 			ResponseWriter(false, "User not found", nil, http.StatusBadRequest, w)
 		} else {
@@ -97,6 +100,7 @@ func (hawk *App) banUser(w http.ResponseWriter, r *http.Request) {
 	err := tx.Where("ID = ?", key).First(&u).Update("Banned", 1).Error
 	if err != nil {
 		tx.Rollback()
+		LogRequest(r, ERROR, err.Error())
 		if gorm.IsRecordNotFoundError(err) {
 			ResponseWriter(false, "User not found", nil, http.StatusBadRequest, w)
 		} else {
@@ -121,6 +125,7 @@ func (hawk *App) unbanUser(w http.ResponseWriter, r *http.Request) {
 	err := tx.Where("ID = ?", key).First(&u).Update("Banned", 0).Error
 	if err != nil {
 		tx.Rollback()
+		LogRequest(r, ERROR, err.Error())
 		if gorm.IsRecordNotFoundError(err) {
 			ResponseWriter(false, "User not found", nil, http.StatusBadRequest, w)
 		} else {
@@ -145,6 +150,7 @@ func (hawk *App) makeAdmin(w http.ResponseWriter, r *http.Request) {
 	err := tx.Where("ID = ?", key).First(&u).Update("Access", 1).Error
 	if err != nil {
 		tx.Rollback()
+		LogRequest(r, ERROR, err.Error())
 		if gorm.IsRecordNotFoundError(err) {
 			ResponseWriter(false, "User not found", nil, http.StatusBadRequest, w)
 		} else {
@@ -168,6 +174,7 @@ func (hawk *App) revokeAdmin(w http.ResponseWriter, r *http.Request) {
 	err := tx.Where("ID = ?", key).First(&u).Update("Access", 0).Error
 	if err != nil {
 		tx.Rollback()
+		LogRequest(r, ERROR, err.Error())
 		if gorm.IsRecordNotFoundError(err) {
 			ResponseWriter(false, "Admin not revoked", nil, http.StatusBadRequest, w)
 		} else {
@@ -192,6 +199,7 @@ func (hawk *App) listUsers(w http.ResponseWriter, r *http.Request) {
 	err = hawk.DB.Select("id, username, name, email, tel, college, banned, points, region1, region2, region3, region4, region5, unlock_order, side_quest").Limit(perPage).Offset(offset).Order("region5 desc").Find(&users).Error
 	if err != nil {
 		fmt.Println("Error in database")
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Cannot list users", nil, http.StatusInternalServerError, w)
 		return
 	}
@@ -209,6 +217,7 @@ func (hawk *App) searchUser(w http.ResponseWriter, r *http.Request) {
 	arg := "%" + user[0] + "%"
 	err := hawk.DB.Select("id, username, name, email, tel, college, banned, points, region1, region2, region3, region4, region5, unlock_order, side_quest").Where("username LIKE ? OR name LIKE ?", arg, arg).Find(&users).Error
 	if err != nil {
+		LogRequest(r, ERROR, err.Error())
 		fmt.Println("Cannot find user")
 		ResponseWriter(false, "Cannot find user", nil, http.StatusInternalServerError, w)
 		return
@@ -235,11 +244,13 @@ func (hawk *App) userLogs(w http.ResponseWriter, r *http.Request) {
 	}
 	page, err := strconv.Atoi(keys["page"][0])
 	if err != nil {
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Parameters not valid. Cannot log answers.", nil, http.StatusBadRequest, w)
 		return
 	}
 	id, err := strconv.Atoi(keys["id"][0])
 	if err != nil {
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Parameters not valid. Cannot log answers.", nil, http.StatusBadRequest, w)
 		return
 	}
@@ -248,6 +259,7 @@ func (hawk *App) userLogs(w http.ResponseWriter, r *http.Request) {
 
 	err = hawk.DB.Where("user = ? ", id).Order("id desc").Offset(offset).Limit(perPage).Find(&answers).Error
 	if err != nil {
+		LogRequest(r, ERROR, err.Error())
 		fmt.Println("Cannot log questions")
 		ResponseWriter(false, "Cannot log questions", nil, http.StatusInternalServerError, w)
 		return

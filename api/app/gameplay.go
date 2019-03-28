@@ -10,9 +10,8 @@ import (
 )
 
 type CheckAnswer struct {
-	Answer   string
-	RegionId int
-	Level    int
+	Answer   string `json:"answer"`
+	RegionID int    `json:"regionID" validate:"min=0,max=5"`
 }
 
 type Stats struct {
@@ -31,6 +30,15 @@ const (
 func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 	//obtain currUser from context
 	currUser := r.Context().Value("User").(User)
+	// check if verified and not banned
+	if currUser.IsVerified != 1 {
+		ResponseWriter(false, "Not verified", nil, http.StatusOK, w)
+		return
+	}
+	if currUser.Banned == 1 {
+		ResponseWriter(false, "User banned", nil, http.StatusOK, w)
+		return
+	}
 	//obtain answer, regionId from request
 	checkAns := CheckAnswer{}
 	err := json.NewDecoder(r.Body).Decode(&checkAns)
@@ -39,20 +47,21 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "Could not decode check answer struct", nil, http.StatusBadRequest, w)
 		return
 	}
+
+	level := -1
+
 	//get level from currUser
-	switch checkAns.RegionId {
+	switch checkAns.RegionID {
 	case 1:
-		checkAns.Level = currUser.Region1
+		level = currUser.Region1
 	case 2:
-		checkAns.Level = currUser.Region2
+		level = currUser.Region2
 	case 3:
-		checkAns.Level = currUser.Region3
+		level = currUser.Region3
 	case 4:
-		checkAns.Level = currUser.Region4
+		level = currUser.Region4
 	case 5:
-		checkAns.Level = currUser.Region5
-	case 6:
-		checkAns.Level = currUser.Region6
+		level = currUser.Region5
 
 	}
 
@@ -61,7 +70,17 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 
 	//find actual answer
 	question := Question{}
-	err = hawk.DB.Where("level = ? AND region = ?", checkAns.Level, checkAns.RegionId).First(&question).Error
+	err = hawk.DB.Where("level = ? AND region = ?", level, checkAns.RegionID).First(&question).Error
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			LogRequest(r, ERROR, err.Error())
+			ResponseWriter(false, "Question not found", nil, http.StatusNotFound, w)
+			return
+		}
+		LogRequest(r, ERROR, err.Error())
+		ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
+		return
+	}
 	actualAns := question.Answer
 	//check if same, close or wrong
 	status := CheckAnswerStatus(checkAns.Answer, actualAns)
@@ -76,28 +95,29 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 	tx := hawk.DB.Begin()
 	err = tx.Create(&attempt).Error
 	if err != nil {
-		fmt.Println("Could not log answer attempt")
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Could not log answer", nil, http.StatusInternalServerError, w)
 		tx.Rollback()
 		return
 	}
-	tx.Commit()
+
 	//if answer is correct
 	if status == CorrectAnswer {
 		//answer is correct
 		//update currUser level
-		tx := hawk.DB.Begin()
-		region := "Region" + strconv.Itoa(checkAns.RegionId)
-		err = tx.Model(&currUser).Update(region, checkAns.Level+1).Error
+
+		region := "Region" + strconv.Itoa(checkAns.RegionID)
+
+		err = tx.Model(&currUser).Update(region, level+1).Error
 		if err != nil {
-			fmt.Println("Could not update level")
+			LogRequest(r, ERROR, err.Error())
 			ResponseWriter(false, "Could not update level", nil, http.StatusInternalServerError, w)
 			tx.Rollback()
 		}
 
 		//unlock region
 		isRegionComplete := false
-		switch checkAns.RegionId {
+		switch checkAns.RegionID {
 		case 1:
 			if currUser.Region1 == RegionComplete {
 				isRegionComplete = true
@@ -115,37 +135,40 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 			if currUser.Region4 == RegionComplete {
 				isRegionComplete = true
 			}
-		case 5:
-			if currUser.Region5 == RegionComplete {
-				//unlock linear gameplay
-				err = tx.Model(&currUser).Update("Region6", 1).Error
-				if err != nil {
-					fmt.Println("Could not unlock linear region")
-					ResponseWriter(false, "Could not unlock linear region", nil, http.StatusInternalServerError, w)
-					tx.Rollback()
-					return
-				}
+			/*
+				case 5:
+					if currUser.Region5 == RegionComplete {
+						//unlock linear gameplay
+						err = tx.Model(&currUser).Update("Region6", 1).Error
+						if err != nil {
+							fmt.Println("Could not unlock linear region")
+							ResponseWriter(false, "Could not unlock linear region", nil, http.StatusInternalServerError, w)
+							tx.Rollback()
+							return
+						}
 
-			}
+					}
+			*/
 		}
 		if isRegionComplete {
 
 			//get next region
-			nextRegion := GetNextRegion(currUser.UnlockOrder)
-			currUser.UnlockOrder = UpdateUnlockOrder(currUser.UnlockOrder, int(nextRegion)-48)
+			nextRegion := int(GetNextRegion(currUser.UnlockOrder)) - 48
+			//if next region is 5 unlock linear region
+			currUser.UnlockOrder = UpdateUnlockOrder(currUser.UnlockOrder, nextRegion)
 			//update DB with unlocked region
 			switch nextRegion {
-			case '2':
+			case 2:
 				err = tx.Model(&currUser).Update("Region2", 1).Error
-			case '3':
+			case 3:
 				err = tx.Model(&currUser).Update("Region3", 1).Error
-			case '4':
+			case 4:
 				err = tx.Model(&currUser).Update("Region4", 1).Error
-			case '5':
+			case 5: //linear
 				err = tx.Model(&currUser).Update("Region5", 1).Error
 			}
 			if err != nil {
-				fmt.Println("Could not unlock region in DB")
+				LogRequest(r, ERROR, err.Error())
 				ResponseWriter(false, "Could not unlock region in DB", nil, http.StatusInternalServerError, w)
 				tx.Rollback()
 				return
@@ -153,7 +176,7 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 			//update UnlockOrder string in DB
 			err = tx.Model(&currUser).Update("unlock_order", currUser.UnlockOrder).Error
 			if err != nil {
-				fmt.Println("Could not unlock region in DB")
+				LogRequest(r, ERROR, err.Error())
 				ResponseWriter(false, "Could not unlock region in DB", nil, http.StatusInternalServerError, w)
 				tx.Rollback()
 				return
@@ -176,9 +199,9 @@ func (hawk *App) getRecentTries(w http.ResponseWriter, r *http.Request) {
 	}
 	var answers []string
 	//query db for answers
-	err := hawk.DB.Model(&Attempt{}).Where("question = ? AND user = ?", keys[0], currUser.ID).Order("timestamp desc").Pluck("answer", &answers).Error
+	err := hawk.DB.Model(&Attempt{}).Where("question = ? AND user = ?", keys[0], currUser.ID).Order("timestamp desc").Limit(7).Pluck("answer", &answers).Error
 	if err != nil && !gorm.IsRecordNotFoundError(err) {
-		fmt.Println("Database error")
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
 		return
 	}
@@ -220,7 +243,15 @@ func (hawk *App) getQuestion(w http.ResponseWriter, r *http.Request) {
 
 	err := hawk.DB.Select("id, question, level, region, add_info").Where("level = ? AND region = ?", level, key).First(&question).Error
 	if err != nil {
-		ResponseWriter(false, "Could not fetch question.", nil, http.StatusInternalServerError, w)
+		if gorm.IsRecordNotFoundError(err) {
+			LogRequest(r, ERROR, err.Error())
+			ResponseWriter(false, "Question doesn't exist", nil, http.StatusInternalServerError, w)
+			fmt.Println(err)
+		} else {
+			LogRequest(r, ERROR, err.Error())
+			ResponseWriter(false, "Could not fetch question.", nil, http.StatusInternalServerError, w)
+			fmt.Println(err)
+		}
 		return
 	}
 
@@ -240,7 +271,15 @@ func (hawk *App) getHints(w http.ResponseWriter, r *http.Request) {
 
 	err := hawk.DB.Model(&Hint{}).Where("question=? AND active=1", key).Pluck("hint", &hints).Error
 	if err != nil {
-		ResponseWriter(false, "Could not fetch hint.", nil, http.StatusInternalServerError, w)
+		if gorm.IsRecordNotFoundError(err) {
+			LogRequest(r, ERROR, err.Error())
+			ResponseWriter(false, "Question doesn't exist", nil, http.StatusInternalServerError, w)
+			fmt.Println(err)
+		} else {
+			LogRequest(r, ERROR, err.Error())
+			ResponseWriter(false, "Could not fetch question.", nil, http.StatusInternalServerError, w)
+			fmt.Println(err)
+		}
 		return
 	}
 
@@ -249,70 +288,64 @@ func (hawk *App) getHints(w http.ResponseWriter, r *http.Request) {
 
 func (hawk *App) getStats(w http.ResponseWriter, r *http.Request) {
 	currUser := r.Context().Value("User").(User)
-	if (currUser == User{}) {
-		ResponseWriter(false, "User not logged in.", nil, http.StatusNetworkAuthenticationRequired, w)
-		return
-	}
-
+	/*
+		if (currUser == User{}) {
+			ResponseWriter(false, "User not logged in.", nil, http.StatusNetworkAuthenticationRequired, w)
+			return
+		}
+	*/
 	currStats := Stats{}
-
+	//Total players
 	err := hawk.DB.Model(&User{}).Count(&currStats.TotalPlayers).Error
 	if err != nil {
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Cant get total players", nil, http.StatusInternalServerError, w)
 		return
 	}
 
-	err = hawk.DB.Model(&User{}).Where("points = ?", currUser.Points).Count(&currStats.SameLevel).Error
+	//Total answer attempts
+	err = hawk.DB.Model(&Attempt{}).Count(&currStats.AnswerAttempts).Error
 	if err != nil {
+		LogRequest(r, ERROR, err.Error())
+		ResponseWriter(false, "Cant get total answer attempts", nil, http.StatusInternalServerError, w)
+		return
+	}
+
+	//on same level in linear gameplay
+	err = hawk.DB.Model(&User{}).Where("region5 = ?", currUser.Region5).Count(&currStats.SameLevel).Error
+	if err != nil {
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Cant get players at par", nil, http.StatusInternalServerError, w)
 		return
 	}
-
-	err = hawk.DB.Model(&User{}).Where("points > ?", currUser.Points).Count(&currStats.Leading).Error
+	//leading on linear gameplay
+	err = hawk.DB.Model(&User{}).Where("region5 > ?", currUser.Region5).Count(&currStats.Leading).Error
 	if err != nil {
-		ResponseWriter(false, "Cant get leading users", nil, http.StatusInternalServerError, w)
+		LogRequest(r, ERROR, err.Error())
+		ResponseWriter(false, "Cant get leading players at par", nil, http.StatusInternalServerError, w)
 		return
 	}
 
-	currStats.TotalPlayers += 1
-	currStats.Leading += 1
-	currStats.Trailing = currStats.TotalPlayers - (currStats.Leading + currStats.SameLevel)
-
-	ResponseWriter(true, "Current stats", currStats, http.StatusOK, w)
-
-}
-
-func (hawk *App) getSideQuestQuestion(w http.ResponseWriter, r *http.Request) {
-	currUser := r.Context().Value("User").(User)
-	//get sidequest level from request
-	keys, ok := r.URL.Query()["level"]
-	if !ok || len(keys) < 1 {
-		fmt.Println("Params missing")
-		ResponseWriter(false, "Param missing", nil, http.StatusBadRequest, w)
-		return
-	}
-	index, err := strconv.Atoi(keys[0])
-	index -= 1
-	if err != nil {
-		fmt.Println("Error in Atoi")
-		ResponseWriter(false, "Error in Atoi", nil, http.StatusInternalServerError, w)
-		return
-	}
-	level := currUser.SideQuest[index] - 48 //ascii to int
-	fmt.Println(level)
-	question := Question{}
-	err = hawk.DB.Select("id, question, level, region, add_info").Where("region = ? AND level = ?", 0, level).First(&question).Error
-	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
-			fmt.Println("Question does not exist")
-			ResponseWriter(false, "Question does not exist", nil, http.StatusNotFound, w)
-			return
-		} else {
-			fmt.Println("Database error")
-			ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
+	/*
+		err = hawk.DB.Model(&User{}).Where("points = ?", currUser.Points).Count(&currStats.SameLevel).Error
+		if err != nil {
+			LogRequest(r, ERROR, err.Error())
+			ResponseWriter(false, "Cant get players at par", nil, http.StatusInternalServerError, w)
 			return
 		}
 
-	}
-	ResponseWriter(true, "Question fetched", question, http.StatusOK, w)
+
+		err = hawk.DB.Model(&User{}).Where("points > ?", currUser.Points).Count(&currStats.Leading).Error
+		if err != nil {
+			LogRequest(r, ERROR, err.Error())
+			ResponseWriter(false, "Cant get leading users", nil, http.StatusInternalServerError, w)
+			return
+		}
+	*/
+	currStats.TotalPlayers += 1
+	currStats.Leading += 1
+	currStats.Trailing = currStats.TotalPlayers - (currStats.Leading + currStats.SameLevel)
+	currStats.SameLevel -= 1 //counts currUser also
+	ResponseWriter(true, "Current stats", currStats, http.StatusOK, w)
+
 }
