@@ -9,6 +9,23 @@ import map from '../components/assets/mapbg.png';
 import logo from '../components/assets/iecse_logo.png';
 import hawk from '../components/assets/hawk_logo.png';
 
+const size = {
+	mobileS: '320px',
+	mobileL: '500px',
+	tablet: '768px',
+	laptop: '730px',
+	laptopL: '862px',
+	desktop: '1000px'
+};
+export const device = {
+	mobileS: `(min-width: ${size.mobileS})`,
+	mobileL: `(min-width: ${size.mobileL})`,
+	tablet: `(min-width: ${size.tablet})`,
+	laptop: `(min-width: ${size.laptop})`,
+	laptopL: `(min-width: ${size.laptopL})`,
+	desktop: `(min-width: ${size.desktop})`
+};
+
 import { Link, Redirect } from 'react-router-dom';
 
 import { Button, TextField } from '../components';
@@ -52,8 +69,9 @@ class LoginPage extends Component<Props> {
 			<div className={this.props.className}>
 				<img src="hawk" alt="" id="hawk" />
 				<div id="box">
-					<h1>HawkEye</h1>
-					<span>Sign into your account</span>
+					<h1>HAWKEYE</h1>
+					<span id="subt">Sign into your account</span>
+
 					<div id="inputs">
 						<TextField
 							name="username"
@@ -87,101 +105,367 @@ class LoginPage extends Component<Props> {
 
 export default styled(LoginPage)`
 	width: 100%;
-	${media.phone`
-	#box {
-		${centerHV}
-		padding-top:10px;
-		border-radius:10px;
-		background:#1c1c1c;
-		filter: drop-shadow(0px 15px 15px #000);
-		width:80%;
-		position: absolute;
-		height:280px;
-		text-align:center;
+	@media ${device.mobileS} {
+		max-width: 500px;
+		#box {
+			padding-top: 10px;
+			h1 {
+				color: #ffd627;
+				margin: 10px 0 3px 0;
+			}
+			span {
+				color: white;
+				font-weight: 300;
+				font-size: 0.7em;
+				letter-spacing: 3px;
+			}
+			border-radius: 10px;
 
-		h1 {
-			color:#FFD627;
-			margin:10px 0 3px 0;
-			text-transform: uppercase;
-		}
+			background: #1c1c1c;
+			filter: drop-shadow(0px 15px 15px #000);
+			width: 80%;
+			position: absolute;
+			height: 280px;
+			text-align: center;
+			left: 50%;
+			top: 50%;
+			transform: translate(-50%, -50%);
+			#inputs {
+				${TextField} {
+					input {
+						letter-spacing: 1.25px;
+						font-size: 100%;
+						text-indent: 10px;
+						margin-top: 10px;
+						font-weight: 300;
+						width: 80%;
+						color: #fff;
+						border: 0px;
+						border-radius: 4px;
+						box-shadow: none;
+						outline: none;
+						-webkit-appearance: none;
+						-moz-appearance: none;
+						appearance: none;
+						height: 25px;
+						border: none;
+						text-indent: 10px;
+						background: #333333;
+					}
+				}
+			}
 
-		span {
-			color:white;
-			font-weight:300;
-			font-size:0.7em;
-			letter-spacing:3px;
-		}
-
-	#inputs{
-		text-align:left;
-		width:100%;
-		margin-left:30px;
-		${TextField}{
-			input{
-				letter-spacing:1.25px;
-				display:block;
-				font-size:100%;
-				text-indent: 10px;
-				margin-top:10px;
-				font-weight:300;
-				width:80%;
-				color:#fff;
-				border: 0px;
-				border-radius: 4px;
-				box-shadow: none;
-				outline: none;
-				-webkit-appearance:none ;
-				-moz-appearance:none ;
-				appearance:none ;
-				height:25px;
-				border:none;
-				text-indent: 10px;
-				background: #333333;
+			${Button} {
+				color: #1c1c1c;
+				font-weight: 500;
+				background: #ffd627;
+				width: 50%;
+				height: 35px;
+				padding: 10px;
+				padding-top: 7px;
+				border: none;
+				border-radius: 20px;
+				margin-top: 10px;
+				margin-bottom: 10px;
+			}
+			#register {
+				letter-spacing: 1px;
+				color: white;
+				text-decoration: none;
+				font-weight: 300;
+				font-size: 0.8em;
 			}
 		}
-	}
-	
-	${Button}{
-		color: #1c1c1c;
-		font-weight: 500;
-		background: #FFD627;
-		width: 50%;
-		height: 35px;
-		padding: 10px;
-		padding-top: 7px;
-		border: none;
-		border-radius: 20px;
-		margin-top:10px;
-		margin-bottom:10px;
 
-	}
-	#register{
-		letter-spacing:1px;
-		color:white;
-		text-decoration:none;
-		font-weight:300;
-		font-size:0.8em;
+		#map {
+			position: fixed;
+			top: 0;
+			z-index: -10;
+			min-width: 100%;
+			max-height: 200vh;
+			opacity: 0.25;
+		}
+		#logo {
+			position: absolute;
+			width: 10%;
+			bottom: 30px;
+			left: 50%;
+			transform: translate(-50%, 0%);
+		}
 	}
 
+	/************* mobmedium *************/
+	@media ${device.mobileL} {
+		max-width: 768px;
+		#box {
+			padding-top: 10px;
+			h1 {
+				color: #ffd627;
+				margin: 10px 0 3px 0;
+			}
+			span {
+				color: white;
+				font-weight: 300;
+				font-size: 0.7em;
+				letter-spacing: 3px;
+			}
+			border-radius: 10px;
+
+			background: #1c1c1c;
+			filter: drop-shadow(0px 15px 15px #000);
+			width: 60%;
+			position: absolute;
+			height: 280px;
+			text-align: center;
+			left: 50%;
+			top: 50%;
+			transform: translate(-50%, -50%);
+			#inputs {
+				${TextField} {
+					input {
+						letter-spacing: 1.25px;
+						font-size: 100%;
+						text-indent: 10px;
+						margin-top: 10px;
+						font-weight: 300;
+						width: 80%;
+						color: #fff;
+						border: 0px;
+						border-radius: 4px;
+						box-shadow: none;
+						outline: none;
+						-webkit-appearance: none;
+						-moz-appearance: none;
+						appearance: none;
+						height: 25px;
+						border: none;
+						text-indent: 10px;
+						background: #333333;
+					}
+				}
+			}
+
+			${Button} {
+				color: #1c1c1c;
+				font-weight: 500;
+				background: #ffd627;
+				width: 50%;
+				height: 35px;
+				padding: 10px;
+				padding-top: 7px;
+				border: none;
+				border-radius: 20px;
+				margin-top: 10px;
+				margin-bottom: 10px;
+			}
+			#register {
+				letter-spacing: 1px;
+				color: white;
+				text-decoration: none;
+				font-weight: 300;
+				font-size: 0.8em;
+			}
+		}
+
+		#map {
+			position: fixed;
+			top: 0;
+			min-width: 100%;
+			max-height: 200vh;
+			opacity: 0.25;
+			/* Preserve aspet ratio */
+
+			/* position: absolute;
+			z-index: -10;
+			width: 100vw;
+			top: -100vh;
+			/* left: 50%; */
+
+			/* transform: translate(-50%, 0%); */
+		}
+		#logo {
+			position: absolute;
+			width: 10%;
+			bottom: 30px;
+			left: 50%;
+			transform: translate(-50%, 0%);
+		}
 	}
 
+	/************* tablet *************/
+	@media ${device.tablet} {
+		max-width: 1000px;
+		#box {
+			padding-top: 10px;
+			h1 {
+				color: #ffd627;
+				margin: 10px 0 3px 0;
+			}
+			span {
+				color: white;
+				font-weight: 300;
+				font-size: 0.7em;
+				letter-spacing: 3px;
+			}
+			border-radius: 10px;
 
-	#map{
-		position:absolute;
-		z-index:-10;
-		width:100%;
-		top:-120px;
-		left: 50%;
-		opacity:0.25;
-	transform: translate(-50%,0%);
-	}
-	#logo{
-		position:absolute;
-		width:10%;
-		bottom:30px;
-		left: 50%;
-		transform: translate(-50%,0%);
+			background: #1c1c1c;
+			filter: drop-shadow(0px 15px 15px #000);
+			width: 50%;
+			position: absolute;
+			height: 300px;
+			text-align: center;
+			left: 50%;
+			top: 50%;
+			transform: translate(-50%, -50%);
+			#inputs {
+				${TextField} {
+					input {
+						letter-spacing: 1.25px;
+						font-size: 100%;
+						text-indent: 10px;
+						margin-top: 10px;
+						font-weight: 300;
+						width: 80%;
+						color: #fff;
+						border: 0px;
+						border-radius: 4px;
+						box-shadow: none;
+						outline: none;
+						-webkit-appearance: none;
+						-moz-appearance: none;
+						appearance: none;
+						height: 25px;
+						border: none;
+						text-indent: 10px;
+						background: #333333;
+					}
+				}
+			}
 
+			${Button} {
+				color: #1c1c1c;
+				font-weight: 500;
+				background: #ffd627;
+				width: 50%;
+				height: 35px;
+				padding: 10px;
+				padding-top: 7px;
+				border: none;
+				border-radius: 20px;
+				margin-top: 10px;
+				margin-bottom: 10px;
+			}
+			#register {
+				letter-spacing: 1px;
+				color: white;
+				text-decoration: none;
+				font-weight: 300;
+				font-size: 0.8em;
+			}
+		}
+
+		#map {
+			position: fixed;
+			top: 0;
+			min-width: 100%;
+			max-height: 200vh;
+			opacity: 0.25;
+		}
+		#logo {
+			position: absolute;
+			width: 5%;
+			bottom: 30px;
+			left: 50%;
+			transform: translate(-50%, 0%);
+		}
 	}
-	`}
+
+	/************* desktop *************/
+	@media ${device.desktop} {
+		#box {
+			padding-top: 10px;
+			h1 {
+				color: #ffd627;
+				margin: 10px 0 3px 0;
+			}
+			span {
+				color: white;
+				font-weight: 300;
+				font-size: 0.7em;
+				letter-spacing: 3px;
+			}
+			border-radius: 10px;
+
+			background: #1c1c1c;
+			filter: drop-shadow(0px 15px 15px #000);
+			width: 30%;
+			position: absolute;
+			height: 350px;
+			text-align: center;
+			left: 50%;
+			top: 50%;
+			transform: translate(-50%, -50%);
+			#inputs {
+				${TextField} {
+					input {
+						letter-spacing: 1.25px;
+						font-size: 100%;
+						text-indent: 10px;
+						margin-top: 10px;
+						font-weight: 300;
+						width: 80%;
+						color: #fff;
+						border: 0px;
+						border-radius: 4px;
+						box-shadow: none;
+						outline: none;
+						-webkit-appearance: none;
+						-moz-appearance: none;
+						appearance: none;
+						height: 25px;
+						border: none;
+						text-indent: 10px;
+						background: #333333;
+					}
+				}
+			}
+
+			${Button} {
+				color: #1c1c1c;
+				font-weight: 500;
+				background: #ffd627;
+				width: 50%;
+				height: 35px;
+				padding: 10px;
+				padding-top: 7px;
+				border: none;
+				border-radius: 20px;
+				margin-top: 10px;
+				margin-bottom: 10px;
+			}
+			#register {
+				letter-spacing: 1px;
+				color: white;
+				text-decoration: none;
+				font-weight: 300;
+				font-size: 0.8em;
+			}
+		}
+
+		#map {
+			position: fixed;
+			top: 0;
+			min-width: 100%;
+			max-height: 300vh;
+			opacity: 0.25;
+		}
+		#logo {
+			position: absolute;
+			width: 5%;
+			bottom: 30px;
+			left: 50%;
+			transform: translate(-50%, 0%);
+		}
+	}
 `;
