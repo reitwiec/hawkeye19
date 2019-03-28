@@ -171,9 +171,12 @@ class RegisterPage extends Component {
 					<Button onClick={this.onSubmit} id="regbtn">
 						Register
 					</Button>
-					<span><br/><Link to="/" style={{ 'color': 'white', 'text-decoration': 'none', 'font-weight': '500', 'font-size': '1.2em'}}>Already have an account? Log in </Link></span>
+					<span>
+					<br/>
+					<Link to="/" style={{ 'color': 'white', 'text-decoration': 'none', 'font-weight': '500', 'font-size': '1.2em'}}>
+						Already have an account? Log in
+					</Link></span>
 				</div>
-
 				<img src={hawk} alt="" id="hawk" />
 				<img src={logo} alt="" id="logo" />
 				<div id="bg">
