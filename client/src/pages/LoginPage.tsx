@@ -58,8 +58,8 @@ class LoginPage extends Component<Props> {
 			.then(res => res.json())
 			.then(json => {
 				if (json.success) {
-					this.setState({ loggedIn: true });
 					this.props.UserStore.setCurrentUser(json.data);
+					this.setState({ loggedIn: true });
 				}
 			});
 	};

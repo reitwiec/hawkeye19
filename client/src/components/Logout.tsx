@@ -11,7 +11,7 @@ class Logout extends Component {
 
 	logout = () => {
 		fetch('/api/logout', {
-			method: 'POST',
+			method: 'GET',
 			headers: { 'Content-Type': 'application/json' }
 		})
 			.then(res => res.json())

@@ -56,7 +56,6 @@ Block Key: %s
 }
 
 func (hawk *App) migrate() {
-	fmt.Println("Creating Tables")
 	hawk.DB.CreateTable(
 		&Help{},
 		&User{},
@@ -64,6 +63,7 @@ func (hawk *App) migrate() {
 		&Question{},
 		&Hint{},
 		&ForgotPassReq{},
+		&Verification{},
 	)
 }
 
@@ -80,6 +80,7 @@ func (hawk *App) Run(Args []string) {
 	for _, arg := range Args {
 		switch arg {
 		case "-m":
+			fmt.Println("migrate entered")
 			hawk.migrate()
 		}
 	}

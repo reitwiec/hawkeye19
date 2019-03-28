@@ -30,7 +30,8 @@ func ClearSession(w http.ResponseWriter) {
 	}
 	http.SetCookie(w, cookie)
 }
-func GetCurrUser(w http.ResponseWriter, r *http.Request) (CurrUser, error) {
+
+func GetCurrUser(r *http.Request) (CurrUser, error) {
 	c, err := r.Cookie("session")
 	if err != nil {
 		fmt.Println("Error in reading cookie\n\t" + err.Error())

@@ -3,7 +3,7 @@ package app
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
+	"github.com/jinzhu/gorm"
 	"github.com/texttheater/golang-levenshtein/levenshtein"
 	"io/ioutil"
 	"log"
@@ -252,7 +252,6 @@ func GetNextRegion(unlockOrder string) uint8 {
 	l := len(unlockOrder)
 	for i := 0; i < l; i++ {
 		if unlockOrder[i] != ',' && unlockOrder[i] != '0' {
-			fmt.Println(unlockOrder[i])
 			return unlockOrder[i]
 		}
 	}
@@ -271,11 +270,10 @@ func UpdateUnlockOrder(unlockOrder string, region int) string {
 	}
 	return updatedUO
 }
-
-func SendEmail(email string, token string, name string, route string) error {
-	clickurl := "http://localhost:8080/api/verifyUser?email=" + email +"&token=" + token
+func SendFPEmail(email string, token string, name string) error {
+	clickurl := "http://localhost:8080/api/forgotPassword?email=" + email +"&token=" + token
 	data := []byte (`{"toEmail":` + `"` + email + `",` + `"url": "`+ clickurl +`",`+ `"name":"`+ name +`"}`)
-	req, err:= http.NewRequest("POST", route, bytes.NewBuffer(data))
+	req, err:= http.NewRequest("POST", "https://mail.iecsemanipal.com/hawkeye/forgotpassword", bytes.NewBuffer(data))
 	req.Header.Add("content-type", "application/json")
 	req.Header.Add("authorization", "thehawkiswatching12345")
 
@@ -291,6 +289,24 @@ func SendEmail(email string, token string, name string, route string) error {
 	return err
 }
 
+func SendVUEmail(email string, token string, name string) error {
+	clickurl := "http://localhost:8080/api/verifyUser?email=" + email +"&token=" + token
+	data := []byte (`{"toEmail":` + `"` + email + `",` + `"url": "`+ clickurl +`",`+ `"name":"`+ name +`"}`)
+	req, err:= http.NewRequest("POST", "https://mail.iecsemanipal.com/hawkeye/emailverification", bytes.NewBuffer(data))
+	req.Header.Add("content-type", "application/json")
+	req.Header.Add("authorization", "thehawkiswatching12345")
+
+	if err != nil {
+		return err
+	}
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	return err
+}
 func LogRequest(r *http.Request, status string, err string) {
 
 	body, _ := ioutil.ReadAll(r.Body)
@@ -306,3 +322,26 @@ func LogRequest(r *http.Request, status string, err string) {
 		logInfo.Timestamp.Format("Mon Jan _2 15:04:05 2006"), logInfo.Method, logInfo.URL, logInfo.Body, logInfo.User,
 		err)
 }
+
+func (hawk *App) GetUser (w http.ResponseWriter, r *http.Request) {
+	currUser, err := GetCurrUser(r)
+	if err != nil {
+		LogRequest(r, ERROR, err.Error())
+		ResponseWriter(false, "Could not read cookie data", nil, http.StatusInternalServerError, w)
+		return
+	}
+	user := User{}
+	err = hawk.DB.Where("username = ?", currUser.Username).First(&user).Error
+	if gorm.IsRecordNotFoundError(err) {
+		ResponseWriter(false, "User not registered", nil, http.StatusOK, w)
+		return
+	} else if err != nil {
+		LogRequest(r, ERROR, err.Error())
+		ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
+		return
+	}
+	user.Password=""
+	ResponseWriter(true, "User fetched", user, http.StatusOK, w)
+}
+//@TODO
+//func SanitizeAnswer

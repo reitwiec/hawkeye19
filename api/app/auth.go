@@ -14,17 +14,17 @@ import (
 
 func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 	/*
-	re := recaptcha.R{
-		Secret: "6LftZZoUAAAAAPXZ3nAqHd4jzIbHBNxfMFpuWfMe",
-	}
-	isValid := re.Verify(*r)
-	if isValid {
-		fmt.Fprintf(w, "Valid")
-	} else {
-		//fmt.Fprintf(w, "Invalid! These errors ocurred: %v", re.LastError())
-		ResponseWriter(false, "Captcha error", nil, http.StatusBadRequest, w)
-		return
-	}
+		re := recaptcha.R{
+			Secret: "6LftZZoUAAAAAPXZ3nAqHd4jzIbHBNxfMFpuWfMe",
+		}
+		isValid := re.Verify(*r)
+		if isValid {
+			fmt.Fprintf(w, "Valid")
+		} else {
+			//fmt.Fprintf(w, "Invalid! These errors ocurred: %v", re.LastError())
+			ResponseWriter(false, "Captcha error", nil, http.StatusBadRequest, w)
+			return
+		}
 	*/
 	user := User{}
 	err := json.NewDecoder(r.Body).Decode(&user)
@@ -77,6 +77,7 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 		Country:        strings.TrimSpace(user.Country),
 		IsVerified:     0,
 		IsMahe:         user.IsMahe,
+		FirstLogin:		1,
 	}
 	//load newUser to database
 	tx := hawk.DB.Begin()
@@ -98,7 +99,7 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 	token := RandomString()
 	//@TODO: send verification email and remove print token statement
 	//fmt.Println(token)
-	err = SendEmail(newUser.Email, token, newUser.Name, "https://mail.iecsemanipal.com/hawkeye/emailverification")
+	err = SendVUEmail(newUser.Email, token, newUser.Name)
 	if err != nil {
 		tx.Rollback()
 		ResponseWriter(false, "Error in sending verification email", nil, http.StatusInternalServerError, w)
@@ -166,8 +167,23 @@ func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "Error in setting session, user not logged in", nil, http.StatusInternalServerError, w)
 		return
 	}
+	updatedUser:= user
 	user.Password = ""
+	fmt.Println(updatedUser)
+	if updatedUser.FirstLogin == 1 {
+		updatedUser.FirstLogin = 0
+	}
+	tx := hawk.DB.Begin ()
+	err = tx.Model(&updatedUser).Update("first_login", 0).Error
+	updatedUser.Password = ""
+	if err != nil {
+		LogRequest(r, ERROR, err.Error())
+		ResponseWriter(true, "User logged in but login field not updated", updatedUser, http.StatusOK,w)
+		tx.Rollback()
+		return
+	}
 	ResponseWriter(true, "User logged in and session is set", user, http.StatusOK, w)
+	tx.Commit()
 }
 
 func (hawk *App) logout(w http.ResponseWriter, r *http.Request) {
@@ -221,7 +237,7 @@ func (hawk *App) forgotPassword(w http.ResponseWriter, r *http.Request) {
 	token := RandomString()
 	//@TODO: Email token and delete print statement
 	fmt.Println(token)
-	err = SendEmail(user.Email, token, user.Name, "https://mail.iecsemanipal.com/hawkeye/forgotpassword")
+	err = SendFPEmail(user.Email, token, user.Name)
 	if err != nil {
 		ResponseWriter(false, "Error in sending forgot password email", nil, http.StatusInternalServerError, w)
 		LogRequest(r, ERROR, err.Error())
@@ -300,18 +316,17 @@ func (hawk *App) resetPassword(w http.ResponseWriter, r *http.Request) {
 	//@TODO test this feature
 	t24, _ := time.ParseDuration("24h")
 	if time.Since(forgotPassReqUser.Timestamp) >= t24 {
-		ResponseWriter(false, "Token Expired", nil, http.StatusOK, w)
-		//delete token
+		//delete  expired token
 		tx := hawk.DB.Begin()
 		err = tx.Delete(forgotPassReqUser).Error
 		if err != nil {
 			LogRequest(r, ERROR, err.Error())
-			ResponseWriter(false, "Could not delete expired token", nil, http.StatusInternalServerError, w)
+			ResponseWriter(false, "Expired token, Could not delete expired token", nil, http.StatusInternalServerError, w)
 			tx.Rollback()
 			return
 		}
 		tx.Commit()
-		ResponseWriter(true, "Deleted expired token", nil, http.StatusOK, w)
+		ResponseWriter(true, "Expired token, deleted expired token", nil, http.StatusOK, w)
 		return
 	}
 	//create hash for new password

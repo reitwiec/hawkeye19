@@ -59,6 +59,10 @@ func (hawk *App) LoadRoutes() {
 	hawk.router.HandleFunc("/api/listUsers", hawk.createContext(hawk.listUsers, true, true)).Methods("GET")
 	hawk.router.HandleFunc("/api/searchUser", hawk.createContext(hawk.searchUser, true, true)).Methods("GET")
 	hawk.router.HandleFunc("/api/userLogs", hawk.createContext(hawk.userLogs, true, true)).Methods("GET")
+
+	//Helper routes
+	hawk.router.HandleFunc("/api/getUser", hawk.GetUser).Methods("GET")
+
 }
 
 func (hawk *App) createContext(next http.HandlerFunc, isAdmin bool, isLoggedIn bool) http.HandlerFunc {
@@ -66,7 +70,7 @@ func (hawk *App) createContext(next http.HandlerFunc, isAdmin bool, isLoggedIn b
 		func(w http.ResponseWriter, r *http.Request) {
 			if isLoggedIn {
 				//extract data from cookie
-				currUser, err := GetCurrUser(w, r)
+				currUser, err := GetCurrUser(r)
 				if err != nil {
 					fmt.Println("Not logged in")
 					ResponseWriter(false, "Not logged in", nil, http.StatusForbidden, w)

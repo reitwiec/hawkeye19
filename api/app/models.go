@@ -53,6 +53,7 @@ type User struct {
 	Country    string `gorm:"not null" json:"country"`
 	IsMahe     int    `gorm:"not null" json:"isMahe"` //1 if MAHE else, 0
 	IsVerified int    `gorm:"not null" json:"isVerified"`
+	FirstLogin	int		`gorm:"not null" json:"firstLogin"` //1 by default, sets to 0 on first login
 
 	//Gameplay status
 	Region0 int `json:"region0" ` //sidequest
@@ -90,8 +91,8 @@ type Question struct {
 	ID        int       `gorm:"primary_key;auto_increment" json:"questionID"`
 	Level     int       `gorm:"not null" json:"level" validate:"required"`
 	Region    int       `gorm:"not null" json:"region" validate:"required"`
-	Question  string    `gorm:"not null" sql:"DEFAULT:NULL" json:"question" validate:"required"`
-	Answer    string    `gorm:"not null" sql:"DEFAULT:NULL" json:"answer,omitempty" validate:"required"`
+	Question  string    `gorm:"not null" json:"question" validate:"required"`
+	Answer    string    `gorm:"not null" json:"answer,omitempty" validate:"required"`
 	AddInfo   string    `json:"addinfo"`
 	AddedBy   string    `gorm:"not null" json:"addedBy" validate:"required"`
 	Timestamp time.Time `gorm:"not null" json:"timestamp"`
