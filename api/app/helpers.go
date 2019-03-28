@@ -88,7 +88,7 @@ func Sanitize(s string) string {
 	return s
 }
 
-func SanitizeAnswer (s string) string {
+func SanitizeAnswer(s string) string {
 	s = Sanitize(s)
 	//remove special characters
 	reg, err := regexp.Compile("[^a-z0-9]+")
@@ -98,6 +98,7 @@ func SanitizeAnswer (s string) string {
 	processedString := reg.ReplaceAllString(s, "")
 	return processedString
 }
+
 /*
 func SideQuestOrdere () [LevelCount] int {
 	var index int
@@ -281,9 +282,9 @@ func UpdateUnlockOrder(unlockOrder string, region int) string {
 	return updatedUO
 }
 func SendFPEmail(email string, token string, name string) error {
-	clickurl := "http://localhost:8080/api/forgotPassword?email=" + email +"&token=" + token
-	data := []byte (`{"toEmail":` + `"` + email + `",` + `"url": "`+ clickurl +`",`+ `"name":"`+ name +`"}`)
-	req, err:= http.NewRequest("POST", "https://mail.iecsemanipal.com/hawkeye/forgotpassword", bytes.NewBuffer(data))
+	clickurl := "http://localhost:8080/api/forgotPassword?email=" + email + "&token=" + token
+	data := []byte(`{"toEmail":` + `"` + email + `",` + `"url": "` + clickurl + `",` + `"name":"` + name + `"}`)
+	req, err := http.NewRequest("POST", "https://mail.iecsemanipal.com/hawkeye/forgotpassword", bytes.NewBuffer(data))
 	req.Header.Add("content-type", "application/json")
 	req.Header.Add("authorization", "thehawkiswatching12345")
 
@@ -300,9 +301,9 @@ func SendFPEmail(email string, token string, name string) error {
 }
 
 func SendVUEmail(email string, token string, name string) error {
-	clickurl := "http://localhost:8080/api/verifyUser?email=" + email +"&token=" + token
-	data := []byte (`{"toEmail":` + `"` + email + `",` + `"url": "`+ clickurl +`",`+ `"name":"`+ name +`"}`)
-	req, err:= http.NewRequest("POST", "https://mail.iecsemanipal.com/hawkeye/emailverification", bytes.NewBuffer(data))
+	clickurl := "http://localhost:8080/api/verifyUser?email=" + email + "&token=" + token
+	data := []byte(`{"toEmail":` + `"` + email + `",` + `"url": "` + clickurl + `",` + `"name":"` + name + `"}`)
+	req, err := http.NewRequest("POST", "https://mail.iecsemanipal.com/hawkeye/emailverification", bytes.NewBuffer(data))
 	req.Header.Add("content-type", "application/json")
 	req.Header.Add("authorization", "thehawkiswatching12345")
 
@@ -333,7 +334,7 @@ func LogRequest(r *http.Request, status string, err string) {
 		err)
 }
 
-func (hawk *App) GetUser (w http.ResponseWriter, r *http.Request) {
+func (hawk *App) GetUser(w http.ResponseWriter, r *http.Request) {
 	currUser, err := GetCurrUser(r)
 	if err != nil {
 		LogRequest(r, ERROR, err.Error())
@@ -350,8 +351,9 @@ func (hawk *App) GetUser (w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
 		return
 	}
-	user.Password=""
+	user.Password = ""
 	ResponseWriter(true, "User fetched", user, http.StatusOK, w)
 }
+
 //@TODO
 //func SanitizeAnswer

@@ -99,7 +99,17 @@ func (hawk *App) checkSidequestAnswer(w http.ResponseWriter, r *http.Request) {
 		currUser.Region0 += 1
 		currUser.SideQuestPoints += PointsPerQuestion
 		tx = hawk.DB.Begin()
-		err = tx.Save(&currUser).Error
+		err = tx.Model(&currUser).Updates(map[string]interface{}{"region0": currUser.Region0, "side_quest_points": currUser.SideQuestPoints}).Error
+		/*
+		err = tx.Update("region0", currUser.Region0).Error
+
+		if err != nil {
+			LogRequest(r, ERROR, err.Error())
+			ResponseWriter(false, "Could not update database", nil, http.StatusInternalServerError, w)
+			tx.Rollback()
+			return
+		}
+		err = tx.Update("side_quest_points", currUser.SideQuestPoints).Error
 		//err = tx.Model(&currUser).Updates(map[string]interface{}{"Region0": currUser.Region0+1, "side_quest_points": currUser.SideQuestPoints+PointsPerQuestion}).Error
 
 		if err != nil {
@@ -108,6 +118,7 @@ func (hawk *App) checkSidequestAnswer(w http.ResponseWriter, r *http.Request) {
 			tx.Rollback()
 			return
 		}
+		*/
 		tx.Commit()
 	}
 	ResponseWriter(true, "Answer status", status, http.StatusOK, w)
