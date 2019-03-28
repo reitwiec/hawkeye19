@@ -71,7 +71,7 @@ class RegisterPage extends Component {
 			fetch('/api/addUser', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ ...postData, captcha: this.state.token})
+				body: JSON.stringify({ user: postData, captcha: this.state.token})
 			})
 				.then(res => res.json())
 				.then(json => console.log(json));
