@@ -93,8 +93,13 @@ class RegisterPage extends Component {
 					<TextField
 						name="password"
 						type="password"
+<<<<<<< HEAD
 						placeholder="Password"
 						onChange={this.onChange}
+=======
+						placeholder="Password (Min-char:8)"
+						onChange={onChange}
+>>>>>>> d0095ad6808aaf164778abd81c558791ba0fab94
 					/>
 					<TextField
 						name="confirm_password"

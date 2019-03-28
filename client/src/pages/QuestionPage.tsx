@@ -6,6 +6,7 @@ import logo from '../components/assets/hawk_logo.png';
 import sideq from '../components/assets/sideq.svg';
 import { inject, observer } from 'mobx-react';
 import { Button } from '../components';
+import Logout from '../components/Logout';
 
 const recent = [
 	'yes',
@@ -42,8 +43,8 @@ const stats = ['Tries : 6969', 'On-par : 0', 'Leading : 1', 'Trailing : 69'];
 
 interface IQuestionPageProps {
 	className: string;
-	location: { state: { name: string, regionIndex: number }};
-};
+	location: { state: { name: string; regionIndex: number } };
+}
 
 interface IQuestionPageState {
 	tryvisible: boolean;
@@ -81,36 +82,42 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 
 	getQuestion = () => {
 		fetch(`/api/getQuestion?region=${this.state.regionIndex}`)
-		.then(res => res.json())
-		.then(json => {
-			this.setState({
-			question: json.data.question,
-			questionID: json.data.questionID,
-		})});
+			.then(res => res.json())
+			.then(json => {
+				this.setState({
+					question: json.data.question,
+					questionID: json.data.questionID
+				});
+			})
+			.catch(() => {});
 	};
 
 	getHints = () => [
 		fetch(`/api/getHints?question=${this.state.questionID}`)
-		.then(res => res.json())
-		.then(json => {
-			console.log(json);
-			this.setState({
-			});
-		})
+			.then(res => res.json())
+			.then(json => {
+				console.log(json);
+				this.setState({});
+			})
 	];
 
 	getAttempts = () => {
-		fetch(`/api/getRecentTries?question`)
+		fetch(`/api/getRecentTries?question`);
 	};
 
-	checkAnswer = ()  => {
+	checkAnswer = () => {
 		fetch(`/api/checkAnswer`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ regionID: this.state.regionIndex, answer: this.state.answer }),
-		}).then(res => res.json()).then(json => console.log(json));
+			body: JSON.stringify({
+				regionID: this.state.regionIndex,
+				answer: this.state.answer
+			})
+		})
+			.then(res => res.json())
+			.then(json => console.log(json));
 	};
 
 	onEditAnswer = e => {
@@ -123,7 +130,7 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 			hintvisible: false,
 			statsvisible: false
 		});
-	}
+	};
 
 	stats = () => {
 		this.setState({
@@ -131,7 +138,7 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 			hintvisible: false,
 			statsvisible: true
 		});
-	}
+	};
 
 	hints = () => {
 		this.setState({
@@ -139,7 +146,7 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 			hintvisible: true,
 			statsvisible: false
 		});
-	}
+	};
 
 	render() {
 		// const { region } = this.props.location.state || {
@@ -148,17 +155,25 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 
 		return (
 			<div className={this.props.className}>
+				{/* <Logout /> */}
 				<h1 id="name">HAWKEYE</h1>
-				<h2 id="region"></h2>
+				<h2 id="region" />
 				<div id="questionbox">
 					<div id="level">{`Level ${this.state.level}`}</div>
 					<div id="question">{this.state.question}</div>
 					<div id="answerbox">
-						<input type="text" id="answer" placeholder="Enter answer here..." onChange={this.onEditAnswer}/>
+						<input
+							type="text"
+							id="answer"
+							placeholder="Enter answer here..."
+							onChange={this.onEditAnswer}
+						/>
 					</div>
 				</div>
-
-						<Button onClick={this.checkAnswer}>SUBMIT</Button>
+				<span id="status">Hawk thinks you're close</span>
+				<Button onClick={this.checkAnswer} id="submit">
+					SUBMIT
+				</Button>
 				<div id="hint_try">
 					<div className="tab">
 						<button
@@ -222,6 +237,7 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 						})}
 					</div>
 				</div>
+				<span id="status">Hawk thinks you're close</span>
 
 				<div id="control">
 					<div id="signals">
@@ -250,11 +266,23 @@ const drag = keyframes`
 `;
 
 export default styled(QuestionPage)`
-			${Button} {
+      ${Logout}{
+        z-index:150;
+        position:absolute;
+        left: 50%;
+        top: 8%;
+        transform: translate(-50%,50%);
+      }
+			#submit {
+        left: 50%;
+        bottom: 15%;
+        transform: translate(-50%,50%);
+        z-index:30;
+        position:absolute;
 				color: #1c1c1c;
 				font-weight: 500;
 				background: #ffd627;
-				width: 50%;
+				width: 20%;
 				height: 35px;
 				padding: 10px;
 				padding-top: 7px;
@@ -267,6 +295,20 @@ export default styled(QuestionPage)`
   display:none;
 }
 @media ${device.mobileS} {  
+  #status{
+    opacity:0.5;
+    left: 50%;
+        bottom: 25%;
+        transform: translate(-50%,50%);
+    position:absolute;
+    z-index:150;
+    color:white;
+  }
+  #submit{
+    z-index:200;
+    bottom:17%;
+    width:30%;
+  }
   max-width: 420px; 
 #name{
     text-align:center;
@@ -307,7 +349,7 @@ export default styled(QuestionPage)`
             bottom:0;
             height:60px;
             background:#FFD627;
-            width: 70%;
+            width: 100%;
 						display: flex;
 						flex-flow: row nowrap;
         }
@@ -345,14 +387,13 @@ export default styled(QuestionPage)`
 		text-align:center;
         left: 50%;
         top: 50%;
-        transform: translate(-50%,65%);
+        transform: translate(-50%,75%);
         z-index:100;
-        margin-bottom:40px;s
-
-        .tab {
+        margin-bottom:40px;
+/* .tab {
   overflow: hidden;
   border: 1px solid #ccc;
-  background-color: #f1f1f1;
+  background-color: #f1f1f1; */
 }
 
 /* Style the buttons inside the tab */
@@ -492,6 +533,7 @@ left:19%;
   /* transform: translate(-50%,0%); */
         padding:15px;
 }
+
 }
 
 
