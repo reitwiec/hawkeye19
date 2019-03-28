@@ -13,7 +13,8 @@ import {
 	LoginPage,
 	QuestionPage,
 	RegisterPage,
-	SupportPage
+	SupportPage,
+	TutPage
 } from './pages';
 import { PrivateRoute, PublicRoute } from './components';
 import { AdminRouter } from './routers';
@@ -39,6 +40,12 @@ class App extends Component {
 									exact
 									path="/register"
 									component={RegisterPage}
+									auth={this.loggedIn}
+								/>
+								<PublicRoute
+									exact
+									path="/tutorial"
+									component={TutPage}
 									auth={this.loggedIn}
 								/>
 
