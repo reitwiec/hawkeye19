@@ -64,6 +64,7 @@ func (hawk *App) migrate() {
 		&Question{},
 		&Hint{},
 		&ForgotPassReq{},
+		&Verification{},
 	)
 }
 
@@ -75,11 +76,17 @@ func (hawk *App) Run(Args []string) {
 		return
 	}
 	log.Println("Database connection established")
+	fmt.Println(" DBUsername:", Configuration.DBUsername,
+		"\n DBPassword:", Configuration.DBPassword,
+		"\n DBName:", Configuration.DBName,
+		"\n HashKey:", Configuration.HashKey,
+		"\n BlockKey:", Configuration.BlockKey)
 	defer hawk.DB.Close()
 
 	for _, arg := range Args {
 		switch arg {
 		case "-m":
+			fmt.Println("migrate entered")
 			hawk.migrate()
 		}
 	}

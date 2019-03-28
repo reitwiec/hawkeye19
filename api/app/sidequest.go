@@ -70,7 +70,7 @@ func (hawk *App) checkSidequestAnswer(w http.ResponseWriter, r *http.Request) {
 			ResponseWriter(false, "Question does not exist", nil, http.StatusNotFound, w)
 			return
 		} else {
-			LogRequest(r, ERROR, err.Error ())
+			LogRequest(r, ERROR, err.Error())
 			ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
 			return
 		}
@@ -126,7 +126,7 @@ func (hawk *App) unlockRegion(w http.ResponseWriter, r *http.Request) {
 	tx := hawk.DB.Begin()
 
 	nextRegion := GetNextRegion(currUser.UnlockOrder)
-	if  nextRegion == '5' {
+	if nextRegion == '5' {
 		ResponseWriter(false, "Cannot unlock linear region from sidequest", nil, http.StatusOK, w)
 		return
 	}

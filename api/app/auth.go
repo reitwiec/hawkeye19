@@ -14,17 +14,17 @@ import (
 
 func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 	/*
-	re := recaptcha.R{
-		Secret: "6LftZZoUAAAAAPXZ3nAqHd4jzIbHBNxfMFpuWfMe",
-	}
-	isValid := re.Verify(*r)
-	if isValid {
-		fmt.Fprintf(w, "Valid")
-	} else {
-		//fmt.Fprintf(w, "Invalid! These errors ocurred: %v", re.LastError())
-		ResponseWriter(false, "Captcha error", nil, http.StatusBadRequest, w)
-		return
-	}
+		re := recaptcha.R{
+			Secret: "6LftZZoUAAAAAPXZ3nAqHd4jzIbHBNxfMFpuWfMe",
+		}
+		isValid := re.Verify(*r)
+		if isValid {
+			fmt.Fprintf(w, "Valid")
+		} else {
+			//fmt.Fprintf(w, "Invalid! These errors ocurred: %v", re.LastError())
+			ResponseWriter(false, "Captcha error", nil, http.StatusBadRequest, w)
+			return
+		}
 	*/
 	user := User{}
 	err := json.NewDecoder(r.Body).Decode(&user)
