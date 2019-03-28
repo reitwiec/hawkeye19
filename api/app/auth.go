@@ -35,6 +35,10 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	user := captchaUser.User
+	if !hawk.checkEmail (user.Email) || !hawk.checkUsername(user.Username){
+		ResponseWriter(false, "User already exists", nil, http.StatusOK, w)
+		return
+	}
 	err = validate.Struct(user)
 	if err != nil {
 		if _, ok := err.(*validator.InvalidValidationError); ok {
@@ -356,54 +360,32 @@ func (hawk *App) resetPassword(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func (hawk *App) checkUsername(w http.ResponseWriter, r *http.Request) {
-	checkUsername := CheckUsername{}
-	err := json.NewDecoder(r.Body).Decode(&checkUsername)
-	if err != nil {
-		ResponseWriter(false, "Error in decoding", nil, http.StatusBadRequest, w)
-		return
-	}
+func (hawk *App) checkUsername(username string) bool {
 	//look for username in string
-	checkUsername.Username = Sanitize(checkUsername.Username)
-	err = hawk.DB.Where("Username = ?", checkUsername.Username).Find(&User{}).Error
+	username = Sanitize(username)
+	err := hawk.DB.Where("username = ?", username).Find(&User{}).Error
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			ResponseWriter(true, "Username available", nil, http.StatusOK, w)
-			return
+			return true
 		} else {
-			LogRequest(r, ERROR, err.Error())
-			ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
-			return
+			return false
 		}
 	}
-	//username exists
-	ResponseWriter(false, "Username taken", nil, http.StatusOK, w)
-	return
+	return false
 }
 
-func (hawk *App) checkEmail(w http.ResponseWriter, r *http.Request) {
-	checkEmail := CheckEmail{}
-	err := json.NewDecoder(r.Body).Decode(&checkEmail)
-	if err != nil {
-		ResponseWriter(false, "Error in decoding", nil, http.StatusBadRequest, w)
-		return
-	}
-	//look for email in DB
-	checkEmail.Email = Sanitize(checkEmail.Email)
-	err = hawk.DB.Where("Email = ?", checkEmail.Email).Select("email").Find(&User{}).Error
+func (hawk *App) checkEmail(email string) bool {
+	//look for username in string
+	email = Sanitize(email)
+	err := hawk.DB.Where("email = ?", email).Find(&User{}).Error
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			ResponseWriter(true, "Email available", nil, http.StatusOK, w)
-			return
+			return true
 		} else {
-			LogRequest(r, ERROR, err.Error())
-			ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
-			return
+			return false
 		}
 	}
-	//username exists
-	ResponseWriter(false, "Email registered", nil, http.StatusOK, w)
-	return
+	return false
 }
 
 func (hawk *App) verifyUser(w http.ResponseWriter, r *http.Request) {

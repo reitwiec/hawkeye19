@@ -282,7 +282,7 @@ func UpdateUnlockOrder(unlockOrder string, region int) string {
 	return updatedUO
 }
 func SendFPEmail(email string, token string, name string) error {
-	clickurl := "http://localhost:8080/api/forgotPassword?email=" + email + "&token=" + token
+	clickurl := "https://hawkeye.iecsemanipal.com/api/forgotPassword?email=" + email + "&token=" + token
 	data := []byte(`{"toEmail":` + `"` + email + `",` + `"url": "` + clickurl + `",` + `"name":"` + name + `"}`)
 	req, err := http.NewRequest("POST", "https://mail.iecsemanipal.com/hawkeye/forgotpassword", bytes.NewBuffer(data))
 	req.Header.Add("content-type", "application/json")
@@ -301,7 +301,7 @@ func SendFPEmail(email string, token string, name string) error {
 }
 
 func SendVUEmail(email string, token string, name string) error {
-	clickurl := "http://localhost:8080/api/verifyUser?email=" + email + "&token=" + token
+	clickurl := "https://hawkeye.iecsemanipal.com/api/verifyUser?email=" + email + "&token=" + token
 	data := []byte(`{"toEmail":` + `"` + email + `",` + `"url": "` + clickurl + `",` + `"name":"` + name + `"}`)
 	req, err := http.NewRequest("POST", "https://mail.iecsemanipal.com/hawkeye/emailverification", bytes.NewBuffer(data))
 	req.Header.Add("content-type", "application/json")
