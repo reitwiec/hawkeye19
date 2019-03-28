@@ -103,6 +103,7 @@ class Dashboard extends Component<IDashBoardProps> {
 		fetch(`/api/getUser`)
 		.then(res => res.json())
 		.then(json => {
+			console.log(json);
 			const userFields = {
 				username: json.data.username,
 				email: json.data.email,
@@ -112,6 +113,7 @@ class Dashboard extends Component<IDashBoardProps> {
 				region3: json.data.region3,
 				region4: json.data.region4,
 				region5: json.data.region5,
+				isVerified: json.data.isVerified
 			}
 			this.props.UserStore.setCurrentUser(userFields);
 		});

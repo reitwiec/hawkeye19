@@ -9,6 +9,7 @@ class UserStore {
 	@observable region3 = 0;
 	@observable region4 = 0;
 	@observable region5 = 0;
+	@observable isVerified = false;
 
 	@action setCurrentUser = user => {
 		this.username = user.username;
@@ -19,6 +20,7 @@ class UserStore {
 		this.region3 = user.region3;
 		this.region4 = user.region4;
 		this.region5 = user.region5;
+		this.isVerified = user.isVerified;
 	};
 
 	@action clear = () => {
@@ -30,6 +32,7 @@ class UserStore {
 		this.region3 = 0;
 		this.region4 = 0;
 		this.region5 = 0;
+		this.isVerified = false;
 	};
 }
 

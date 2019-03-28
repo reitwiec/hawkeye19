@@ -9,6 +9,8 @@ import map from '../components/assets/mapbg.png';
 import { Button } from '../components';
 import { Link } from 'react-router-dom';
 import Logout from '../components/Logout';
+import { UserStore } from '../stores/User';
+import { Snackbar } from '../components';
 
 const size = {
 	mobileS: '320px',
@@ -41,6 +43,7 @@ const stats = ['Tries : 6969', 'On-par : 0', 'Leading : 1', 'Trailing : 69'];
 interface IQuestionPageProps {
 	className: string;
 	location: { state: { name: string; regionIndex: number } };
+	UserStore: UserStore;
 }
 
 interface IQuestionPageState {
@@ -54,6 +57,8 @@ interface IQuestionPageState {
 	attempts: string[];
 	hints: string[];
 	hawkMessage: string;
+	barOpen: boolean;
+	snackbarMessage: string;
 }
 
 @inject('UserStore')
@@ -71,22 +76,27 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 		hints: [],
 		hawkMessage: '',
 		region: this.props.location.state.name,
-		regionIndex: this.props.location.state.regionIndex
+		regionIndex: this.props.location.state.regionIndex,
+		barOpen: false,
+		snackbarMessage: ''
 	};
 
 	componentDidMount() {
-		this.getQuestion();
-		this.getHints();
-		this.getAttempts();
+		this.getQuestion(() => {
+			this.getHints();
+			this.getAttempts();
+		});
 	}
 
-	getQuestion = () => {
+	getQuestion = (after = () => {}) => {
 		fetch(`/api/getQuestion?region=${this.state.regionIndex}`)
 			.then(res => res.json())
 			.then(json => {
 				this.setState({
 					question: json.data.question,
 					questionID: json.data.questionID
+				}, () => {
+					after();
 				});
 			})
 			.catch(() => {});
@@ -114,27 +124,35 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 	};
 
 	checkAnswer = () => {
-		fetch(`/api/checkAnswer`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				regionID: this.state.regionIndex,
-				answer: this.state.answer
+		if (this.props.UserStore.isVerified) {
+			fetch(`/api/checkAnswer`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					regionID: this.state.regionIndex,
+					answer: this.state.answer
+				})
 			})
-		})
-			.then(res => res.json())
-			.then(json => {
-				this.getAttempts();
-				this.clearAnswer();
-				this.setState({
-					hawkMessage: hawkResponses[json.data]
+				.then(res => res.json())
+				.then(json => {
+					this.getAttempts();
+					this.clearAnswer();
+					this.setState({
+						hawkMessage: hawkResponses[json.data]
+					});
+					if (json.data == 1) {
+						this.getQuestion();
+					}
 				});
-				if (json.data == 1) {
-					this.getQuestion();
-				}
-			});
+		} else {
+			this.openSnackbar('Please verify your email');
+		}
+	};
+
+	openSnackbar = (message) => {
+		this.setState({ barOpen: true, snackbarMessage: message });
 	};
 
 	onEditAnswer = e => {
@@ -258,6 +276,7 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 					<img src={sideq} alt="" id="sideq" />
 					<img src={map} alt="" id="map" />
 				</div>
+				<Snackbar open={this.state.barOpen} message={this.state.snackbarMessage}/>
 			</div>
 		);
 	}
