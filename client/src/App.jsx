@@ -1,43 +1,84 @@
-import React, { Component } from "react";
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import { CookiesProvider } from "react-cookie";
-import { Provider } from "mobx-react";
+import React, { Component } from 'react';
+import {
+	BrowserRouter as Router,
+	Redirect,
+	Route,
+	Switch
+} from 'react-router-dom';
+import { CookiesProvider, withCookies } from 'react-cookie';
+import { Provider } from 'mobx-react';
 
 import {
-  Dashboard,
-  LoginPage,
-  QuestionPage,
-  RegisterPage,
-  SupportPage
-} from "./pages";
-import { AdminRouter } from "./routers";
-import * as stores from "./stores";
+	Dashboard,
+	LoginPage,
+	QuestionPage,
+	RegisterPage,
+	SupportPage,
+	TutPage
+} from './pages';
+import { PrivateRoute, PublicRoute } from './components';
+import { AdminRouter } from './routers';
+import * as stores from './stores';
 
 class App extends Component {
-  render() {
-    return (
-      <div>
-        <Provider {...stores}>
-          <CookiesProvider>
-            <Router>
-              <Switch>
-                <Route exact path="/" render={() => <LoginPage />} />
-                <Route exact path="/register" render={() => <RegisterPage />} />
-                <Route exact path="/dashboard" render={() => <Dashboard />} />
-                <Route
-                  exact
-                  path="/question"
-                  render={props => <QuestionPage {...props} />}
-                />
-                <Route path="/___admin" component={AdminRouter} />
-                <Route exact path="/support" render={() => <SupportPage />} />
-              </Switch>
-            </Router>
-          </CookiesProvider>
-        </Provider>
-      </div>
-    );
-  }
+	loggedIn = () => (this.props.cookies.get('session') ? true : false);
+
+	render() {
+		return (
+			<div>
+				<Provider {...stores}>
+					<CookiesProvider>
+						<Router>
+							<Switch>
+								<PublicRoute
+									exact
+									path="/"
+									component={LoginPage}
+									auth={this.loggedIn}
+								/>
+								<PublicRoute
+									exact
+									path="/register"
+									component={RegisterPage}
+									auth={this.loggedIn}
+								/>
+								<PublicRoute
+									exact
+									path="/tutorial"
+									component={TutPage}
+									auth={this.loggedIn}
+								/>
+
+								<PrivateRoute
+									exact
+									path="/dashboard"
+									component={Dashboard}
+									auth={this.loggedIn}
+								/>
+								<PrivateRoute
+									exact
+									path="/question"
+									component={QuestionPage}
+									auth={this.loggedIn}
+								/>
+								<PrivateRoute
+									path="/___admin"
+									component={AdminRouter}
+									auth={this.loggedIn}
+								/>
+								<PrivateRoute
+									exact
+									path="/support"
+									component={SupportPage}
+									auth={this.loggedIn}
+								/>
+							</Switch>
+						</Router>
+					</CookiesProvider>
+				</Provider>
+			</div>
+		);
+	}
 }
 
-export default App;
+export default withCookies(App);
