@@ -36,7 +36,8 @@ class RegisterPage extends Component {
 			confirm_password: '',
 			email: '',
 			tel: '',
-			college: ''
+			college: '',
+			token: ''
 		},
 		isVerified: false
 	};
@@ -56,6 +57,7 @@ class RegisterPage extends Component {
 	verifyCallback = token => {
 		if (token) {
 			this.setState({ isVerified: true });
+			this.setState({ token });
 		}
 	};
 
@@ -72,7 +74,7 @@ class RegisterPage extends Component {
 			fetch('/api/addUser', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(postData)
+				body: JSON.stringify({ user: postData, captcha: this.state.token})
 			})
 				.then(res => res.json())
 				.then(json => console.log(json));
