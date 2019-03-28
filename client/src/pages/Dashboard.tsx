@@ -16,6 +16,23 @@ import LakesideRuinsIcon from '../components/assets/lakeside_ruins.svg';
 import AshValleyIcon from '../components/assets/ash_valley.svg';
 import EdenIcon from '../components/assets/eden.svg';
 
+const size = {
+	mobileS: '320px',
+	mobileL: '500px',
+	tablet: '768px',
+	laptop: '730px',
+	laptopL: '862px',
+	desktop: '1000px'
+};
+export const device = {
+	mobileS: `(min-width: ${size.mobileS})`,
+	mobileL: `(min-width: ${size.mobileL})`,
+	tablet: `(min-width: ${size.tablet})`,
+	laptop: `(min-width: ${size.laptop})`,
+	laptopL: `(min-width: ${size.laptopL})`,
+	desktop: `(min-width: ${size.desktop})`
+};
+
 interface IDashBoardProps {
 	className: string;
 	UserStore: UserStore;
@@ -26,24 +43,60 @@ interface IDashBoardProps {
 class Dashboard extends Component<IDashBoardProps> {
 	state = {
 		regions: [
-			{ key: RegionKey.region1, name: 'Installation 09', icon: Installation09Icon, locked: false, level: 1 },
-			{ key: RegionKey.region2, name: 'Panchea', icon: PancheaIcon, locked: true, level: 0 },
-			{ key: RegionKey.region3, name: 'City of Darwins', icon: CityOfDarwinsIcon, locked: true, level: 0 },
-			{ key: RegionKey.region4, name: 'Lakeside Ruins', icon: LakesideRuinsIcon, locked: true, level: 0 },
-			{ key: RegionKey.region5, name: 'Eden', icon: EdenIcon, locked: true, level: 0 },
+			{
+				key: RegionKey.region1,
+				name: 'Installation 09',
+				icon: Installation09Icon,
+				locked: false,
+				level: 1
+			},
+			{
+				key: RegionKey.region2,
+				name: 'Panchea',
+				icon: PancheaIcon,
+				locked: true,
+				level: 0
+			},
+			{
+				key: RegionKey.region3,
+				name: 'City of Darwins',
+				icon: CityOfDarwinsIcon,
+				locked: true,
+				level: 0
+			},
+			{
+				key: RegionKey.region4,
+				name: 'Lakeside Ruins',
+				icon: LakesideRuinsIcon,
+				locked: true,
+				level: 0
+			},
+			{
+				key: RegionKey.region5,
+				name: 'Eden',
+				icon: EdenIcon,
+				locked: true,
+				level: 0
+			}
 		]
 	};
 
 	componentDidMount() {
-		this.setState({
-			regions: [
-				...this.state.regions.map(region => ({
-					...region,
-					locked: (this.props.UserStore[region.key] === 0)? true : false,
-					level: this.props.UserStore[region.key],
-				}))
-			]
-		})
+		this.setState(
+			{
+				regions: [
+					...this.state.regions.map(region => ({
+						...region,
+						locked: this.props.UserStore[region.key] === 0 ? true : false,
+						level: this.props.UserStore[region.key]
+					}))
+				]
+			},
+			() =>
+				this.setState({
+					regions: this.state.regions.filter(region => !region.locked)
+				})
+		);
 	}
 
 	render() {
@@ -51,10 +104,10 @@ class Dashboard extends Component<IDashBoardProps> {
 		return (
 			<div className={className}>
 				<h1>Dashboard</h1>
-				<h5>Logged in as {this.props.UserStore.username}</h5>
+				{/* <h5>Logged in as {this.props.UserStore.username}</h5> */}
 				<div className="regions-container">
 					{this.state.regions.map((region, i) => (
-						<RegionCard key={i} regionIndex={i+1} {...region} />
+						<RegionCard key={i} regionIndex={i + 1} {...region} />
 					))}
 				</div>
 			</div>
@@ -70,7 +123,8 @@ export default styled(Dashboard)`
 		${onCircle(5, '300px', '90px', 270)}
 	}
 
-	${media.phone`
+	@media ${device.mobileS} {
+		max-width: 768px;
 		.regions-container {
 			display: flex;
 			flex-flow: column nowrap;
@@ -83,11 +137,14 @@ export default styled(Dashboard)`
 				height: 250px;
 				margin: auto;
 				margin-bottom: 4em;
-				
+
 				.name {
 					margin-top: 10px;
 				}
 			}
 		}
-	`}
+	}
+
+	@media ${device.tablet} {
+	}
 `;

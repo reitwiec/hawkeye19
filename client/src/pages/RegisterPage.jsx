@@ -42,7 +42,9 @@ class RegisterPage extends Component {
 	};
 
 	onChange = (name, value, error) => {
-		this.setState({ formData: Object.assign(this.state.formData, { [name]: { value, error } })});
+		this.setState({
+			formData: Object.assign(this.state.formData, { [name]: { value, error } })
+		});
 	};
 
 	recaptchaLoaded = () => {
@@ -58,6 +60,7 @@ class RegisterPage extends Component {
 	};
 
 	onSubmit = () => {
+		// checkerror();
 		if (this.state.isVerified) {
 			// Remove error keys from formData
 			const postData = Object.entries(this.state.formData)
@@ -76,76 +79,90 @@ class RegisterPage extends Component {
 		}
 	};
 
-	render() {
+	// checkerror = () => {
+	// 	console.log(this.state.formData.name);
+	// };
 
-	return (
-		<div className={this.props.className}>
-			<div id="box">
-				<h1>HAWKEYE</h1>
-				<span>Create a new account</span>
-				<div id="inputs">
-					<TextField name="name" placeholder="Name" onChange={this.onChange} />
-					<TextField
-						name="username"
-						placeholder="Username"
-						onChange={this.onChange}
+	render() {
+		return (
+			<div className={this.props.className}>
+				<div id="box">
+					<h1>HAWKEYE</h1>
+					<span>Create a new account</span>
+					<div id="inputs">
+						<TextField
+							name="name"
+							placeholder="Name"
+							onChange={this.onChange}
+						/>
+						<TextField
+							name="username"
+							placeholder="Username"
+							onChange={this.onChange}
+						/>
+						<TextField
+							name="password"
+							type="password"
+							placeholder="Password"
+							onChange={this.onChange}
+						/>
+						<TextField
+							name="confirm_password"
+							type="password"
+							placeholder="Confirm password"
+							onChange={this.onChange}
+						/>
+						<TextField
+							name="email"
+							type="email"
+							placeholder="Email"
+							onChange={this.onChange}
+							validation={v => (validator.isEmail(v) ? '' : 'Invalid Email')}
+							validateOnChange
+						/>
+						<TextField
+							name="tel"
+							placeholder="Mobile Number"
+							onChange={this.onChange}
+							validation={v =>
+								validator.isMobilePhone(v) ? '' : 'Invalid Number'
+							}
+							validateOnChange
+						/>
+						<TextField
+							name="college"
+							placeholder="College"
+							onChange={this.onChange}
+						/>
+					</div>
+					<Recaptcha
+						id="recap"
+						ref={el => {
+							this.captchaDemo = el;
+						}}
+						size="normal"
+						theme="dark"
+						render="explicit"
+						sitekey="6LftZZoUAAAAAJPGqjgVjZ0ZI9aPQ7RJWKvocH1g"
+						onloadCallback={this.recaptchaLoaded}
+						verifyCallback={this.verifyCallback}
 					/>
-					<TextField
-						name="password"
-						type="password"
-						placeholder="Password"
-						onChange={this.onChange}
-					/>
-					<TextField
-						name="confirm_password"
-						type="password"
-						placeholder="Confirm password"
-						onChange={this.onChange}
-					/>
-					<TextField
-						name="email"
-						type="email"
-						placeholder="Email"
-						onChange={this.onChange}
-						validation={v => (validator.isEmail(v) ? '' : 'Invalid Email')}
-						validateOnChange
-					/>
-					<TextField
-						name="tel"
-						placeholder="Mobile Number"
-						onChange={this.onChange}
-						validation={v =>
-							validator.isMobilePhone(v) ? '' : 'Invalid Number'
-						}
-						validateOnChange
-					/>
-					<TextField name="college" placeholder="College" onChange={this.onChange} />
+					<Button onClick={this.onSubmit} id="regbtn">
+						Register
+					</Button>
 				</div>
-				<Button onClick={this.onSubmit} id="regbtn">
-					Register
-				</Button>
+
+				<img src={hawk} alt="" id="hawk" />
+				<img src={logo} alt="" id="logo" />
+				<div id="bg">
+					<img src={pcb} alt="" id="pcb1" />
+					<img src={pcb} alt="" id="pcb2" />
+					<img src={pcb1} alt="" id="pcbdesk" />
+				</div>
 			</div>
-			<Recaptcha
-				id="recap"
-				ref={(el) => {this.captchaDemo = el; }}
-				size="normal"
-				theme="dark"
-				render="explicit"
-				sitekey="6LftZZoUAAAAAJPGqjgVjZ0ZI9aPQ7RJWKvocH1g"
-				onloadCallback={this.recaptchaLoaded}
-				verifyCallback={this.verifyCallback}
-			/>
-			<img src={hawk} alt="" id="hawk" />
-			<img src={logo} alt="" id="logo" />
-			<div id="bg">
-				<img src={pcb} alt="" id="pcb1" />
-				<img src={pcb} alt="" id="pcb2" />
-				<img src={pcb1} alt="" id="pcbdesk" />
-			</div>
-		</div>
-	);
+		);
 	}
-};
+}
 
 RegisterPage.propTypes = {
 	className: PropTypes.string
@@ -165,8 +182,12 @@ const flash = keyframes`
 `;
 
 export default styled(RegisterPage)`
-	#recap.rc-anchor-dark.rc-anchor-normal {
+	/* #recap.rc-anchor-dark.rc-anchor-normal {
 		border: none !important;
+	}*/
+	#g-recaptcha {
+		margin: 0 auto;
+		display: table;
 	}
 
 	#pcbdesk {
@@ -208,7 +229,7 @@ export default styled(RegisterPage)`
 			filter: drop-shadow(0px 15px 15px #000);
 			width: 80%;
 			position: absolute;
-			height: 500px;
+			height: 520px;
 			text-align: center;
 			left: 50%;
 			top: 50%;
@@ -292,6 +313,13 @@ export default styled(RegisterPage)`
 
 	/*************tablettttt******************/
 	@media ${device.tablet} {
+		#g-recaptcha {
+			position: absolute;
+			margin-left: 15%;
+			bottom: 5%;
+			transform: scale(0.7);
+			transform-origin: 0 0;
+		}
 		max-width: 1000px;
 		#hawk {
 			position: absolute;
@@ -327,7 +355,7 @@ export default styled(RegisterPage)`
 			filter: drop-shadow(0px 15px 15px #000);
 			width: 40%;
 			position: absolute;
-			height: 500px;
+			height: 520px;
 			text-align: center;
 			left: 50%;
 			top: 50%;
@@ -410,6 +438,11 @@ export default styled(RegisterPage)`
 
 	/*************desktop******************/
 	@media ${device.desktop} {
+		#g-recaptcha {
+			margin-bottom: -30px;
+			margin-left: 25%;
+			/* display: table; */
+		}
 		#pcbdesk {
 			display: block;
 			left: 50%;
@@ -457,7 +490,7 @@ export default styled(RegisterPage)`
 			filter: drop-shadow(0px 15px 15px #000);
 			width: 30%;
 			position: absolute;
-			height: 500px;
+			height: 520px;
 			text-align: center;
 			left: 50%;
 			top: 50%;
