@@ -6,6 +6,19 @@ const sizes = {
 	giant: 1170
 };
 
+const query = size => (...args) => {
+	return (...args) => {
+		return css`
+			@media (max-width: ${size}px) {
+				${css(...args)}
+			}
+		`;
+	};
+};
+
+const desktop = query(sizes.desktop);
+const giant = query(sizes.giant);
+
 function phone(...args) {
 	return css`
 		@media (max-width: ${sizes.phone}px) {
@@ -24,7 +37,10 @@ function tablet(...args) {
 
 const media = {
 	phone,
-	tablet
+	tablet,
+	desktop,
+	giant,
+	query
 };
 
 export default media;

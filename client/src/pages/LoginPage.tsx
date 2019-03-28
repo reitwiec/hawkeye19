@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import { observer, inject } from 'mobx-react';
 import { UserStore } from '../stores/User';
 import media from '../components/theme/media';
+import { centerHV } from '../mixins';
+import * as colors from '../components/';
 import map from '../components/assets/mapbg.png';
 import logo from '../components/assets/iecse_logo.png';
 import hawk from '../components/assets/hawk_logo.png';
@@ -50,9 +52,8 @@ class LoginPage extends Component<Props> {
 			<div className={this.props.className}>
 				<img src="hawk" alt="" id="hawk" />
 				<div id="box">
-					<h1>HAWKEYE</h1>
+					<h1>HawkEye</h1>
 					<span>Sign into your account</span>
-
 					<div id="inputs">
 						<TextField
 							name="username"
@@ -87,29 +88,30 @@ class LoginPage extends Component<Props> {
 export default styled(LoginPage)`
 	width: 100%;
 	${media.phone`
-	#box{
+	#box {
+		${centerHV}
 		padding-top:10px;
-		h1{
-			color:#FFD627;
-			margin:10px 0 3px 0;
-		}
-		span{
-			color:white;
-			font-weight:300;
-			font-size:0.7em;
-			letter-spacing:3px;
-		}
 		border-radius:10px;
-
 		background:#1c1c1c;
 		filter: drop-shadow(0px 15px 15px #000);
 		width:80%;
 		position: absolute;
 		height:280px;
 		text-align:center;
-    left: 50%;
-    top: 50%;
-	transform: translate(-50%,-50%);
+
+		h1 {
+			color:#FFD627;
+			margin:10px 0 3px 0;
+			text-transform: uppercase;
+		}
+
+		span {
+			color:white;
+			font-weight:300;
+			font-size:0.7em;
+			letter-spacing:3px;
+		}
+
 	#inputs{
 		text-align:left;
 		width:100%;
