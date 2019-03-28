@@ -13,28 +13,29 @@ import (
 	"time"
 )
 
-type  RegisterUser struct {
-	User	User `json:"user"`
+type RegisterUser struct {
+	User    User   `json:"user"`
 	Captcha string `json:"captcha"`
 }
 
 func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 	var captchaUser RegisterUser
 	/*
+		re := recaptcha.R{
+			Secret: "6LftZZoUAAAAAPXZ3nAqHd4jzIbHBNxfMFpuWfMe",
+		}
+		isValid := re.VerifyResponse(newUser.Captcha)
+		if isValid {
+			fmt.Fprintf(w, "Valid")
+		} else {
+			//fmt.Fprintf(w, "Invalid! These errors ocurred: %v", re.LastError())
+			ResponseWriter(false, "Captcha error", nil, http.StatusBadRequest, w)
+			return
+		}
+	*/
+	err := json.NewDecoder(r.Body).Decode(&captchaUser)
 	re := recaptcha.R{
 		Secret: "6LftZZoUAAAAAPXZ3nAqHd4jzIbHBNxfMFpuWfMe",
-	}
-	isValid := re.VerifyResponse(newUser.Captcha)
-	if isValid {
-		fmt.Fprintf(w, "Valid")
-	} else {
-		//fmt.Fprintf(w, "Invalid! These errors ocurred: %v", re.LastError())
-		ResponseWriter(false, "Captcha error", nil, http.StatusBadRequest, w)
-		return
-	}
-	*/
-	re := recaptcha.R{
-		Secret : "6LftZZoUAAAAAPXZ3nAqHd4jzIbHBNxfMFpuWfMe",
 	}
 	isValid := re.VerifyResponse(captchaUser.Captcha)
 	if !isValid {
@@ -42,12 +43,11 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "Captcha failed. Please reload the page and try again", nil, http.StatusBadRequest, w)
 		return
 	}
-	user := User{}
-	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		ResponseWriter(false, "Bad Request", nil, http.StatusBadRequest, w)
 		return
 	}
+	user := captchaUser.User
 	err = validate.Struct(user)
 	if err != nil {
 		if _, ok := err.(*validator.InvalidValidationError); ok {
@@ -93,7 +93,7 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 		Country:        strings.TrimSpace(user.Country),
 		IsVerified:     0,
 		IsMahe:         user.IsMahe,
-		FirstLogin:		1,
+		FirstLogin:     1,
 	}
 	//load newUser to database
 	tx := hawk.DB.Begin()
@@ -183,17 +183,17 @@ func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "Error in setting session, user not logged in", nil, http.StatusInternalServerError, w)
 		return
 	}
-	updatedUser:= user
+	updatedUser := user
 	user.Password = ""
 	if updatedUser.FirstLogin == 1 {
 		updatedUser.FirstLogin = 0
 	}
-	tx := hawk.DB.Begin ()
+	tx := hawk.DB.Begin()
 	err = tx.Model(&updatedUser).Update("first_login", 0).Error
 	updatedUser.Password = ""
 	if err != nil {
 		LogRequest(r, ERROR, err.Error())
-		ResponseWriter(true, "User logged in but login field not updated", updatedUser, http.StatusOK,w)
+		ResponseWriter(true, "User logged in but login field not updated", updatedUser, http.StatusOK, w)
 		tx.Rollback()
 		return
 	}
