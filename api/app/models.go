@@ -11,12 +11,13 @@ import (
 type Settings struct {
 	ServerAddr string `json:"ServerAddr"`
 
-	DBUsername string `json:"DBUsername"`
-	DBPassword string `json:"DBPassword"`
-	DBName     string `json:"DBName"`
-	DBConn     string
-	HashKey    string `json:"HashKey"`
-	BlockKey   string `json:"BlockKey"`
+	DBUsername   string `json:"DBUsername"`
+	DBPassword   string `json:"DBPassword"`
+	DBName       string `json:"DBName"`
+	DBConn       string
+	HashKey      string `json:"HashKey"`
+	BlockKey     string `json:"BlockKey"`
+	RecaptchaKey string `json:"RecaptchaKey"`
 }
 
 type Response struct {
@@ -49,7 +50,7 @@ type User struct {
 	//general info
 	Email      string `gorm:"unique;not null" json:"email" validate:"email,required"`
 	Tel        string `gorm:"not null;unique" json:"tel" validate:"len=10,required"`
-	College    string `gorm:"not null" json:"college" validate:"alpha,required"`
+	College    string `gorm:"not null" json:"college" validate:"required"`
 	Country    string `gorm:"not null" json:"country"`
 	IsMahe     int    `gorm:"not null" json:"isMahe"` //1 if MAHE else, 0
 	IsVerified int    `gorm:"not null" json:"isVerified"`

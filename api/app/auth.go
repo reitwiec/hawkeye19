@@ -13,15 +13,16 @@ import (
 	"time"
 )
 
-type  RegisterUser struct {
-	User	User `json:"user"`
+type RegisterUser struct {
+	User    User   `json:"user"`
 	Captcha string `json:"captcha"`
 }
 
 func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 	var captchaUser RegisterUser
+	err := json.NewDecoder(r.Body).Decode(&captchaUser)
 	re := recaptcha.R{
-		Secret : "6LftZZoUAAAAAPXZ3nAqHd4jzIbHBNxfMFpuWfMe",
+		Secret: "6LftZZoUAAAAAPXZ3nAqHd4jzIbHBNxfMFpuWfMe",
 	}
 	isValid := re.VerifyResponse(captchaUser.Captcha)
 	if !isValid {
@@ -29,12 +30,11 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "Captcha failed. Please reload the page and try again", nil, http.StatusBadRequest, w)
 		return
 	}
-	user := User{}
-	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		ResponseWriter(false, "Bad Request", nil, http.StatusBadRequest, w)
 		return
 	}
+	user := captchaUser.User
 	err = validate.Struct(user)
 	if err != nil {
 		if _, ok := err.(*validator.InvalidValidationError); ok {
