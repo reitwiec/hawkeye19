@@ -28,7 +28,7 @@ func (hawk *App) addQuestion(w http.ResponseWriter, r *http.Request) {
 	newQues.Question = strings.TrimSpace(newQues.Question)
 	newQues.AddInfo = strings.TrimSpace(newQues.AddInfo)
 	newQues.AddedBy = currUser.Username
-	newQues.Answer = Sanitize(newQues.Answer)
+	newQues.Answer = SanitizeAnswer(newQues.Answer)
 	newQues.Timestamp = time.Now()
 
 	tx := hawk.DB.Begin()

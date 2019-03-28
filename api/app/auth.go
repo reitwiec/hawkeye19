@@ -169,7 +169,6 @@ func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 	}
 	updatedUser:= user
 	user.Password = ""
-	fmt.Println(updatedUser)
 	if updatedUser.FirstLogin == 1 {
 		updatedUser.FirstLogin = 0
 	}

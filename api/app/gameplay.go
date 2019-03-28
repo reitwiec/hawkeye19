@@ -65,8 +65,7 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//sanitize answer
-	checkAns.Answer = Sanitize(checkAns.Answer)
-
+	checkAns.Answer = SanitizeAnswer(checkAns.Answer)
 	//find actual answer
 	question := Question{}
 	err = hawk.DB.Where("level = ? AND region = ?", level, checkAns.RegionID).First(&question).Error
