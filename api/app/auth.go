@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-sql-driver/mysql"
+	"github.com/haisum/recaptcha"
 	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/go-playground/validator.v9"
@@ -20,17 +21,15 @@ type RegisterUser struct {
 func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 	var captchaUser RegisterUser
 	err := json.NewDecoder(r.Body).Decode(&captchaUser)
-	/*
-		re := recaptcha.R{
-			Secret: "6LftZZoUAAAAAPXZ3nAqHd4jzIbHBNxfMFpuWfMe",
-		}
-		isValid := re.VerifyResponse(captchaUser.Captcha)
-		if !isValid {
-			LogRequest(r, INFO, "Captcha Invalid")
-			ResponseWriter(false, "Captcha failed. Please reload the page and try again", nil, http.StatusBadRequest, w)
-			return
-		}
-	*/
+	re := recaptcha.R{
+		Secret: "6LftZZoUAAAAAPXZ3nAqHd4jzIbHBNxfMFpuWfMe",
+	}
+	isValid := re.VerifyResponse(captchaUser.Captcha)
+	if !isValid {
+		LogRequest(r, INFO, "Captcha Invalid")
+		ResponseWriter(false, "Captcha failed. Please reload the page and try again", nil, http.StatusBadRequest, w)
+		return
+	}
 	if err != nil {
 		ResponseWriter(false, "Bad Request", nil, http.StatusBadRequest, w)
 		return
