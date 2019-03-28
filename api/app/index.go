@@ -18,9 +18,20 @@ var (
 )
 
 func (hawk *App) Initialise() {
+	//initialise logger
+	//create your file with desired read/write permissions
+	var err error
+	hawk.logFile, err = os.OpenFile("info.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	//set output of logs to f
+	log.SetOutput(hawk.logFile)
+	//test case
+	log.Println("Logging to file")
 	//configure Instance
 	ConfigureInstance()
-	fmt.Printf(`
+	log.Printf(`
 
 Configuration:
 DB Username: %s
@@ -42,23 +53,12 @@ Block Key: %s
 	//create securecookie instance
 	CookieHandler = securecookie.New([]byte(Configuration.HashKey), []byte(Configuration.BlockKey))
 
-	//initialise logger
-	//create your file with desired read/write permissions
-	var err error
-	hawk.logFile, err = os.OpenFile("info.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
-	if err != nil {
-		log.Fatal(err)
-	}
-	//set output of logs to f
-	log.SetOutput(hawk.logFile)
-	//test case
-	log.Println("Logging to file")
-
 }
 
 func (hawk *App) migrate() {
 	fmt.Println("Creating Tables")
 	hawk.DB.CreateTable(
+		&Help{},
 		&User{},
 		&Attempt{},
 		&Question{},
@@ -84,7 +84,6 @@ func (hawk *App) Run(Args []string) {
 		}
 	}
 
-	fmt.Println("Server started")
 	err = http.ListenAndServe(Configuration.ServerAddr, hawk.router)
 	if err != nil {
 		log.Fatalf("Could not start server, shutting down")

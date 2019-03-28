@@ -13,11 +13,12 @@ func (hawk *App) LoadRoutes() {
 	//Auth routes
 	hawk.router.HandleFunc("/api/addUser", hawk.createContext(hawk.addUser, false, false)).Methods("POST")
 	hawk.router.HandleFunc("/api/login", hawk.createContext(hawk.login, false, false)).Methods("POST")
-	hawk.router.HandleFunc("/api/logout",  hawk.createContext(hawk.logout, false, false)).Methods("POST")
-	hawk.router.HandleFunc("/api/forgotPassword",  hawk.createContext(hawk.forgotPassword, false, false)).Methods("POST")
-	hawk.router.HandleFunc("/api/resetPassword",  hawk.createContext(hawk.resetPassword, false, false)).Methods("POST")
+	hawk.router.HandleFunc("/api/logout", hawk.createContext(hawk.logout, false, false)).Methods("GET")
+	hawk.router.HandleFunc("/api/forgotPassword", hawk.createContext(hawk.forgotPassword, false, false)).Methods("POST")
+	hawk.router.HandleFunc("/api/resetPassword", hawk.createContext(hawk.resetPassword, false, false)).Methods("POST")
 	hawk.router.HandleFunc("/api/checkUsername", hawk.createContext(hawk.checkUsername, false, false)).Methods("POST")
 	hawk.router.HandleFunc("/api/checkEmail", hawk.createContext(hawk.checkEmail, false, false)).Methods("POST")
+	hawk.router.HandleFunc("/api/verifyUser", hawk.createContext(hawk.verifyUser, false, false)).Methods("GET")
 
 	//Gameplay routes
 	hawk.router.HandleFunc("/api/checkAnswer", hawk.createContext(hawk.checkAnswer, false, true)).Methods("POST")
@@ -25,8 +26,15 @@ func (hawk *App) LoadRoutes() {
 	hawk.router.HandleFunc("/api/getHints", hawk.createContext(hawk.getHints, false, true)).Methods("GET")
 	hawk.router.HandleFunc("/api/getStats", hawk.createContext(hawk.getStats, false, true)).Methods("GET")
 	hawk.router.HandleFunc("/api/getRecentTries", hawk.createContext(hawk.getRecentTries, false, true)).Methods("GET")
-	hawk.router.HandleFunc("/api/getSideQuestQuestion", hawk.createContext(hawk.getSideQuestQuestion, false, true)).Methods("GET")
-	//hawk.router.HandleFunc("/api/checkLinearAnswer", hawk.createContext(hawk.checkLinearAnswer, false, true)).Methods("POST")
+
+	//Help center routes
+	hawk.router.HandleFunc("/api/submitHelpRequest", hawk.createContext(hawk.submitHelpRequest, false, true)).Methods("POST")
+	hawk.router.HandleFunc("/api/getHelpRequests", hawk.createContext(hawk.getHelpRequests, false, true)).Methods("GET")
+
+	//Sidequest routes
+	hawk.router.HandleFunc("/api/getSidequestQuestion", hawk.createContext(hawk.getSidequestQuestion, false, true)).Methods("GET")
+	hawk.router.HandleFunc("/api/checkSidequestAnswer", hawk.createContext(hawk.checkSidequestAnswer, false, true)).Methods("POST")
+	hawk.router.HandleFunc("/api/unlockRegion", hawk.createContext(hawk.unlockRegion, false, true)).Methods("GET")
 
 	//Admin gameplay routes
 	hawk.router.HandleFunc("/api/addQuestion", hawk.createContext(hawk.addQuestion, true, true)).Methods("POST")
@@ -56,7 +64,6 @@ func (hawk *App) LoadRoutes() {
 func (hawk *App) createContext(next http.HandlerFunc, isAdmin bool, isLoggedIn bool) http.HandlerFunc {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
-
 			if isLoggedIn {
 				//extract data from cookie
 				currUser, err := GetCurrUser(w, r)
@@ -86,6 +93,7 @@ func (hawk *App) createContext(next http.HandlerFunc, isAdmin bool, isLoggedIn b
 				ctx := context.WithValue(r.Context(), "User", user)
 				r = r.WithContext(ctx)
 			}
+			LogRequest(r, INFO, "Nil")
 			next.ServeHTTP(w, r)
 		})
 }

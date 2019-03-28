@@ -38,28 +38,43 @@ type App struct {
 }
 
 type User struct {
-	ID       int    `gorm:"primary_key;auto_increment" json:"userID"`
-	Name     string `gorm:"not null" json:"name" validate:"required"`
-	Username string `gorm:"not null;unique" json:"username" validate:"alphanum,required"`
-	Password string `gorm:"not null" json:"password" validate:"min=8,max=24,required"`
-	Access   int    `json:"access"`
-	Banned   int    `json:"banned"`
+	ID        int       `gorm:"primary_key;auto_increment" json:"userID"`
+	Name      string    `gorm:"not null" json:"name" validate:"required"`
+	Username  string    `gorm:"not null;unique" json:"username" validate:"alphanum,required"`
+	Password  string    `gorm:"not null" json:"password" validate:"min=8,max=24,required"`
+	Access    int       `json:"access"`
+	Banned    int       `json:"banned"`
+	Timestamp time.Time `gorm:"not null" json:"timestamp"`
 
 	//general info
-	Email   string `gorm:"unique;not null" json:"email" validate:"email,required"`
-	Tel     string `gorm:"not null;unique" json:"tel" validate:"len=10,required"`
-	College string `gorm:"not null" json:"college" validate:"alpha,required"`
+	Email      string `gorm:"unique;not null" json:"email" validate:"email,required"`
+	Tel        string `gorm:"not null;unique" json:"tel" validate:"len=10,required"`
+	College    string `gorm:"not null" json:"college" validate:"alpha,required"`
+	Country    string `gorm:"not null" json:"country"`
+	IsMahe     int    `gorm:"not null" json:"isMahe"` //1 if MAHE else, 0
+	IsVerified int    `gorm:"not null" json:"isVerified"`
 
 	//Gameplay status
-	Region1     int    `json:"region1"`
-	Region2     int    `json:"region2"`
-	Region3     int    `json:"region3"`
-	Region4     int    `json:"Region4"`
-	Region5     int    `json:"region5"`
-	Region6     int    `json:"region6"`
-	Points      int    `json:"points"`
-	SideQuest   string `json:"sideQuest"`
-	UnlockOrder string `json:"unlockOrder"`
+	Region0 int `json:"region0" ` //sidequest
+	Region1 int `json:"region1" `
+	Region2 int `json:"region2" `
+	Region3 int `json:"region3" `
+	Region4 int `json:"region4" `
+	Region5 int `json:"region5"` //linear
+
+	Points          int    `json:"points"`
+	SidequestOrder  string `json:"sideQuestOrder"`
+	UnlockOrder     string `json:"unlockOrder"`
+	SideQuestPoints int    `json:"sideQuestPoints"`
+}
+
+type Help struct {
+	ID        int       `gorm:"primary_key;auto_increment" json:"helpID"`
+	User      int       `gorm:"not null" json:"userID" validate:"required"`
+	Username  string    `gorm:"not null" json:"username" validate:"required"`
+	Message   string    `gorm:"not null" validate:"required"`
+	Email     string    `gorm:"not null" validate:"email,required"`
+	Timestamp time.Time `gorm:"not null" json:"timestamp"`
 }
 
 type Attempt struct {
@@ -72,20 +87,23 @@ type Attempt struct {
 }
 
 type Question struct {
-	ID       int    `gorm:"primary_key;auto_increment" json:"questionID"`
-	Level    int    `gorm:"not null" json:"level" validate:"required"`
-	Region   int    `gorm:"not null" json:"region" validate:"required"`
-	Question string `gorm:"not null" json:"question" validate:"required"`
-	Answer   string `gorm:"not null" json:"answer,omitempty" validate:"required"`
-	AddInfo  string `json:"addinfo"`
-	AddedBy  string `gorm:"not null" json:"addedBy" validate:"required"`
+	ID        int       `gorm:"primary_key;auto_increment" json:"questionID"`
+	Level     int       `gorm:"not null" json:"level" validate:"required"`
+	Region    int       `gorm:"not null" json:"region" validate:"required"`
+	Question  string    `gorm:"not null" sql:"DEFAULT:NULL" json:"question" validate:"required"`
+	Answer    string    `gorm:"not null" sql:"DEFAULT:NULL" json:"answer,omitempty" validate:"required"`
+	AddInfo   string    `json:"addinfo"`
+	AddedBy   string    `gorm:"not null" json:"addedBy" validate:"required"`
+	Timestamp time.Time `gorm:"not null" json:"timestamp"`
 }
 
 type Hint struct {
-	ID       int    `gorm:"primary_key; autoincrement" json:"hintID"`
-	Question int    `gorm:"not null" json:"questionID" validate:"required"`
-	Active   int    `gorm:"not null" json:"active"`
-	Hint     string `json:"hint" validate:"required"`
+	ID        int       `gorm:"primary_key; autoincrement" json:"hintID"`
+	Question  int       `gorm:"not null" json:"questionID" validate:"required"`
+	Active    int       `gorm:"not null" json:"active"`
+	Hint      string    `json:"hint" validate:"required"`
+	Timestamp time.Time `gorm:"not null" json:"timestamp"`
+	AddedBy   string    `gorm:"not null" json:"addedBy" validate:"required"`
 }
 
 type ForgotPassReq struct {
@@ -107,4 +125,19 @@ type CheckUsername struct {
 
 type CheckEmail struct {
 	Email string
+}
+
+type Verification struct {
+	ID    int `gorm:"primary_key;auto_increment" json:"id"`
+	Email string
+	Token string
+}
+
+type LogInfo struct {
+	Timestamp time.Time
+	Method    string
+	URL       string
+	Body      string
+	User      interface{}
+	Response  *Response
 }

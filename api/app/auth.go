@@ -3,29 +3,38 @@ package app
 import (
 	"encoding/json"
 	"fmt"
-	"log"
-	"net/http"
-	"strings"
-	"time"
-
+	"github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/go-playground/validator.v9"
+	"net/http"
+	"strings"
+	"time"
 )
 
 func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
+	/*
+	re := recaptcha.R{
+		Secret: "6LftZZoUAAAAAPXZ3nAqHd4jzIbHBNxfMFpuWfMe",
+	}
+	isValid := re.Verify(*r)
+	if isValid {
+		fmt.Fprintf(w, "Valid")
+	} else {
+		//fmt.Fprintf(w, "Invalid! These errors ocurred: %v", re.LastError())
+		ResponseWriter(false, "Captcha error", nil, http.StatusBadRequest, w)
+		return
+	}
+	*/
 	user := User{}
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		log.Println("Decoding error, user not registered")
 		ResponseWriter(false, "Bad Request", nil, http.StatusBadRequest, w)
 		return
 	}
-
 	err = validate.Struct(user)
 	if err != nil {
 		if _, ok := err.(*validator.InvalidValidationError); ok {
-			fmt.Println(err)
 			ResponseWriter(false, "Invalid validation error ", nil, http.StatusBadRequest, w)
 			return
 		}
@@ -41,42 +50,74 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 	//hash  and salt password
 	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), 14)
 	if err != nil {
-		log.Println(err)
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Error in hash and salt", nil, http.StatusInternalServerError, w)
 		return
 	}
 
 	newUser := User{
-		Username:    strings.TrimSpace(user.Username),
-		Name:        strings.TrimSpace(user.Name),
-		Password:    string(hash),
-		Access:      0,
-		Email:       Sanitize(user.Email),
-		Tel:         Sanitize(user.Tel),
-		College:     strings.TrimSpace(user.College),
-		Region1:     1,
-		Region2:     0,
-		Region3:     0,
-		Region4:     0,
-		Region5:     0,
-		Region6:      0,
-		Banned:      0,
-		Points:      0,
-		SideQuest:   SideQuestOrder(),
-		UnlockOrder: UnlockOrder(),
+		Username:       strings.TrimSpace(user.Username),
+		Name:           strings.TrimSpace(user.Name),
+		Password:       string(hash),
+		Access:         0,
+		Email:          Sanitize(user.Email),
+		Tel:            Sanitize(user.Tel),
+		College:        strings.TrimSpace(user.College),
+		Region0:        1,
+		Region1:        1,
+		Region2:        0,
+		Region3:        0,
+		Region4:        0,
+		Region5:        0,
+		Banned:         0,
+		Points:         0,
+		SidequestOrder: SideQuestOrder(),
+		UnlockOrder:    UnlockOrder(),
+		Timestamp:      time.Now(),
+		Country:        strings.TrimSpace(user.Country),
+		IsVerified:     0,
+		IsMahe:         user.IsMahe,
 	}
-	fmt.Println("Unlock order " + newUser.UnlockOrder)
 	//load newUser to database
 	tx := hawk.DB.Begin()
 	err = tx.Create(&newUser).Error
 	if err != nil {
-		fmt.Println("Database error, new user not created")
+		mysqlErr, ok := err.(*mysql.MySQLError)
+		if ok {
+			//duplicate entry
+			if mysqlErr.Number == 1062 {
+				ResponseWriter(false, "Duplicate Entry", nil, http.StatusBadRequest, w)
+				return
+			}
+		}
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Database error, new user not created", nil, http.StatusInternalServerError, w)
 		tx.Rollback()
 		return
 	}
+	token := RandomString()
+	//@TODO: send verification email and remove print token statement
+	//fmt.Println(token)
+	err = SendEmail(newUser.Email, token, newUser.Name, "https://mail.iecsemanipal.com/hawkeye/emailverification")
+	if err != nil {
+		tx.Rollback()
+		ResponseWriter(false, "Error in sending verification email", nil, http.StatusInternalServerError, w)
+		LogRequest(r, ERROR, err.Error())
+		return
+	}
+	verification := Verification{
+		Email: user.Email,
+		Token: token,
+	}
+	//create entry for verification
+	err = tx.Create(&verification).Error
+	if err != nil {
+		LogRequest(r, ERROR, err.Error())
+		ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
+		tx.Rollback()
+		return
+	}
 	tx.Commit()
-	fmt.Println("New user registered")
 	ResponseWriter(true, "New user registered", nil, http.StatusOK, w)
 }
 
@@ -90,27 +131,25 @@ func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 	formData := User{}
 	err := json.NewDecoder(r.Body).Decode(&formData)
 	if err != nil {
-		fmt.Println("Could not decode login information")
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Could not decode login information", nil, http.StatusInternalServerError, w)
 		return
 	}
 	user := User{}
 	//check if username exists
-	// @TODO: add recordnotfound to other DB queries as well
-	err = hawk.DB.Where("username = ?", Sanitize(formData.Username)).First(&user).Error
+	err = hawk.DB.Where("username = ?", strings.TrimSpace(formData.Username)).First(&user).Error
 	if gorm.IsRecordNotFoundError(err) {
-		fmt.Println("User not registered")
 		ResponseWriter(false, "User not registered", nil, http.StatusOK, w)
 		return
 	} else if err != nil {
-		fmt.Println("Database error")
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
 		return
 	}
 	//compare passwords
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(strings.TrimSpace(formData.Password)))
 	if err != nil {
-		fmt.Println("Cannot log in, incorrect password")
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Incorrect password, cannot log in", nil, http.StatusUnauthorized, w)
 		return
 	}
@@ -123,17 +162,17 @@ func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 	//set session for 1 day
 	err = SetSession(w, currUser, 86400)
 	if err != nil {
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Error in setting session, user not logged in", nil, http.StatusInternalServerError, w)
 		return
 	}
-	log.Println("User logged in and session set")
-	ResponseWriter(true, "User logged in and session is set", currUser, http.StatusOK, w)
+	user.Password = ""
+	ResponseWriter(true, "User logged in and session is set", user, http.StatusOK, w)
 }
 
 func (hawk *App) logout(w http.ResponseWriter, r *http.Request) {
 	//@TODO: what if user is not logged in ?
 	ClearSession(w)
-	fmt.Println("Logout successful")
 	ResponseWriter(true, "User logged out", nil, http.StatusOK, w)
 
 }
@@ -143,7 +182,6 @@ func (hawk *App) forgotPassword(w http.ResponseWriter, r *http.Request) {
 	formData := ForgotPassReq{}
 	err := json.NewDecoder(r.Body).Decode(&formData)
 	if err != nil {
-		fmt.Println("Error in decoding form data")
 		ResponseWriter(false, "Error in decoding form data, password not reset", nil, http.StatusBadRequest, w)
 		return
 	}
@@ -152,7 +190,6 @@ func (hawk *App) forgotPassword(w http.ResponseWriter, r *http.Request) {
 	err = validate.Struct(formData)
 	if err != nil {
 		if _, ok := err.(*validator.InvalidValidationError); ok {
-			fmt.Println(err)
 			ResponseWriter(false, "Invalid validation error ", nil, http.StatusBadRequest, w)
 			return
 		}
@@ -169,12 +206,11 @@ func (hawk *App) forgotPassword(w http.ResponseWriter, r *http.Request) {
 	err = hawk.DB.Where("email = ?", formData.Email).First(&user).Error
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			fmt.Println("Email not found")
 			ResponseWriter(false, "User does not exist", nil, http.StatusOK, w)
 			return
 		} else {
-			fmt.Println("Database error")
-			fmt.Println(false, "Database error", nil, http.StatusInternalServerError, w)
+			LogRequest(r, ERROR, err.Error())
+			ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
 			return
 		}
 	}
@@ -183,9 +219,17 @@ func (hawk *App) forgotPassword(w http.ResponseWriter, r *http.Request) {
 	formData.Timestamp = time.Now()
 	//generate token for password reset
 	token := RandomString()
+	//@TODO: Email token and delete print statement
+	fmt.Println(token)
+	err = SendEmail(user.Email, token, user.Name, "https://mail.iecsemanipal.com/hawkeye/forgotpassword")
+	if err != nil {
+		ResponseWriter(false, "Error in sending forgot password email", nil, http.StatusInternalServerError, w)
+		LogRequest(r, ERROR, err.Error())
+		return
+	}
 	hashedToken, err := bcrypt.GenerateFromPassword([]byte(token), 14)
 	if err != nil {
-		fmt.Println("Could not hash token")
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Could not hash token", nil, http.StatusInternalServerError, w)
 		return
 	}
@@ -196,14 +240,20 @@ func (hawk *App) forgotPassword(w http.ResponseWriter, r *http.Request) {
 	//err = tx.Model (&ForgotPassReq{}).Where("email = ?", formData.Email).Update("token, timestamp", formData.Token, formData.Timestamp).Error
 	err = tx.Save(&formData).Error
 	if err != nil {
-		fmt.Println("Database error")
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
 		tx.Rollback()
 		return
 	}
 	tx.Commit()
-	//@TODO: Email the token
-	fmt.Println(token)
+	/*
+		err = SendEmail (formData.Email, formData.Token)
+		if err != nil {
+			fmt.Println ("Could not email token" + err.Error())
+			ResponseWriter(false, "Could not email token", nil, http.StatusInternalServerError, w)
+			return
+		}
+	*/
 	ResponseWriter(true, "Password reset link sent", nil, http.StatusOK, w)
 	return
 }
@@ -217,8 +267,7 @@ func (hawk *App) resetPassword(w http.ResponseWriter, r *http.Request) {
 	formData := ResetPassReq{}
 	err := json.NewDecoder(r.Body).Decode(&formData)
 	if err != nil {
-		fmt.Println("Could not decode json data")
-		ResponseWriter(false, "Could not decode form data", nil, http.StatusInternalServerError, w)
+		ResponseWriter(false, "Could not decode form data", nil, http.StatusBadRequest, w)
 		return
 	}
 	//trim spaces
@@ -231,11 +280,10 @@ func (hawk *App) resetPassword(w http.ResponseWriter, r *http.Request) {
 	err = hawk.DB.Where("email = ?", formData.Email).First(&forgotPassReqUser).Error
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			fmt.Println("Incorrect email")
 			ResponseWriter(false, "Incorrect email", nil, http.StatusOK, w)
 			return
 		} else {
-			fmt.Println("Database error")
+			LogRequest(r, ERROR, err.Error())
 			ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
 			return
 		}
@@ -244,22 +292,21 @@ func (hawk *App) resetPassword(w http.ResponseWriter, r *http.Request) {
 	//match tokens
 	err = bcrypt.CompareHashAndPassword([]byte(forgotPassReqUser.Token), []byte(formData.Token))
 	if err != nil {
-		fmt.Println("Incorrect token")
 		ResponseWriter(false, "Incorrect token", nil, http.StatusOK, w)
 		return
 	}
 	//tokens match
 	//if difference in time > 24 hours delete token and return
+	//@TODO test this feature
 	t24, _ := time.ParseDuration("24h")
 	if time.Since(forgotPassReqUser.Timestamp) >= t24 {
-		fmt.Println("Token expired")
 		ResponseWriter(false, "Token Expired", nil, http.StatusOK, w)
 		//delete token
 		tx := hawk.DB.Begin()
 		err = tx.Delete(forgotPassReqUser).Error
 		if err != nil {
-			fmt.Println("Could not delete expired token")
-			ResponseWriter(false, "Could not delete expired token", nil, http.StatusOK, w)
+			LogRequest(r, ERROR, err.Error())
+			ResponseWriter(false, "Could not delete expired token", nil, http.StatusInternalServerError, w)
 			tx.Rollback()
 			return
 		}
@@ -273,7 +320,7 @@ func (hawk *App) resetPassword(w http.ResponseWriter, r *http.Request) {
 	tx := hawk.DB.Begin()
 	err = tx.Model(&User{}).Where("email = ?", forgotPassReqUser.Email).Update("Password", string(hash)).Error
 	if err != nil {
-		fmt.Println("Could not update password")
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Could not update password", nil, http.StatusInternalServerError, w)
 		tx.Rollback()
 		return
@@ -282,13 +329,12 @@ func (hawk *App) resetPassword(w http.ResponseWriter, r *http.Request) {
 	err = tx.Delete(&forgotPassReqUser).Error
 	//err = tx.Where("email = ?", forgotPassReqUser.Email).Delete(ForgotPassReq{}).Error
 	if err != nil {
-		fmt.Println("Could not delete token entry")
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Could not delete token entry", nil, http.StatusInternalServerError, w)
 		tx.Rollback()
 		return
 	}
 	tx.Commit()
-	fmt.Println("Password updated successfully")
 	ResponseWriter(true, "Password updated successfully", nil, http.StatusOK, w)
 	return
 }
@@ -297,8 +343,7 @@ func (hawk *App) checkUsername(w http.ResponseWriter, r *http.Request) {
 	checkUsername := CheckUsername{}
 	err := json.NewDecoder(r.Body).Decode(&checkUsername)
 	if err != nil {
-		fmt.Println("Error in decoding")
-		ResponseWriter(false, "Error in decoding", nil, http.StatusInternalServerError, w)
+		ResponseWriter(false, "Error in decoding", nil, http.StatusBadRequest, w)
 		return
 	}
 	//look for username in string
@@ -306,17 +351,15 @@ func (hawk *App) checkUsername(w http.ResponseWriter, r *http.Request) {
 	err = hawk.DB.Where("Username = ?", checkUsername.Username).Find(&User{}).Error
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			fmt.Println("Username available")
 			ResponseWriter(true, "Username available", nil, http.StatusOK, w)
 			return
 		} else {
-			fmt.Println("Database error")
+			LogRequest(r, ERROR, err.Error())
 			ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
 			return
 		}
 	}
 	//username exists
-	fmt.Println("Username taken")
 	ResponseWriter(false, "Username taken", nil, http.StatusOK, w)
 	return
 }
@@ -325,8 +368,7 @@ func (hawk *App) checkEmail(w http.ResponseWriter, r *http.Request) {
 	checkEmail := CheckEmail{}
 	err := json.NewDecoder(r.Body).Decode(&checkEmail)
 	if err != nil {
-		fmt.Println("Error in decoding")
-		ResponseWriter(false, "Error in decoding", nil, http.StatusInternalServerError, w)
+		ResponseWriter(false, "Error in decoding", nil, http.StatusBadRequest, w)
 		return
 	}
 	//look for email in DB
@@ -334,17 +376,57 @@ func (hawk *App) checkEmail(w http.ResponseWriter, r *http.Request) {
 	err = hawk.DB.Where("Email = ?", checkEmail.Email).Select("email").Find(&User{}).Error
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			fmt.Println("Email available")
 			ResponseWriter(true, "Email available", nil, http.StatusOK, w)
 			return
 		} else {
-			fmt.Println("Database error")
+			LogRequest(r, ERROR, err.Error())
 			ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
 			return
 		}
 	}
 	//username exists
-	fmt.Println("Email registered")
 	ResponseWriter(false, "Email registered", nil, http.StatusOK, w)
 	return
+}
+
+func (hawk *App) verifyUser(w http.ResponseWriter, r *http.Request) {
+	keys, ok := r.URL.Query()["email"]
+	if !ok || len(keys) < 1 {
+		ResponseWriter(false, "Bad request", nil, http.StatusBadRequest, w)
+		return
+	}
+	email := keys[0]
+	keys, ok = r.URL.Query()["token"]
+	if !ok || len(keys) < 1 {
+		ResponseWriter(false, "Bad request", nil, http.StatusBadRequest, w)
+		return
+	}
+	token := keys[0]
+	verificationData := Verification{}
+	err := hawk.DB.Where("email = ? AND token = ? ", email, token).First(&verificationData).Error
+	/*
+		if err == nil {
+			fmt.Println(verificationData)
+		}
+	*/
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			ResponseWriter(false, "Wrong data", nil, http.StatusOK, w)
+			return
+		}
+		LogRequest(r, ERROR, err.Error())
+		ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
+		return
+	}
+	//token exists
+	tx := hawk.DB.Begin()
+	err = tx.Where("email = ?", email).First(&User{}).Update("is_verified", 1).Error
+	if err != nil {
+		LogRequest(r, ERROR, err.Error())
+		ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
+		tx.Rollback()
+		return
+	}
+	tx.Commit()
+	ResponseWriter(true, "User verified", nil, http.StatusOK, w)
 }
