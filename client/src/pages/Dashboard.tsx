@@ -82,8 +82,8 @@ class Dashboard extends Component<IDashBoardProps> {
 	};
 
 	componentDidMount() {
-		this.setState(
-			{
+		this.getUser();
+		setTimeout(() => this.setState({
 				regions: [
 					...this.state.regions.map(region => ({
 						...region,
@@ -96,15 +96,33 @@ class Dashboard extends Component<IDashBoardProps> {
 				this.setState({
 					regions: this.state.regions.filter(region => !region.locked)
 				})
-		);
+		), 500);
 	}
+
+	getUser = () => {
+		fetch(`/api/getUser`)
+		.then(res => res.json())
+		.then(json => {
+			const userFields = {
+				username: json.data.username,
+				email: json.data.email,
+				region0: json.data.region0,
+				region1: json.data.region1,
+				region2: json.data.region2,
+				region3: json.data.region3,
+				region4: json.data.region4,
+				region5: json.data.region5,
+			}
+			this.props.UserStore.setCurrentUser(userFields);
+		});
+	};
 
 	render() {
 		const { className } = this.props;
 		return (
 			<div className={className}>
 				<h1>Dashboard</h1>
-				{/* <h5>Logged in as {this.props.UserStore.username}</h5> */}
+				<h5>Logged in as {this.props.UserStore.username}</h5>
 				<div className="regions-container">
 					{this.state.regions.map((region, i) => (
 						<RegionCard key={i} regionIndex={i + 1} {...region} />

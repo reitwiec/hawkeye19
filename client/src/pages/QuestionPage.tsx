@@ -5,7 +5,9 @@ import media from '../components/theme/media';
 import logo from '../components/assets/hawk_logo.png';
 import sideq from '../components/assets/sideq.svg';
 import { inject, observer } from 'mobx-react';
+import map from '../components/assets/mapbg.png';
 import { Button } from '../components';
+import { Link } from 'react-router-dom';
 import Logout from '../components/Logout';
 
 const size = {
@@ -247,14 +249,14 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 					</div>
 				</div>
 				<span id="status">{this.state.hawkMessage}</span>
-
 				<div id="control">
 					<div id="signals">
-						<i className="fas fa-question" />
+						<Link to="/rules"><i className="fas fa-question" /></Link>
 						<img src={logo} id="hawklogo" alt="" />
-						<i className="fas fa-chess-rook" />
+						<i className="fas fa-chess-rook" onClick={() => alert('Sidequest is currently locked. It will be accessible 12 hours into the game...')}/>
 					</div>
 					<img src={sideq} alt="" id="sideq" />
+					<img src={map} alt="" id="map" />
 				</div>
 			</div>
 		);
@@ -270,7 +272,6 @@ const drag = keyframes`
 }
 100%{
 	opacity:1;
-
 }
 `;
 
@@ -282,6 +283,14 @@ export default styled(QuestionPage)`
         top: 8%;
         transform: translate(-50%,50%);
       }
+		#map {
+			position: fixed;
+			top: 0;
+			z-index: -10;
+			min-width: 100%;
+			max-height: 200vh;
+			opacity: 0.25;
+		}
 			#submit {
         left: 50%;
         bottom: 15%;
@@ -292,6 +301,7 @@ export default styled(QuestionPage)`
 				font-weight: 500;
 				background: #ffd627;
 				width: 20%;
+				max-width: 150px;
 				height: 35px;
 				padding: 10px;
 				padding-top: 7px;
@@ -544,28 +554,8 @@ left:19%;
 }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /******************  LARGE MOBILE  ************************/
-@media ${device.mobileL} {  
+@media ${device.mobileL} {
   max-width: 580px; 
 #name{
     text-align:center;
@@ -791,21 +781,8 @@ left:22%;
   bottom:0.3vh;
   /* transform: translate(-50%,0%); */
         padding:15px;
+	}
 }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /******************  TABLET  ************************/
 @media ${device.tablet} {  
@@ -1534,6 +1511,13 @@ left:35%;
 
 /******************  larggetsssss ************************/
 @media ${device.desktop} {  
+		#map {
+			position: fixed;
+			top: 0;
+			min-width: 100%;
+			max-height: 400vh;
+			opacity: 0.25;
+		}
   .hintnew{
   display:block;
 }
