@@ -90,8 +90,8 @@ type Question struct {
 	ID        int       `gorm:"primary_key;auto_increment" json:"questionID"`
 	Level     int       `gorm:"not null" json:"level" validate:"required"`
 	Region    int       `gorm:"not null" json:"region" validate:"required"`
-	Question  string    `gorm:"not null" sql:"DEFAULT:NULL" json:"question" validate:"required"`
-	Answer    string    `gorm:"not null" sql:"DEFAULT:NULL" json:"answer,omitempty" validate:"required"`
+	Question  string    `gorm:"not null" json:"question" validate:"required"`
+	Answer    string    `gorm:"not null" json:"answer,omitempty" validate:"required"`
 	AddInfo   string    `json:"addinfo"`
 	AddedBy   string    `gorm:"not null" json:"addedBy" validate:"required"`
 	Timestamp time.Time `gorm:"not null" json:"timestamp"`
