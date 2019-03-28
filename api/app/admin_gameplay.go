@@ -2,7 +2,6 @@ package app
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/jinzhu/gorm"
 	"net/http"
 	"strconv"
@@ -28,7 +27,7 @@ func (hawk *App) addQuestion(w http.ResponseWriter, r *http.Request) {
 	newQues.Question = strings.TrimSpace(newQues.Question)
 	newQues.AddInfo = strings.TrimSpace(newQues.AddInfo)
 	newQues.AddedBy = currUser.Username
-	newQues.Answer = Sanitize(newQues.Answer)
+	newQues.Answer = SanitizeAnswer(newQues.Answer)
 	newQues.Timestamp = time.Now()
 
 	tx := hawk.DB.Begin()
@@ -60,12 +59,12 @@ func (hawk *App) addHint(w http.ResponseWriter, r *http.Request) {
 	newHint.Hint = strings.TrimSpace(newHint.Hint)
 	newHint.Active = 0
 	newHint.AddedBy = currUser.Username
-
+	newHint.Timestamp = time.Now()
 	tx := hawk.DB.Begin()
 	err = tx.Create(&newHint).Error
 
 	if err != nil {
-		fmt.Println(err.Error())
+		LogRequest(r, ERROR, err.Error())
 		ResponseWriter(false, "Database error", nil, http.StatusInternalServerError, w)
 		tx.Rollback()
 		return
