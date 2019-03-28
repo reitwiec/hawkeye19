@@ -68,7 +68,7 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 		tryvisible: true,
 		hintvisible: false,
 		statsvisible: false,
-		level: 1,
+		level: this.props.UserStore[`region${this.props.location.state.regionIndex}`],
 		question: '',
 		questionID: null,
 		answer: '',
@@ -84,11 +84,12 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 	componentDidMount() {
 		this.getQuestion(() => {
 			this.getHints();
-			this.getAttempts();
+			this.getAttempts()
 		});
 	}
 
 	getQuestion = (after = () => {}) => {
+		console.log(this.state.regionIndex);
 		fetch(`/api/getQuestion?region=${this.state.regionIndex}`)
 			.then(res => res.json())
 			.then(json => {
@@ -118,13 +119,12 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 		fetch(`/api/getRecentTries?question=${this.state.questionID}`)
 		.then(res => res.json())
 		.then(json => {
-			console.log(json);
 			this.setState({ attempts: json.data? json.data : [] })
 		});
 	};
 
 	checkAnswer = () => {
-		if (this.props.UserStore.isVerified) {
+		if (this.props.UserStore.isVerified == 1) {
 			fetch(`/api/checkAnswer`, {
 				method: 'POST',
 				headers: {
@@ -137,19 +137,28 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 			})
 				.then(res => res.json())
 				.then(json => {
-					this.getAttempts();
-					this.clearAnswer();
-					this.setState({
-						hawkMessage: hawkResponses[json.data]
-					});
-					if (json.data == 1) {
-						this.getQuestion();
-					}
+					this.onSubmit(json);
 				});
 		} else {
 			this.openSnackbar('Please verify your email');
 		}
 	};
+
+	onSubmit = (json) => {
+		this.clearAnswer();
+		this.setState({
+			hawkMessage: hawkResponses[json.data]
+		});
+		if (json.data == 1) {
+			this.onCorrectAnswer();
+		}
+	};
+
+	onCorrectAnswer = () => {
+		this.getQuestion();
+		this.getAttempts();
+	}
+
 
 	openSnackbar = (message) => {
 		this.setState({ barOpen: true, snackbarMessage: message });
