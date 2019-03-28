@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled, { keyframes } from 'styled-components';
 import validator from 'validator';
+import Recaptcha from 'react-recaptcha';
 import media from '../components/theme/media';
 import logo from '../components/assets/iecse_logo.png';
 import hawk from '../components/assets/hawk_logo.png';
@@ -36,11 +37,29 @@ const RegisterPage = ({ className }) => {
 		college: ''
 	});
 
+	const [isVerified, setIsVerified] = useState(false);
+
 	const onChange = useCallback((name, value, error) => {
 		setformData(Object.assign(formData, { [name]: { value, error } }));
 	}, []);
 
+	const recaptchaLoaded = () => {
+		console.log('captcha has loaded');
+	};
+
+	const verifyCallback = useCallback(response => {
+		if (response) {
+			setIsVerified(true);
+			console.log('YOU ARE A HUMAN');
+		}
+	}, []);
+
 	const onSubmit = useCallback(() => {
+		if (isVerified) {
+			console.log('human');
+		} else {
+			console.log('inhuman');
+		}
 		// Remove error keys from formData
 		const postData = Object.entries(formData)
 			.map(([k, v]) => {
@@ -104,6 +123,12 @@ const RegisterPage = ({ className }) => {
 					Register
 				</Button>
 			</div>
+			<Recaptcha
+				sitekey="6LftZZoUAAAAAJPGqjgVjZ0ZI9aPQ7RJWKvocH1g"
+				render="explicit"
+				onloadCallback={recaptchaLoaded}
+				verifyCallback={verifyCallback}
+			/>
 			<img src={hawk} alt="" id="hawk" />
 			<img src={logo} alt="" id="logo" />
 			<div id="bg">

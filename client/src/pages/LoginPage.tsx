@@ -65,7 +65,7 @@ class LoginPage extends Component<Props> {
 	render() {
 		return (
 			<div className={this.props.className}>
-				<img src="hawk" alt="" id="hawk" />
+				{/* <img src=hawk} alt="" id="hawk" /> */}
 				<div id="box">
 					<h1>HAWKEYE</h1>
 					<span id="subt">Sign into your account</span>
