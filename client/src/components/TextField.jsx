@@ -53,7 +53,7 @@ TextField.propTypes = {
 export default styled(TextField)`
 	margin-bottom: 0.8em;
 	.error-label {
-		display: ${({ validation }) => (validation ? 'block' : 'none')};
+		visibility: ${({ validation }) => (validation ? 'none' : 'hidden')};
 		font-size: 0.8em;
 		height: 1em;
 	}
