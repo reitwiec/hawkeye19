@@ -235,7 +235,7 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 				<div id="hint_try">
 					<div className="tab">
 						<button
-            style={{width: '50%'}}
+            style={{ width: window.innerWidth > 999 ? '100%' : '50%' }}
 							className="tablinks"
 							onClick={this.tries}
 							id={this.state.tryvisible ? 'active' : 'inactive'}
@@ -243,7 +243,7 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 							Attempts
 						</button>
 						<button
-            style={{width: '50%'}}
+            style={{ width: window.innerWidth > 999 ? '100%' : '50%' }}
 							className="tablinks hintss"
 							onClick={this.hints}
 							id={this.state.hintvisible ? 'active' : 'inactive'}
