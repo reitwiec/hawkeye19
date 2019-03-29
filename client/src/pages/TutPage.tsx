@@ -117,7 +117,7 @@ class TutPage extends Component<Props, IState> {
 
 	showww1 = () => {
 		let x = `When you solve all five questions in a region, a new region is unlocked for you. Once you complete all the questions in the four main regions you proceed to EDEN. Your objective is to solve the most number of questions in a fair manner...`;
-		console.log(this.state.display1);
+		// console.log(this.state.display1);
 		this.setState({
 			cursor1: this.state.cursor1 + 1,
 			display1: this.state.display1 + x[this.state.cursor1]
@@ -144,7 +144,7 @@ class TutPage extends Component<Props, IState> {
 
 	showww = () => {
 		let x = `When you are stuck at a particular region, you can visit the Hermit of Ash Valley. For every question you solve you get a scroll and once you have 3 scrolls the Hermit unlocks a new region for you.`;
-		console.log(this.state.display2);
+		// console.log(this.state.display2);
 		this.setState({
 			cursor2: this.state.cursor2 + 1,
 			display2: this.state.display2 + x[this.state.cursor2]
@@ -172,7 +172,7 @@ class TutPage extends Component<Props, IState> {
 	showww2 = () => {
 		let x =
 			'Every 8 hours after the game starts, a new region will be unlocked for you. However, EDEN, the final region, will not be unlocked until you complete the four main regions...';
-		console.log(this.state.display3);
+		// console.log(this.state.display3);
 		this.setState({
 			cursor3: this.state.cursor3 + 1,
 			display3: this.state.display3 + x[this.state.cursor3]

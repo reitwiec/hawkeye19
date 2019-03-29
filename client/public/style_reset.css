@@ -20,6 +20,7 @@ body {
 body {
 	background: #181818;
 	line-height: 1;
+	min-height: 100vh;
 }
 
 article,

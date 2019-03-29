@@ -93,7 +93,7 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 	}
 
 	getQuestion = (after = () => {}) => {
-		console.log(this.props.UserStore.activeRegion);
+		// console.log(this.props.UserStore.activeRegion);
 		fetch(`/api/getQuestion?region=${this.props.UserStore.activeRegion}`)
 			.then(res => res.json())
 			.then(json => {
@@ -1796,7 +1796,7 @@ left:35%;
 }
 #sideq{
   z-index:20;
-  position:absolute;
+  position:fixed;
   bottom:0px;
   transform: translate(-50%,0);
   left: 50%;
@@ -1815,50 +1815,68 @@ left:35%;
 #hawklogo{
   /* filter: drop-shadow(0px -15px 10px #000); */
   /* animation: ${drag} 2s 1 0s ease-in forwards; */
-  width:4%;
+  width: 70px;
   background:#181818;
   left: 50%;
   border:5px solid #c49905;
   padding:2px;
   border-radius:100px;
-  position:absolute;
+  position:fixed;
   bottom:20px;
   transform: translate(-50%,0%);
   z-index:102;
   transition:0.3s;
 }
 #hawklogo:hover{
-width:4.5%;
+  width: 80px;
   /* filter: drop-shadow(0px 2px 2px #000); */
 }
-#control{
+#sideq {
+  z-index: 20;
+  position: fixed;
+  bottom: 0px;
+  transform: translate(-50%, 0);
+  left: 50%;
+  /* 
+    top: 50%;
+     */
+  width: 400px;
+  filter: drop-shadow(0px -5px 10px #000);
+}
+#control {
+  position: fixed;
+  bottom: 0;
   /* background:red; */
-  position:relative;
-  top:0px;
-  height:92vh;
-  
+  position: relative;
+  top: 0px;
+  height: 18vh;
 }
-.fa-question{
-  font-size:3vw;
-  z-index:104;
-  color:#242121;
- position:absolute;
-  bottom:0.3vh;
-  right:40%;
-  transition:0.3s;
+.fa-question {
+  font-size: 30px;
+  z-index: 100;
+  color: #242121;
+  position: fixed;
+  bottom: 0px;
+  right: calc(50% - 125px);
+  transition: 0.3s;
   /* transform: translate(-50%,0%); */
-  padding:15px;
+  padding: 20px;
 }
-.fa-chess-rook{
-  font-size:3vw;
-  z-index:110;
-  color:#242121;
-position:absolute;
-left:40%;
-  bottom:0.3vh;
-  transition:0.3s;
+.fa-chess-rook {
+  font-size: 30px;
+  z-index: 100;
+  color: #242121;
+  position: fixed;
+  left: calc(50% - 125px);
+  bottom: 0px;
+  transition: 0.3s;
   /* transform: translate(-50%,0%); */
-        padding:15px;
+  padding: 20px;
+}
+.fa-chess-rook:hover,
+.fa-question:hover {
+  cursor: pointer;
+  font-size: 35px;
 }
 
 .fa-chess-rook:hover,.fa-question:hover,#hawklogo:hover{

@@ -195,7 +195,6 @@ class RegisterPage extends Component {
 							theme="dark"
 							render="explicit"
 							sitekey="6LftZZoUAAAAAJPGqjgVjZ0ZI9aPQ7RJWKvocH1g"
-							onloadCallback={this.recaptchaLoaded}
 							verifyCallback={this.verifyCallback}
 						/>
 					</div>

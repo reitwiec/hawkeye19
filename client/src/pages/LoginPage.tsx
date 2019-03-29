@@ -72,7 +72,7 @@ class LoginPage extends Component<Props> {
 						this.props.UserStore.setCurrentUser(json.data);
 						this.setState({ loggedIn: true });
 					} else {
-						console.log(json);
+						// console.log(json);
 						this.openSnackbar(json.msg);
 					}
 				});

@@ -114,14 +114,14 @@ class Dashboard extends Component<IDashBoardProps> {
 	};
 
 	locky = () => {
-		console.log('locked');
+		// console.log('locked');
 	};
 
 	getUser = () => {
 		fetch(`/api/getUser`)
 			.then(res => res.json())
 			.then(json => {
-				console.log(json);
+				// console.log(json);
 				const userFields = {
 					username: json.data.username,
 					email: json.data.email,
@@ -147,6 +147,7 @@ class Dashboard extends Component<IDashBoardProps> {
 				<div className="regions-container">
 					{this.state.regions.map((region, i) => (
 						<div
+							key={`region_${i}`}
 							className="questions"
 							onClick={
 								this.state.regions[i].locked
@@ -182,14 +183,20 @@ export default styled(Dashboard)`
 
 	.logout-btn {
 
-		position: absolute;
+		position: fixed;
 		bottom: 10px;
 		transform: translate(-50%, 0%);
 		z-index: 102;
 		left: 50%;
+		font-size: 1.3rem;
 	}
 
 	@media ${device.mobileS} {
+		.logout-btn {
+			height: 50px;
+			bottom: 0px;
+			padding-top: 15px;
+		}
 
 		.locked {
 			user-select: none;
@@ -276,41 +283,42 @@ export default styled(Dashboard)`
 
 		#sideq {
 			z-index: 20;
-			position: absolute;
+			position: fixed;
 			bottom: 0px;
 			transform: translate(-50%, 0);
 			left: 50%;
 			/* 
         top: 50%;
          */
-			width: 75%;
+			width: 300px;
 			filter: drop-shadow(0px -5px 10px #000);
 		}
 		#control {
-			z-index: -65;
+			position: fixed;
+			bottom: 0;
 			/* background:red; */
 		}
 		.fa-question {
-			font-size: 8vw;
-			z-index: 104;
+			font-size: 30px;
+			z-index: 100;
 			color: #242121;
-			position: absolute;
-			bottom: 0.3vh;
-			right: 25%;
+			position: fixed;
+			bottom: 0px;
+			right: calc(50% - 103px);
 			transition: 0.3s;
 			/* transform: translate(-50%,0%); */
-			padding: 15px;
+			padding: 10px;
 		}
 		.fa-chess-rook {
-			font-size: 8vw;
-			z-index: 110;
+			font-size: 30px;
+			z-index: 100;
 			color: #242121;
-			position: absolute;
-			left: 25%;
-			bottom: 0.3vh;
+			position: fixed;
+			left: calc(50% - 103px);
+			bottom: 0px;
 			transition: 0.3s;
 			/* transform: translate(-50%,0%); */
-			padding: 15px;
+			padding: 10px;
 		}
 	}
 
@@ -404,48 +412,56 @@ export default styled(Dashboard)`
 		}
 		#sideq {
 			z-index: 20;
-			position: absolute;
+			position: fixed;
 			bottom: 0px;
 			transform: translate(-50%, 0);
 			left: 50%;
 			/* 
         top: 50%;
          */
-			width: 30%;
+			width: 400px;
 			filter: drop-shadow(0px -5px 10px #000);
 		}
 		#control {
-			z-index: -65;
+			position: fixed;
+			bottom: 0;
 			/* background:red; */
 			position: relative;
 			top: 0px;
 			height: 18vh;
 		}
 		.fa-question {
-			font-size: 3vw;
-			z-index: 104;
+			font-size: 30px;
+			z-index: 100;
 			color: #242121;
-			position: absolute;
-			bottom: 0.3vh;
-			right: 40%;
+			position: fixed;
+			bottom: 0px;
+			right: calc(50% - 125px);
 			transition: 0.3s;
 			/* transform: translate(-50%,0%); */
-			padding: 15px;
+			padding: 20px;
 		}
 		.fa-chess-rook {
-			font-size: 3vw;
-			z-index: 110;
+			font-size: 30px;
+			z-index: 100;
 			color: #242121;
-			position: absolute;
-			left: 40%;
-			bottom: 0.3vh;
+			position: fixed;
+			left: calc(50% - 125px);
+			bottom: 0px;
 			transition: 0.3s;
 			/* transform: translate(-50%,0%); */
-			padding: 15px;
+			padding: 20px;
 		}
-
+		.logout-btn {
+			height: 72px;
+			bottom: 0px;
+			padding-top: 25px;
+		}
 		.fa-chess-rook:hover,
-		.fa-question:hover,
+		.fa-question:hover {
+			cursor: pointer;
+			font-size: 35px;
+		}
 		#hawklogo:hover {
 			cursor: pointer;
 			font-size: 3.2vw;

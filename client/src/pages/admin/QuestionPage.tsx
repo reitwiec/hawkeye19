@@ -43,7 +43,7 @@ class QuestionPage extends Component<Props, State> {
 			region: parseInt(this.state.formData.region),
 			level: parseInt(this.state.formData.level)
 		};
-		console.log(formData);
+		// console.log(formData);
 		fetch('/api/addQuestion', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
