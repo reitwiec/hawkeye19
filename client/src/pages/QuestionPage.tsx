@@ -212,6 +212,7 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 				<div id="questionbox">
 					<div id="level">{`Level ${this.state.level}`}</div>
 					<div id="question">{this.state.question}</div>
+          <span id="status">{this.state.hawkMessage}</span>
 					<div id="answerbox">
 						<input
 							type="text"
@@ -228,6 +229,7 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 				<div id="hint_try">
 					<div className="tab">
 						<button
+            style={{width: '100%'}}
 							className="tablinks"
 							onClick={this.tries}
 							id={this.state.tryvisible ? 'active' : 'inactive'}
@@ -241,13 +243,13 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 						>
 							Hints
 						</button>
-						<button
+						{/* <button
 							className="tablinks"
 							onClick={this.stats}
 							id={this.state.statsvisible ? 'active' : 'inactive'}
 						>
 							Stats
-						</button>
+						</button> */}
 					</div>
 					<div
 						id="hints"
@@ -286,11 +288,11 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 						})}
 					</div>
 				</div>
-				<span id="status">{this.state.hawkMessage}</span>
+				
 				<div id="control">
 					<div id="signals">
 						<Link to="/rules"><i className="fas fa-question" /></Link>
-						<img src={logo} id="hawklogo" alt="" />
+						<Link to="/dashboard"><img src={logo} id="hawklogo" alt="" /></Link>
 						<i className="fas fa-chess-rook" onClick={() => alert('Sidequest is currently locked. It will be accessible 12 hours into the game...')}/>
 					</div>
 					<img src={sideq} alt="" id="sideq" />
