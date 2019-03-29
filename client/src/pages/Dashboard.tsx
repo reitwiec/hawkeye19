@@ -88,20 +88,7 @@ class Dashboard extends Component<IDashBoardProps> {
 	};
 
 	componentDidMount() {
-		this.getUser();
-		setTimeout(
-			() =>
-				this.setState({
-						regions: [
-							...this.state.regions.map(region => ({
-								...region,
-								locked: this.props.UserStore[region.key] === 0 ? true : false,
-								level: this.props.UserStore[region.key]
-							}))
-						]
-					}),
-			500
-		);
+		this.getUser(this.initset);
 	}
 
 	unlock = (name, regionID) => e => {
@@ -117,7 +104,7 @@ class Dashboard extends Component<IDashBoardProps> {
 		console.log('locked');
 	};
 
-	getUser = () => {
+	getUser = (callback = () => {}) => {
 		fetch(`/api/getUser`)
 			.then(res => res.json())
 			.then(json => {
@@ -134,7 +121,20 @@ class Dashboard extends Component<IDashBoardProps> {
 					isVerified: json.data.isVerified
 				};
 				this.props.UserStore.setCurrentUser(userFields);
+				callback();
 			});
+	};
+
+	initset = () => {
+		this.setState({
+			regions: [
+				...this.state.regions.map(region => ({
+					...region,
+					locked: this.props.UserStore[region.key] === 0 ? true : false,
+					level: this.props.UserStore[region.key]
+				}))
+			]
+		});
 	};
 
 	render() {
@@ -149,9 +149,12 @@ class Dashboard extends Component<IDashBoardProps> {
 						<div
 							className="questions"
 							onClick={
-								this.state.regions[i].locked
+								this.state.regions[i].locked || this.state.regions[i].level > 4
 									? this.locky
 									: this.unlock(this.state.regions[i].name, i + 1)
+							}
+							id={
+								this.state.regions[i].level > 4 ? 'completed' : 'notcompleted'
 							}
 						>
 							<section className={this.state.regions[i].locked ? 'locked' : ''}>
@@ -167,9 +170,17 @@ class Dashboard extends Component<IDashBoardProps> {
 				{this.state.redirect}
 				<div id="control">
 					<div id="signals">
-						<i className="fas fa-question" />
+						<Link to="/rules">
+							<i className="fas fa-question" />
+						</Link>
 						<Logout className="logout-btn" />
-						<i className="fas fa-chess-rook" />
+						<i
+							className="fas fa-chess-rook"
+							onClick={() =>
+								alert('Sidequest unlocks 12 hours into the game...')
+							}
+							// onClick={this.unlock('ashvalley', 0)}
+						/>
 					</div>
 					<img src={sideq} alt="" id="sideq" />
 				</div>
@@ -179,18 +190,22 @@ class Dashboard extends Component<IDashBoardProps> {
 }
 
 export default styled(Dashboard)`
-
 	.logout-btn {
-
 		position: absolute;
 		bottom: 10px;
 		transform: translate(-50%, 0%);
 		z-index: 102;
 		left: 50%;
 	}
+	#completed {
+		user-select: none;
+		background: #ffd627;
+	}
+	#completed > section {
+		color: #131212;
+	}
 
 	@media ${device.mobileS} {
-
 		.locked {
 			user-select: none;
 			filter: gray; /* IE6-9 */
@@ -260,57 +275,55 @@ export default styled(Dashboard)`
 		.regions-container {
 			margin-top: 5%;
 		}
-		#hawklogo {
-			width: 10%;
-			background: #181818;
-			left: 50%;
-			border: 5px solid #c49905;
-			padding: 2px;
-			border-radius: 100px;
-			position: absolute;
-			bottom: 20px;
-			transform: translate(-50%, 0%);
-			z-index: 102;
-			transition: 0.3s;
-		}
 
 		#sideq {
 			z-index: 20;
-			position: absolute;
+			position: fixed;
 			bottom: 0px;
-			transform: translate(-50%, 0);
+			transform: translate(-50%, 0px);
 			left: 50%;
-			/* 
-        top: 50%;
-         */
-			width: 75%;
-			filter: drop-shadow(0px -5px 10px #000);
+			width: 300px;
+			filter: drop-shadow(rgb(0, 0, 0) 0px -5px 10px);
 		}
 		#control {
-			z-index: -65;
-			/* background:red; */
+			position: fixed;
+			bottom: 0px;
 		}
-		.fa-question {
-			font-size: 8vw;
-			z-index: 104;
-			color: #242121;
-			position: absolute;
-			bottom: 0.3vh;
-			right: 25%;
+		.fa-power-off {
+			font-size: 1.3rem;
+			background: #181818;
+			left: 50%;
+			color: white;
+			border: 5px solid #c49905;
+			padding: 9px;
+			border-radius: 100px;
+			bottom: 20px;
+			left: 50%;
+			transform: translate(-50%, 0%);
+			z-index: 102;
 			transition: 0.3s;
-			/* transform: translate(-50%,0%); */
-			padding: 15px;
+			position: fixed;
+		}
+
+		.fa-question {
+			color: #242121;
+			transition: 0.3s;
+			font-size: 30px;
+			z-index: 100;
+			position: fixed;
+			bottom: 0px;
+			right: calc(50% - 103px);
+			padding: 10px;
 		}
 		.fa-chess-rook {
-			font-size: 8vw;
-			z-index: 110;
 			color: #242121;
-			position: absolute;
-			left: 25%;
-			bottom: 0.3vh;
 			transition: 0.3s;
-			/* transform: translate(-50%,0%); */
-			padding: 15px;
+			font-size: 30px;
+			z-index: 100;
+			position: fixed;
+			left: calc(50% - 103px);
+			bottom: 0px;
+			padding: 10px;
 		}
 	}
 
@@ -386,61 +399,57 @@ export default styled(Dashboard)`
 			margin-top: 5%;
 		}
 
-		#hawklogo {
-			width: 4%;
+		.fa-power-off {
+			font-size: 1.9rem;
 			background: #181818;
 			left: 50%;
+			color: white;
 			border: 5px solid #c49905;
-			padding: 2px;
+			padding: 9px;
 			border-radius: 100px;
-			position: absolute;
+			position: fixed;
 			bottom: 20px;
+			left: 50%;
 			transform: translate(-50%, 0%);
 			z-index: 102;
 			transition: 0.3s;
 		}
-		#hawklogo:hover {
-			width: 4.5%;
+		.fa-power-off:hover {
+			cursor: pointer;
+			font-size: 3.5vw;
 		}
 		#sideq {
 			z-index: 20;
-			position: absolute;
+			position: fixed;
 			bottom: 0px;
 			transform: translate(-50%, 0);
 			left: 50%;
-			/* 
-        top: 50%;
-         */
-			width: 30%;
+			width: 400px;
 			filter: drop-shadow(0px -5px 10px #000);
 		}
 		#control {
-			z-index: -65;
-			/* background:red; */
-			position: relative;
-			top: 0px;
-			height: 18vh;
+			position: fixed;
+			bottom: 0px;
 		}
 		.fa-question {
-			font-size: 3vw;
+			font-size: 38px;
 			z-index: 104;
 			color: #242121;
-			position: absolute;
-			bottom: 0.3vh;
-			right: 40%;
+			position: fixed;
+			bottom: 0;
+			right: calc(50% - 110px);
 			transition: 0.3s;
 			/* transform: translate(-50%,0%); */
 			padding: 15px;
 		}
 		.fa-chess-rook {
-			font-size: 3vw;
+			font-size: 38px;
 			z-index: 110;
 			color: #242121;
-			position: absolute;
-			left: 40%;
-			bottom: 0.3vh;
+			position: fixed;
+			left: calc(50% - 110px);
+			bottom: 0px;
 			transition: 0.3s;
-			/* transform: translate(-50%,0%); */
 			padding: 15px;
 		}
 

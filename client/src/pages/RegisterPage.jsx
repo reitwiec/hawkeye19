@@ -68,13 +68,15 @@ class RegisterPage extends Component {
 
 	onSubmit = () => {
 		// checkerror();
-		if(this.state.formData.name === ''
-		|| this.state.formData.username === ''
-		|| this.state.formData.password === ''
-		|| this.state.formData.confirm_password === ''
-		|| this.state.formData.email === ''
-		|| this.state.formData.tel === ''
-		|| this.state.formData.college === '') {
+		if (
+			this.state.formData.name === '' ||
+			this.state.formData.username === '' ||
+			this.state.formData.password === '' ||
+			this.state.formData.confirm_password === '' ||
+			this.state.formData.email === '' ||
+			this.state.formData.tel === '' ||
+			this.state.formData.college === ''
+		) {
 			this.openSnackbar('Please fill all field');
 			return;
 		}
@@ -85,48 +87,53 @@ class RegisterPage extends Component {
 					return { [k]: v.value };
 				})
 				.reduce((acc, val) => Object.assign(acc, val));
-			
-				this.setState({sending: true}, () => {
-					fetch('/api/addUser', {
-						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({ user: postData, captcha: this.state.token})
-					})
-						.then(res => res.json())
-						.then(json => { 
-							this.setState({sending: false});
-							if (json.success) {
-								this.openSnackbar('Registered - Please verify your email');
-								setTimeout(() => this.setState({
-									redirect: true
-								}), 1000);
-							} else {
-								this.openSnackbar(json.msg)
-								this.captchaDemo.reset();
-							} 
-						})
-						.catch(() => {
-							this.openSnackbar('Registration failed');
-							this.captchaDemo.reset();
-						});
+
+			this.setState({ sending: true }, () => {
+				fetch('/api/addUser', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ user: postData, captcha: this.state.token })
 				})
+					.then(res => res.json())
+					.then(json => {
+						this.setState({ sending: false });
+						if (json.success) {
+							this.openSnackbar('Registered - PLEASE VERIFY YOUR EMAIL');
+							setTimeout(
+								() =>
+									this.setState({
+										redirect: true
+									}),
+								1000
+							);
+						} else {
+							this.openSnackbar(json.msg);
+							this.captchaDemo.reset();
+						}
+					})
+					.catch(() => {
+						this.openSnackbar('Registration failed');
+						this.captchaDemo.reset();
+					});
+			});
 		} else {
-			this.openSnackbar('Please verify that you are a human')
+			this.openSnackbar('Please verify that you are a human');
 		}
 	};
 
-	openSnackbar = (message) => {
+	openSnackbar = message => {
 		this.setState({ barOpen: true, snackbarMessage: message });
-		setTimeout(() => this.setState({ barOpen: false, snackbarMessage: '' }), 3000);
+		setTimeout(
+			() => this.setState({ barOpen: false, snackbarMessage: '' }),
+			3000
+		);
 	};
 
-	onKey = (e) => {
-		if(e.key === 'Enter')
-			this.onSubmit()
-	}
+	onKey = e => {
+		if (e.key === 'Enter') this.onSubmit();
+	};
 
 	render() {
-
 		return (
 			<div className={this.props.className}>
 				<div id="box">
@@ -148,7 +155,7 @@ class RegisterPage extends Component {
 						<TextField
 							name="password"
 							type="password"
-							placeholder="Password"
+							placeholder="Password (Min-char:8)"
 							onChange={this.onChange}
 							onKeyPress={this.onKey}
 						/>
@@ -199,26 +206,48 @@ class RegisterPage extends Component {
 							verifyCallback={this.verifyCallback}
 						/>
 					</div>
-					<Button onClick={this.onSubmit} id="regbtn" disabled={this.state.sending}>
+					<Button
+						onClick={this.onSubmit}
+						id="regbtn"
+						disabled={this.state.sending}
+					>
+						<i
+							className="fa fa-spinner fa-spin"
+							id={this.state.sending ? 'loading' : 'notloading'}
+						/>
 						{this.state.sending ? 'Sending...' : 'Register'}
 					</Button>
 					<span>
-					<br/>
-					<Link to="/" style={{ 'color': 'white', 'textDecoration': 'none', 'fontWeight': '500', 'fontSize': '1.2em'}}>
-						Already have an account? Log in
-					</Link></span>
+						<br />
+						<Link
+							to="/"
+							style={{
+								color: 'white',
+								textDecoration: 'none',
+								fontWeight: '500',
+								fontSize: '1.2em'
+							}}
+						>
+							Already have an account? Log in
+						</Link>
+					</span>
 				</div>
 				<img src={hawk} alt="" id="hawk" />
 				<img src={logo} alt="" id="logo" />
-				{window.innerWidth > 500 && <div id="bg">
-					<img src={pcb} alt="" id="pcb1" />
-					<img src={pcb} alt="" id="pcb2" />
-					<img src={pcb1} alt="" id="pcbdesk" />
-				</div>}
-			<Snackbar open={this.state.barOpen} message={this.state.snackbarMessage}/>
-			{ this.state.redirect && <Redirect to="/"/>}
+				{window.innerWidth > 500 && (
+					<div id="bg">
+						<img src={pcb} alt="" id="pcb1" />
+						<img src={pcb} alt="" id="pcb2" />
+						<img src={pcb1} alt="" id="pcbdesk" />
+					</div>
+				)}
+				<Snackbar
+					open={this.state.barOpen}
+					message={this.state.snackbarMessage}
+				/>
+				{this.state.redirect && <Redirect to="/" />}
 			</div>
-	);
+		);
 	}
 }
 
@@ -239,6 +268,12 @@ const flash = keyframes`
 `;
 
 export default styled(RegisterPage)`
+	#loading {
+		display: inline-block;
+	}
+	#notloading {
+		display: none;
+	}
 	.center-captcha {
 		display: flex;
 		justify-content: center;
@@ -272,7 +307,7 @@ export default styled(RegisterPage)`
 			width: 8%;
 		}
 		#box {
-			padding 10px;
+			padding: 10px;
 			h1 {
 				color: #ffd627;
 				margin: 10px 0 3px 0;

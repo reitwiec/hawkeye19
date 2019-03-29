@@ -3,9 +3,10 @@ package app
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/jinzhu/gorm"
 	"net/http"
 	"time"
+
+	"github.com/jinzhu/gorm"
 )
 
 const (
@@ -23,6 +24,7 @@ func (hawk *App) getSidequestQuestion(w http.ResponseWriter, r *http.Request) {
 	}
 	index := (currLevel - 1) * 2
 	level := currUser.SidequestOrder[index] - 48 //ascii to int
+	fmt.Println("Level ", level)
 	question := Question{}
 	err := hawk.DB.Select("id, level, region, question, add_info").Where("region = ? AND level = ?", 0, level).First(&question).Error
 	if err != nil {

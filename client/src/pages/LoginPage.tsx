@@ -44,22 +44,22 @@ class LoginPage extends Component<Props> {
 		loggedIn: false,
 		barOpen: false,
 		snackbarMessage: '',
-		sending: false
+		sending: false,
+		firstlog: 1
 	};
 
 	onChange = (name, value) => {
 		this.setState({ [name]: value });
 	};
 
-	onKey = (e) => {
-		if(e.key === 'Enter')
-			this.login();
-	}
+	onKey = e => {
+		if (e.key === 'Enter') this.login();
+	};
 
 	login = () => {
 		if (this.state.username === '' || this.state.password === '') return;
 		const { loggedIn, ...loginData } = this.state;
-		this.setState({sending: true}, () => {
+		this.setState({ sending: true }, () => {
 			fetch('/api/login', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -67,21 +67,25 @@ class LoginPage extends Component<Props> {
 			})
 				.then(res => res.json())
 				.then(json => {
-					this.setState({sending: false});
+					this.setState({ sending: false });
 					if (json.success) {
+						console.log(json);
 						this.props.UserStore.setCurrentUser(json.data);
-						this.setState({ loggedIn: true });
+						this.setState({ loggedIn: true, firstlog: json.data.firstLogin });
 					} else {
 						console.log(json);
 						this.openSnackbar(json.msg);
 					}
 				});
-		})
+		});
 	};
 
-	openSnackbar = (message) => {
+	openSnackbar = message => {
 		this.setState({ barOpen: true, snackbarMessage: message });
-		setTimeout(() => this.setState({ barOpen: false, snackbarMessage: '' }), 3000);
+		setTimeout(
+			() => this.setState({ barOpen: false, snackbarMessage: '' }),
+			3000
+		);
 	};
 
 	render() {
@@ -109,8 +113,20 @@ class LoginPage extends Component<Props> {
 						/>
 						<br />
 					</div>
-					<Button disabled={this.state.sending} onClick={this.login}>{this.state.sending? 'Sending...' : 'Sign In'}</Button>
-					{this.state.loggedIn ? <Redirect to="/dashboard" /> : null}
+					<Button disabled={this.state.sending} onClick={this.login}>
+						<i
+							className="fa fa-spinner fa-spin"
+							id={this.state.sending ? 'loading' : 'notloading'}
+						/>
+						{this.state.sending ? ' Sending...' : 'Sign In'}
+					</Button>
+					{this.state.loggedIn ? (
+						this.state.firstlog ? (
+							<Redirect to="/tutorial" />
+						) : (
+							<Redirect to="/dashboard" />
+						)
+					) : null}
 					<br />
 					<Link to="/register" id="register">
 						Create an account
@@ -120,13 +136,22 @@ class LoginPage extends Component<Props> {
 				<a href="https://www.iecsemanipal.com/">
 					<img src={logo} alt="" id="logo" />
 				</a>
-				<Snackbar open={this.state.barOpen} message={this.state.snackbarMessage}/>
+				<Snackbar
+					open={this.state.barOpen}
+					message={this.state.snackbarMessage}
+				/>
 			</div>
 		);
 	}
 }
 
 export default styled(LoginPage)`
+	#loading {
+		display: inline-block;
+	}
+	#notloading {
+		display: none;
+	}
 	width: 100%;
 	@media ${device.mobileS} {
 		max-width: 500px;
@@ -466,6 +491,12 @@ export default styled(LoginPage)`
 				border-radius: 20px;
 				margin-top: 10px;
 				margin-bottom: 10px;
+				transition: 0.5s;
+			}
+			${Button}:hover {
+				color: #fff;
+				background: #ff0000;
+				width: 60%;
 			}
 			#register {
 				letter-spacing: 1px;

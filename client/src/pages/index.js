@@ -4,4 +4,5 @@ export { default as QuestionPage } from './QuestionPage';
 export { default as RegisterPage } from './RegisterPage';
 export { default as SupportPage } from './SupportPage';
 export { default as TutPage } from './TutPage';
+export { default as Sidequest } from './Sidequest';
 export { default as Rules } from './Rules';

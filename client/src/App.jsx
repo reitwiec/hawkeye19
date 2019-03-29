@@ -1,8 +1,5 @@
 import React, { Component } from 'react';
-import {
-	BrowserRouter as Router,
-	Switch
-} from 'react-router-dom';
+import { BrowserRouter as Router, Switch } from 'react-router-dom';
 import { CookiesProvider, withCookies } from 'react-cookie';
 import { Provider } from 'mobx-react';
 
@@ -13,7 +10,8 @@ import {
 	RegisterPage,
 	SupportPage,
 	TutPage,
-	Rules
+	Rules,
+	Sidequest
 } from './pages';
 import { PrivateRoute, PublicRoute } from './components';
 import { AdminRouter } from './routers';
@@ -41,7 +39,7 @@ class App extends Component {
 									component={RegisterPage}
 									auth={this.loggedIn}
 								/>
-								<PublicRoute
+								<PrivateRoute
 									exact
 									path="/tutorial"
 									component={TutPage}
@@ -75,6 +73,12 @@ class App extends Component {
 									exact
 									path="/support"
 									component={SupportPage}
+									auth={this.loggedIn}
+								/>
+								<PrivateRoute
+									exact
+									path="/sidequest"
+									component={Sidequest}
 									auth={this.loggedIn}
 								/>
 							</Switch>

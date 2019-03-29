@@ -5,11 +5,12 @@ import media from '../components/theme/media';
 import logo from '../components/assets/hawk_logo.png';
 import sideq from '../components/assets/sideq.svg';
 import { inject, observer } from 'mobx-react';
-import map from '../components/assets/mapbg.png';
+import map from '../components/assets/hawkbg.png';
 import { Button } from '../components';
 import { Link } from 'react-router-dom';
 import Logout from '../components/Logout';
 import { UserStore } from '../stores/User';
+import { Redirect } from 'react-router-dom';
 import { Snackbar } from '../components';
 
 const size = {
@@ -22,9 +23,16 @@ const size = {
 	desktop: '1000px'
 };
 
+// import nstallation09icon from '../components/assets/installation_09.svg';
+// import pancheaicon from '../components/assets/panchea.svg';
+// import cityofdarwinsicon from '../components/assets/city_of_darwins.svg';
+// import lakesideruinsicon from '../components/assets/lakeside_ruins.svg';
+// import ashvalleyicon from '../components/assets/ash_valley.svg';
+// import edenicon from '../components/assets/eden.svg';
+
 const hawkResponses = {
 	1: 'Hawk approves',
-	2: 'Hawk thinks you\'re close',
+	2: "Hawk thinks you're close",
 	3: 'Hawk disapproves'
 };
 
@@ -43,11 +51,12 @@ const stats = ['Tries : 6969', 'On-par : 0', 'Leading : 1', 'Trailing : 69'];
 interface IQuestionPageProps {
 	className: string;
 	location: { state: { name: string; regionIndex: number } };
-  UserStore: UserStore;
-  history: any;
+	UserStore: UserStore;
+	history: any;
 }
 
 interface IQuestionPageState {
+	stats: string[];
 	tryvisible: boolean;
 	hintvisible: boolean;
 	statsvisible: boolean;
@@ -60,6 +69,8 @@ interface IQuestionPageState {
 	hawkMessage: string;
 	barOpen: boolean;
 	snackbarMessage: string;
+	points: number;
+	redirect: any;
 }
 
 @inject('UserStore')
@@ -74,36 +85,70 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 		questionID: null,
 		answer: '',
 		attempts: [],
+		stats: [],
 		hints: [],
 		hawkMessage: '',
 		region: this.props.location.state.name,
 		regionIndex: this.props.UserStore.activeRegion,
 		barOpen: false,
-		snackbarMessage: ''
+		snackbarMessage: '',
+		points: 0,
+		redirect: null
 	};
 
 	componentDidMount() {
-    if (!this.props.UserStore.activeRegion)
-      this.props.history.push('/dashboard');
-    else
-      this.getQuestion(() => {
-        this.getHints();
-        this.getAttempts()
-      });
+		if (this.props.UserStore.activeRegion === null)
+			this.props.history.push('/dashboard');
+		else if (this.props.UserStore.activeRegion == 0) {
+			this.getSideQuestion(() => {
+				this.getHints();
+				this.getAttempts();
+				this.getUser();
+				this.getStats();
+			});
+		} else {
+			this.getQuestion(() => {
+				this.getHints();
+				this.getAttempts();
+				this.getUser();
+				this.getStats();
+			});
+		}
 	}
 
+	getSideQuestion = (after = () => {}) => {
+		fetch(`/api/getSidequestQuestion`)
+			.then(res => res.json())
+			.then(json => {
+				console.log(json);
+				this.setState(
+					{
+						question: json.data.question,
+						questionID: json.data.questionID,
+						level: json.data.level
+					},
+					() => {
+						after();
+					}
+				);
+			})
+			.catch(() => {});
+	};
+
 	getQuestion = (after = () => {}) => {
-		console.log(this.props.UserStore.activeRegion);
 		fetch(`/api/getQuestion?region=${this.props.UserStore.activeRegion}`)
 			.then(res => res.json())
 			.then(json => {
-				this.setState({
-					question: json.data.question,
-					questionID: json.data.questionID,
-					level: json.data.level
-				}, () => {
-					after();
-				});
+				this.setState(
+					{
+						question: json.data.question,
+						questionID: json.data.questionID,
+						level: json.data.level
+					},
+					() => {
+						after();
+					}
+				);
 			})
 			.catch(() => {});
 	};
@@ -116,19 +161,52 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 		fetch(`/api/getHints?question=${this.state.questionID}`)
 			.then(res => res.json())
 			.then(json => {
-				this.setState({ hints: json.data? json.data : [] });
+				this.setState({ hints: json.data ? json.data : [] });
 			})
 	];
+	getUser = (after = () => {}) => {
+		fetch(`/api/getUser`)
+			.then(res => res.json())
+			.then(json => {
+				this.setState(
+					{
+						points: json.data.sideQuestPoints
+					},
+					() => {
+						after();
+					}
+				);
+			})
+			.catch(() => {});
+	};
 
 	getAttempts = () => {
 		fetch(`/api/getRecentTries?question=${this.state.questionID}`)
-		.then(res => res.json())
-		.then(json => {
-			this.setState({ attempts: json.data? json.data : [] })
-		});
+			.then(res => res.json())
+			.then(json => {
+				this.setState({ attempts: json.data ? json.data : [] });
+			});
+	};
+
+	getStats = () => {
+		fetch(`/api/getStats`)
+			.then(res => res.json())
+			.then(json => {
+				console.log(json);
+				this.setState({
+					stats: [
+						json.data.AnswerAttempts,
+						json.data.Leading,
+						json.data.SameLevel,
+						json.data.TotalPlayers,
+						json.data.Trailing
+					]
+				});
+			});
 	};
 
 	checkAnswer = () => {
+		if (!this.state.answer) return;
 		if (this.props.UserStore.isVerified == 1) {
 			fetch(`/api/checkAnswer`, {
 				method: 'POST',
@@ -149,29 +227,73 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 		}
 	};
 
-	onSubmit = (json) => {
+	checkSideAnswer = () => {
+		if (this.props.UserStore.isVerified == 1) {
+			fetch(`/api/checkSidequestAnswer`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					answer: this.state.answer
+				})
+			})
+				.then(res => res.json())
+				.then(json => {
+					this.onSubmit(json);
+				});
+		} else {
+			this.openSnackbar('Please verify your email');
+		}
+	};
+
+	sideen = () => {
+		this.props.UserStore.setRegion(0);
+		this.getSideQuestion(() => {
+			this.getHints();
+			this.getAttempts();
+			this.getUser();
+			this.getStats();
+		});
+	};
+	onSubmit = json => {
+		this.getStats();
 		this.clearAnswer();
 		this.setState({
 			hawkMessage: hawkResponses[json.data]
-    });
+		});
 		if (json.data == 1) {
-      this.onCorrectAnswer();
+			this.props.UserStore.activeRegion == 0
+				? this.onSideCorrectAnswer()
+				: this.onCorrectAnswer();
 		} else {
-      this.getAttempts();    
-    }
+			this.getAttempts();
+		}
+	};
+	clearHints = () => {
+		this.setState({
+			hints: []
+		});
 	};
 
 	onCorrectAnswer = () => {
-    if(this.state.level === 4) {
-      this.props.history.push('/dashboard')
-    } else {
-      this.getQuestion();
-      this.getAttempts();
-    }
-	}
+		if (this.state.level === 4) {
+			this.props.history.push('/dashboard');
+		} else {
+			this.clearHints();
+			this.getQuestion();
+			this.getAttempts();
+			this.getStats();
+		}
+	};
+	onSideCorrectAnswer = () => {
+		this.clearHints();
+		this.getSideQuestion();
+		this.getAttempts();
+		this.getStats();
+	};
 
-
-	openSnackbar = (message) => {
+	openSnackbar = message => {
 		this.setState({ barOpen: true, snackbarMessage: message });
 	};
 
@@ -202,6 +324,12 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 			statsvisible: false
 		});
 	};
+	onKey = e => {
+		if (e.key === 'Enter')
+			this.props.UserStore.activeRegion == 0
+				? this.checkSideAnswer()
+				: this.checkAnswer();
+	};
 
 	render() {
 		return (
@@ -210,9 +338,13 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 				<h1 id="name">HAWKEYE</h1>
 				<h2 id="region" />
 				<div id="questionbox">
-					<div id="level">{`Level ${this.state.level}`}</div>
+					{this.props.UserStore.activeRegion == 0 ? (
+						<div id="level">{`Points : ${this.state.points}`}</div>
+					) : (
+						<div id="level">{`Level ${this.state.level}`}</div>
+					)}
 					<div id="question">{this.state.question}</div>
-          <span id="status">{this.state.hawkMessage}</span>
+					<span id="status">{this.state.hawkMessage}</span>
 					<div id="answerbox">
 						<input
 							type="text"
@@ -220,16 +352,24 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 							placeholder="Enter answer here..."
 							value={this.state.answer}
 							onChange={this.onEditAnswer}
+							onKeyPress={this.onKey}
 						/>
+						<button
+							onClick={
+								this.props.UserStore.activeRegion == 0
+									? this.checkSideAnswer
+									: this.checkAnswer
+							}
+							id="submit"
+						>
+							Submit
+						</button>
 					</div>
 				</div>
-				<Button onClick={this.checkAnswer} id="submit">
-					SUBMIT
-				</Button>
+
 				<div id="hint_try">
 					<div className="tab">
 						<button
-            style={{width: '100%'}}
 							className="tablinks"
 							onClick={this.tries}
 							id={this.state.tryvisible ? 'active' : 'inactive'}
@@ -243,13 +383,13 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 						>
 							Hints
 						</button>
-						{/* <button
-							className="tablinks"
+						<button
+							className="tablinks stats"
 							onClick={this.stats}
 							id={this.state.statsvisible ? 'active' : 'inactive'}
 						>
 							Stats
-						</button> */}
+						</button>
 					</div>
 					<div
 						id="hints"
@@ -264,15 +404,19 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 						id="tries"
 						className={this.state.tryvisible ? 'available' : 'notavail'}
 					>
-						{this.state.attempts.map((item, i) => <p key={i}>{item}</p>)}
+						{this.state.attempts.map((item, i) => (
+							<p key={i}>{item}</p>
+						))}
 					</div>
 					<div
 						id="stats"
 						className={this.state.statsvisible ? 'available' : 'notavail'}
 					>
-						{stats.map(function(item, i) {
-							return <p key={i}>{item}</p>;
-						})}
+						<p>{`Total Attempts : ${this.state.stats[0]}`}</p>
+						<p>{`Leading : ${this.state.stats[1]}`}</p>
+						<p>{`On-par : ${this.state.stats[2]}`}</p>
+						<p>{`Total : ${this.state.stats[3]}`}</p>
+						<p>{`Trailing : ${this.state.stats[4]}`}</p>
 					</div>
 				</div>
 
@@ -288,17 +432,30 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 						})}
 					</div>
 				</div>
-				
+
 				<div id="control">
 					<div id="signals">
-						<Link to="/rules"><i className="fas fa-question" /></Link>
-						<Link to="/dashboard"><img src={logo} id="hawklogo" alt="" /></Link>
-						<i className="fas fa-chess-rook" onClick={() => alert('Sidequest is currently locked. It will be accessible 12 hours into the game...')}/>
+						<Link to="/rules">
+							<i className="fas fa-question" />
+						</Link>
+						<Link to="/dashboard">
+							<img src={logo} id="hawklogo" alt="" />
+						</Link>
+						<i
+							className="fas fa-chess-rook"
+							onClick={() =>
+								alert('Sidequest unlocks in 12 hours into the game...')
+							}
+						/>
+						{/* onClick={this.sideen} */}
 					</div>
 					<img src={sideq} alt="" id="sideq" />
-					<img src={map} alt="" id="map" />
+					{/* <img src={map} alt="" id="map" /> */}
 				</div>
-				<Snackbar open={this.state.barOpen} message={this.state.snackbarMessage}/>
+				<Snackbar
+					open={this.state.barOpen}
+					message={this.state.snackbarMessage}
+				/>
 			</div>
 		);
 	}
@@ -331,44 +488,47 @@ export default styled(QuestionPage)`
 			min-width: 100%;
 			max-height: 200vh;
 			opacity: 0.25;
-		}
-			#submit {
-        left: 50%;
-        bottom: 15%;
-        transform: translate(-50%,50%);
-        z-index:30;
-        position:absolute;
-				color: #1c1c1c;
-				font-weight: 500;
-				background: #ffd627;
-				width: 20%;
-				max-width: 150px;
-				height: 35px;
-				padding: 10px;
-				padding-top: 7px;
-				border: none;
-				border-radius: 20px;
-				margin-top: 10px;
-				margin-bottom: 10px;
-			}
+    }
+    #submit {
+		background: #181818;
+		color: white;
+		border: 0px;
+		border-radius: 4px;
+		box-shadow: none;
+		outline: none;
+		-webkit-appearance: none;
+		-moz-appearance: none;
+		appearance: none;
+		height: 2.7em;
+		font-size: 0.8em;
+		letter-spacing: 1px;
+		position: absolute;
+		right: 4%;
+		top: 50%;
+		transform: translate(0%, -60%);
+	}
+	#submit:hover {
+		cursor: pointer;
+	}
+
 	.hintnew{
   display:none;
 }
 @media ${device.mobileS} {  
   #status{
-    opacity:0.5;
     left: 50%;
-        bottom: 25%;
+    margin-bottom:8px;
+        bottom: 70px;
         transform: translate(-50%,50%);
     position:absolute;
     z-index:150;
-    color:white;
+    color: #ffd627;
   }
-  #submit{
+  /* #submit{
     z-index:200;
     bottom:17%;
     width:30%;
-  }
+  } */
   max-width: 420px; 
 #name{
     text-align:center;
@@ -415,10 +575,11 @@ export default styled(QuestionPage)`
         }
         #answer{
             position:absolute;
-            left: 50%;
+            left: 40%;
         top: 50%;
+        width:70%;
         transform: translate(-50%,-60%);
-        width:80%;
+
         height:2.7em;
         font-size: 0.8em;
         letter-spacing:1px;
@@ -642,10 +803,10 @@ left:19%;
         }
         #answer{
             position:absolute;
-            left: 50%;
-        top: 50%;
         transform: translate(-50%,-60%);
-        width:80%;
+        left: 40%;
+        top: 50%;
+        width:70%;
         height:2.7em;
         font-size: 0.8em;
         letter-spacing:1px;
@@ -872,10 +1033,10 @@ left:22%;
         }
         #answer{
             position:absolute;
-            left: 50%;
+             transform: translate(-50%,-60%);
+        left: 40%;
         top: 50%;
-        transform: translate(-50%,-60%);
-        width:80%;
+        width:70%;
         height:2.7em;
         font-size: 0.8em;
         letter-spacing:1px;
@@ -1113,10 +1274,10 @@ left:26%;
         }
         #answer{
             position:absolute;
-            left: 50%;
+             transform: translate(-50%,-60%);
+        left: 40%;
         top: 50%;
-        transform: translate(-50%,-60%);
-        width:80%;
+        width:70%;;
         height:2.7em;
         font-size: 0.8em;
         letter-spacing:1px;
@@ -1174,7 +1335,7 @@ left:26%;
 } */
 .tab button{
   transition:0.4s;
-    width:33.33%;
+    width:100%;
     font-size: 0.9em;
     letter-spacing:1px;
    font-weight:500;
@@ -1350,10 +1511,10 @@ left:29%;
         }
         #answer{
             position:absolute;
-            left: 50%;
+             transform: translate(-50%,-60%);
+        left: 40%;
         top: 50%;
-        transform: translate(-50%,-60%);
-        width:80%;
+        width:70%;
         height:2.7em;
         font-size: 0.8em;
         letter-spacing:1px;
@@ -1411,7 +1572,7 @@ left:29%;
 } */
 .tab button{
   transition:0.4s;
-    width:33.33%;
+    width:100%;
     font-size: 0.9em;
     letter-spacing:1px;
    font-weight:500;
@@ -1552,13 +1713,7 @@ left:35%;
 
 /******************  larggetsssss ************************/
 @media ${device.desktop} {  
-		#map {
-			position: fixed;
-			top: 0;
-			min-width: 100%;
-			max-height: 400vh;
-			opacity: 0.25;
-		}
+
   .hintnew{
   display:block;
 }
@@ -1570,7 +1725,6 @@ left:35%;
 			margin:10px 0 3px 0;
 		}
   #questionbox{
-        overflow:hidden;
         border-radius:10px;
 		background: #242121;
 		filter: drop-shadow(0px 15px 15px #000);
@@ -1584,7 +1738,7 @@ left:35%;
         z-index:100;
 
         #question{
-            font-size:2.5vw;
+            font-size:2vw;
             position:absolute;
             left: 50%;
         top: 10%;
@@ -1607,10 +1761,10 @@ left:35%;
         }
         #answer{
             position:absolute;
-            left: 50%;
+             transform: translate(-50%,-60%);
+        left: 40%;
         top: 50%;
-        transform: translate(-50%,-60%);
-        width:80%;
+        width:70%;
         height:2.7em;
         font-size: 0.8em;
         letter-spacing:1px;
@@ -1658,7 +1812,7 @@ left:35%;
                 appearance:none ;
   border: none;
   outline: none;
-  cursor: pointer;
+
   padding: 14px 16px;
   transition: 0.3s;
   font-size: 14px;

@@ -25,9 +25,10 @@ class Logout extends Component<Props> {
 	render() {
 		if (this.state.loggedIn) {
 			return (
-				<Button onClick={this.logout} className={this.props.className}>
-					Logout
-				</Button>
+				<i
+					className={`fas fa-power-off ${this.props.className}`}
+					onClick={this.logout}
+				/>
 			);
 		} else {
 			return <Redirect to="/" />;
@@ -35,10 +36,4 @@ class Logout extends Component<Props> {
 	}
 }
 
-export default styled(Logout)`
-	background: #FBD626;
-	padding: 20px;
-	border: none;
-	text-transform: uppercase;
-	cursor: pointer !important;
-`;
+export default styled(Logout)``;

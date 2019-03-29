@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import { observer, inject } from 'mobx-react';
 import { UserStore } from '../stores/User';
@@ -117,7 +118,7 @@ class TutPage extends Component<Props, IState> {
 
 	showww1 = () => {
 		let x = `When you solve all five questions in a region, a new region is unlocked for you. Once you complete all the questions in the four main regions you proceed to EDEN. Your objective is to solve the most number of questions in a fair manner...`;
-		console.log(this.state.display1);
+
 		this.setState({
 			cursor1: this.state.cursor1 + 1,
 			display1: this.state.display1 + x[this.state.cursor1]
@@ -144,7 +145,6 @@ class TutPage extends Component<Props, IState> {
 
 	showww = () => {
 		let x = `When you are stuck at a particular region, you can visit the Hermit of Ash Valley. For every question you solve you get a scroll and once you have 3 scrolls the Hermit unlocks a new region for you.`;
-		console.log(this.state.display2);
 		this.setState({
 			cursor2: this.state.cursor2 + 1,
 			display2: this.state.display2 + x[this.state.cursor2]
@@ -157,7 +157,7 @@ class TutPage extends Component<Props, IState> {
 	/************ 4th  ****************/
 	eden = () => {
 		this.setState({
-			cursor: 0,
+			cursor: 3,
 			introq: 0,
 			sideq: 0,
 			edenq: 1,
@@ -172,12 +172,12 @@ class TutPage extends Component<Props, IState> {
 	showww2 = () => {
 		let x =
 			'Every 8 hours after the game starts, a new region will be unlocked for you. However, EDEN, the final region, will not be unlocked until you complete the four main regions...';
-		console.log(this.state.display3);
 		this.setState({
 			cursor3: this.state.cursor3 + 1,
 			display3: this.state.display3 + x[this.state.cursor3]
 		});
 		if (this.state.cursor3 >= x.length) {
+			console.log(this.state.count);
 			clearInterval(this.state.interval3!);
 		}
 	};
@@ -224,9 +224,15 @@ class TutPage extends Component<Props, IState> {
 								? this.sideq
 								: this.eden
 						}
+						id={this.state.cursor3 > 0 ? 'block' : 'unblock'}
 					>
 						Next
 					</button>
+					<Link to="/dashboard">
+						<button id={this.state.cursor3 > 0 ? 'unblock' : 'block'}>
+							Play
+						</button>
+					</Link>
 				</div>
 			</div>
 		);
@@ -318,6 +324,12 @@ export default styled(TutPage)`
 		display: none;
 	}
 
+	#block {
+		display: none !important;
+	}
+	#unblock {
+		display: block !important;
+	}
 	@media ${device.mobileS} {
 		max-width: 768px;
 		#imgsiz1 {

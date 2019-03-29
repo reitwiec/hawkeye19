@@ -1,9 +1,27 @@
 import React, { Component } from 'react';
 import styled, { keyframes } from 'styled-components';
 import map from '../components/assets/mapbg.png';
+import { Link } from 'react-router-dom';
 
 type Props = {
 	className: string;
+};
+
+const size = {
+	mobileS: '320px',
+	mobileL: '500px',
+	tablet: '768px',
+	laptop: '730px',
+	laptopL: '862px',
+	desktop: '1000px'
+};
+export const device = {
+	mobileS: `(min-width: ${size.mobileS})`,
+	mobileL: `(min-width: ${size.mobileL})`,
+	tablet: `(min-width: ${size.tablet})`,
+	laptop: `(min-width: ${size.laptop})`,
+	laptopL: `(min-width: ${size.laptopL})`,
+	desktop: `(min-width: ${size.desktop})`
 };
 class Rules extends Component<Props> {
 	render() {
@@ -11,9 +29,7 @@ class Rules extends Component<Props> {
 			<div className={this.props.className}>
 				<div className="rules-container">
 					<div className="heading">RULES</div>
-					{/* <button className="close" onClick={props.closeRules}>
-          &times;
-        </button> */}
+
 					<ul>
 						<li>
 							This is a 3 day game, it starts at 29/3/19 00:00 HRs and ends on
@@ -55,6 +71,9 @@ class Rules extends Component<Props> {
 							on Facebook.
 						</li>
 					</ul>
+					<Link to="/dashboard">
+						<button>RETURN</button>
+					</Link>
 				</div>
 				<img src={map} alt="" id="map" />
 			</div>
@@ -62,34 +81,86 @@ class Rules extends Component<Props> {
 	}
 }
 export default styled(Rules)`
-	.heading {
-		font-size: 3em;
-		font-weight: 700;
-		letter-spacing: 2px;
-		color: #ffd627;
-		text-align: center;
+	button {
+		letter-spacing: 1px;
+		font-size: 0.9em;
+		border-radius: 5px;
+		background-color: #ffd627;
+		box-shadow: none;
+		outline: none;
+		-webkit-appearance: none;
+		-moz-appearance: none;
+		appearance: none;
+		border: none;
+		:hover {
+			cursor: pointer;
+		}
 	}
-	.rules-container {
-		z-index: 120;
-		padding: 20px;
-		position: absolute;
-		left: 50%;
-		top: 50%;
-		transform: translate(-50%, -50%);
-		width: 50%;
-		border-radius: 10px;
-		background: #1c1c1c;
-		filter: drop-shadow(0px 15px 15px #000);
+
+	@media ${device.mobileS} {
+		.heading {
+			font-size: 3em;
+			font-weight: 700;
+			letter-spacing: 2px;
+			color: #ffd627;
+			text-align: center;
+			margin-left: auto;
+			margin-right: auto;
+		}
+		.rules-container {
+			z-index: 120;
+			padding: 20px;
+			position: absolute;
+			left: 50%;
+			top: 50%;
+			transform: translate(-50%, -50%);
+			width: 100%;
+			border-radius: 10px;
+			background: #1c1c1c;
+			filter: drop-shadow(0px 15px 15px #000);
+		}
+		li {
+			color: white;
+			padding: 8px;
+		}
+		#map {
+			position: fixed;
+			top: 0;
+			min-width: 100%;
+			max-height: 300vh;
+			opacity: 0.25;
+		}
 	}
-	li {
-		color: white;
-		padding: 8px;
-	}
-	#map {
-		position: fixed;
-		top: 0;
-		min-width: 100%;
-		max-height: 300vh;
-		opacity: 0.25;
+	@media ${device.desktop} {
+		.heading {
+			font-size: 3em;
+			font-weight: 700;
+			letter-spacing: 2px;
+			color: #ffd627;
+			text-align: center;
+		}
+		.rules-container {
+			z-index: 120;
+			padding: 20px;
+			position: absolute;
+			left: 50%;
+			top: 50%;
+			transform: translate(-50%, -50%);
+			width: 50%;
+			border-radius: 10px;
+			background: #1c1c1c;
+			filter: drop-shadow(0px 15px 15px #000);
+		}
+		li {
+			color: white;
+			padding: 8px;
+		}
+		#map {
+			position: fixed;
+			top: 0;
+			min-width: 100%;
+			max-height: 300vh;
+			opacity: 0.25;
+		}
 	}
 `;

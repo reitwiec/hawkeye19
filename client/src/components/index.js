@@ -4,4 +4,5 @@ export { default as PrivateRoute } from './PrivateRoute';
 export { default as PublicRoute } from './PublicRoute';
 export { default as RegionCard } from './RegionCard';
 export { default as TextField } from './TextField';
-export {default as Snackbar } from './Snackbar';
+export { default as Snackbar } from './Snackbar';
+export { default as Control } from './Control';

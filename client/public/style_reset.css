@@ -19,6 +19,24 @@ body {
 
 body {
 	background: #181818;
+	/* background: -moz-radial-gradient(
+		center,
+		ellipse cover,
+		#181818 40%,
+		#0000 100%
+	); 
+	background: -webkit-radial-gradient(
+		center,
+		ellipse cover,
+		#181818 40%,
+		#000 100%
+	);
+	background: radial-gradient(
+		ellipse at center,
+		#181818 40%,
+		#000000 100%
+	); 
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#181818', endColorstr='#000',GradientType=1 ); */
 	line-height: 1;
 }
 
