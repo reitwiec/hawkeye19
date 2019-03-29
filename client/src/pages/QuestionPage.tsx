@@ -99,7 +99,8 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 			.then(json => {
 				this.setState({
 					question: json.data.question,
-					questionID: json.data.questionID
+					questionID: json.data.questionID,
+					level: json.data.level
 				}, () => {
 					after();
 				});
@@ -115,7 +116,7 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 		fetch(`/api/getHints?question=${this.state.questionID}`)
 			.then(res => res.json())
 			.then(json => {
-				this.setState({});
+				this.setState({ hints: json.data? json.data : [] });
 			})
 	];
 
@@ -152,10 +153,12 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 		this.clearAnswer();
 		this.setState({
 			hawkMessage: hawkResponses[json.data]
-		});
+    });
 		if (json.data == 1) {
-			this.onCorrectAnswer();
-		}
+      this.onCorrectAnswer();
+		} else {
+      this.getAttempts();    
+    }
 	};
 
 	onCorrectAnswer = () => {
