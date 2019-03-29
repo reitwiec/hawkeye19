@@ -201,7 +201,12 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 			hintvisible: true,
 			statsvisible: false
 		});
-	};
+  };
+  
+	onKey = (e) => {
+		if(e.key === 'Enter')
+			this.checkAnswer();
+	}
 
 	render() {
 		return (
@@ -219,7 +224,8 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 							id="answer"
 							placeholder="Enter answer here..."
 							value={this.state.answer}
-							onChange={this.onEditAnswer}
+              onChange={this.onEditAnswer}
+              onKeyPress={this.onKey}
 						/>
 					</div>
 				</div>
@@ -229,7 +235,7 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 				<div id="hint_try">
 					<div className="tab">
 						<button
-            style={{width: '100%'}}
+            style={{ width: window.innerWidth > 999 ? '100%' : '50%' }}
 							className="tablinks"
 							onClick={this.tries}
 							id={this.state.tryvisible ? 'active' : 'inactive'}
@@ -237,6 +243,7 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 							Attempts
 						</button>
 						<button
+            style={{ width: window.innerWidth > 999 ? '100%' : '50%' }}
 							className="tablinks hintss"
 							onClick={this.hints}
 							id={this.state.hintvisible ? 'active' : 'inactive'}
@@ -334,8 +341,9 @@ export default styled(QuestionPage)`
 		}
 			#submit {
         left: 50%;
-        bottom: 15%;
-        transform: translate(-50%,50%);
+        top: calc(50vh + 170px);
+        cursor: pointer;
+        transform: translateX(-50%);
         z-index:30;
         position:absolute;
 				color: #1c1c1c;
@@ -366,7 +374,8 @@ export default styled(QuestionPage)`
   }
   #submit{
     z-index:200;
-    bottom:17%;
+    bottom:calc(50% - 230px);
+    cursor: pointer;
     width:30%;
   }
   max-width: 420px; 
@@ -391,7 +400,8 @@ export default styled(QuestionPage)`
         z-index:100;
 
         #question{
-            font-size:1.3em;
+            padding-top: 20px;
+            font-size:1. 1.3rem;
             position:absolute;
             left: 50%;
         top: 10%;
@@ -416,8 +426,8 @@ export default styled(QuestionPage)`
         #answer{
             position:absolute;
             left: 50%;
-        top: 50%;
-        transform: translate(-50%,-60%);
+        top: 10px;
+        transform: translateX(-50%);
         width:80%;
         height:2.7em;
         font-size: 0.8em;
@@ -542,6 +552,8 @@ export default styled(QuestionPage)`
   filter: drop-shadow(0px -15px 10px #000);
 }
 #level{
+  padding-bottom: 10px;
+  border-bottom: solid thin rgba(100, 0, 0, 0.2);
   font-size:1.2em;
   font-weight:700;
   color:#fff;
@@ -619,7 +631,8 @@ left:19%;
         z-index:100;
 
         #question{
-            font-size:6vw;
+            padding-top: 20px;
+            font-size: 1.3rem;
             position:absolute;
             left: 50%;
         top: 10%;
@@ -674,7 +687,7 @@ left:19%;
 		text-align:center;
         left: 50%;
         top: 50%;
-        transform: translate(-50%,65%);
+        transform: translate(-50%, 80%);
         z-index:100;
         margin-bottom:40px;s
 
@@ -772,6 +785,8 @@ left:19%;
   filter: drop-shadow(0px -15px 10px #000);
 }
 #level{
+  padding-bottom: 10px;
+  border-bottom: solid thin rgba(100, 0, 0, 0.2);
   font-size:1.2em;
   font-weight:700;
   color:#fff;
@@ -849,7 +864,8 @@ left:22%;
         z-index:100;
 
         #question{
-            font-size:5vw;
+            padding-top: 20px;
+            font-size: 1.3rem;
             position:absolute;
             left: 50%;
         top: 10%;
@@ -904,7 +920,7 @@ left:22%;
 		text-align:center;
         left: 50%;
         top: 50%;
-        transform: translate(-50%,65%);
+        transform: translate(-50%, 80%);
         z-index:100;
         margin-bottom:40px;s
 
@@ -1002,6 +1018,8 @@ left:22%;
   filter: drop-shadow(0px -15px 10px #000);
 }
 #level{
+  padding-bottom: 10px;
+  border-bottom: solid thin rgba(100, 0, 0, 0.2);
   font-size:1.2em;
   font-weight:700;
   color:#fff;
@@ -1090,7 +1108,8 @@ left:26%;
         z-index:100;
 
         #question{
-            font-size:4vw;
+            padding-top: 20px;
+            font-size: 1.3rem;
             position:absolute;
             left: 50%;
         top: 10%;
@@ -1145,7 +1164,7 @@ left:26%;
 		text-align:center;
         left: 50%;
         top: 50%;
-        transform: translate(-50%,65%);
+        transform: translate(-50%, 80%);
         z-index:100;
         margin-bottom:40px;s
 
@@ -1243,6 +1262,8 @@ left:26%;
   filter: drop-shadow(0px -15px 10px #000);
 }
 #level{
+  padding-bottom: 10px;
+  border-bottom: solid thin rgba(100, 0, 0, 0.2);
   font-size:1.2em;
   font-weight:700;
   color:#fff;
@@ -1327,7 +1348,8 @@ left:29%;
         z-index:100;
 
         #question{
-            font-size:4vw;
+            padding-top: 20px;
+            font-size: 1.3rem;
             position:absolute;
             left: 50%;
         top: 10%;
@@ -1382,7 +1404,7 @@ left:29%;
 		text-align:center;
         left: 50%;
         top: 50%;
-        transform: translate(-50%,65%);
+        transform: translate(-50%, 80%);
         z-index:100;
         margin-bottom:40px;s
 
@@ -1480,6 +1502,8 @@ left:29%;
   filter: drop-shadow(0px -15px 10px #000);
 }
 #level{
+  padding-bottom: 10px;
+  border-bottom: solid thin rgba(100, 0, 0, 0.2);
   font-size:1.2em;
   font-weight:700;
   color:#fff;
@@ -1551,7 +1575,7 @@ left:35%;
 
 
 /******************  larggetsssss ************************/
-@media ${device.desktop} {  
+@media ${device.desktop} { 
 		#map {
 			position: fixed;
 			top: 0;
@@ -1584,7 +1608,8 @@ left:35%;
         z-index:100;
 
         #question{
-            font-size:2.5vw;
+            padding-top: 20px;
+            font-size:2. 1.3rem;
             position:absolute;
             left: 50%;
         top: 10%;
@@ -1807,6 +1832,8 @@ left:35%;
   filter: drop-shadow(0px -5px 10px #000);
 }
 #level{
+  padding-bottom: 10px;
+  border-bottom: solid thin rgba(100, 100, 100, 0.2);
   font-size:1.2em;
   font-weight:700;
   color:#fff;
@@ -1879,7 +1906,7 @@ left:35%;
   font-size: 35px;
 }
 
-.fa-chess-rook:hover,.fa-question:hover,#hawklogo:hover{
+#hawklogo:hover{
   cursor:pointer;
   font-size:3.2vw;
 }
