@@ -90,8 +90,7 @@ class Dashboard extends Component<IDashBoardProps> {
 		this.getUser();
 		setTimeout(
 			() =>
-				this.setState(
-					{
+				this.setState({
 						regions: [
 							...this.state.regions.map(region => ({
 								...region,
@@ -99,19 +98,15 @@ class Dashboard extends Component<IDashBoardProps> {
 								level: this.props.UserStore[region.key]
 							}))
 						]
-					},
-					() =>
-						this.setState({
-							regions: this.state.regions.filter(region => !region.locked)
-						})
-				),
+					}),
 			500
 		);
 	}
+
 	unlock = (name, regionID) => e => {
 		this.setState({
 			redirect: (
-				<Redirect to={{ pathname: '/questions', state: { name, regionID } }} />
+				<Redirect to={{ pathname: '/question', state: { name, regionID } }} />
 			)
 		});
 	};
@@ -146,7 +141,7 @@ class Dashboard extends Component<IDashBoardProps> {
 			<div className={className}>
 				<img src={iecse} alt="" id="iecse" />
 				<h1>Dashboard</h1>
-				<h5>Logged in as {this.props.UserStore.username}</h5>
+				{/* <h5>Logged in as {this.props.UserStore.username}</h5> */}
 				<div className="regions-container">
 					{this.state.regions.map((region, i) => (
 						<div
