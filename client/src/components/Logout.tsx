@@ -35,4 +35,10 @@ class Logout extends Component<Props> {
 	}
 }
 
-export default styled(Logout)``;
+export default styled(Logout)`
+	background: #FBD626;
+	padding: 20px;
+	border: none;
+	text-transform: uppercase;
+	cursor: pointer !important;
+`;

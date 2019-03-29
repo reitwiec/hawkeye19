@@ -18,6 +18,7 @@ import LakesideRuinsIcon from '../components/assets/lakeside_ruins.svg';
 import AshValleyIcon from '../components/assets/ash_valley.svg';
 import EdenIcon from '../components/assets/eden.svg';
 import { Redirect } from 'react-router-dom';
+import { Logout } from '../components';
 
 const size = {
 	mobileS: '320px',
@@ -167,7 +168,7 @@ class Dashboard extends Component<IDashBoardProps> {
 				<div id="control">
 					<div id="signals">
 						<i className="fas fa-question" />
-						<img src={logo} id="hawklogo" alt="" />
+						<Logout className="logout-btn" />
 						<i className="fas fa-chess-rook" />
 					</div>
 					<img src={sideq} alt="" id="sideq" />
@@ -178,8 +179,18 @@ class Dashboard extends Component<IDashBoardProps> {
 }
 
 export default styled(Dashboard)`
+
+	.logout-btn {
+
+		position: absolute;
+		bottom: 10px;
+		transform: translate(-50%, 0%);
+		z-index: 102;
+		left: 50%;
+	}
+
 	@media ${device.mobileS} {
-		max-width: 768px;
+
 		.locked {
 			user-select: none;
 			filter: gray; /* IE6-9 */
@@ -278,9 +289,6 @@ export default styled(Dashboard)`
 		#control {
 			z-index: -65;
 			/* background:red; */
-			position: relative;
-			top: 0px;
-			height: 19vh;
 		}
 		.fa-question {
 			font-size: 8vw;
@@ -377,6 +385,7 @@ export default styled(Dashboard)`
 		.regions-container {
 			margin-top: 5%;
 		}
+
 		#hawklogo {
 			width: 4%;
 			background: #181818;
