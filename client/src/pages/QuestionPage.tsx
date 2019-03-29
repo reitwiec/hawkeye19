@@ -162,8 +162,12 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 	};
 
 	onCorrectAnswer = () => {
-		this.getQuestion();
-		this.getAttempts();
+    if(this.state.level === 4) {
+      this.props.history.push('/dashboard')
+    } else {
+      this.getQuestion();
+      this.getAttempts();
+    }
 	}
 
 
