@@ -104,6 +104,7 @@ class Dashboard extends Component<IDashBoardProps> {
 	}
 
 	unlock = (name, regionID) => e => {
+		this.props.UserStore.setRegion(regionID);
 		this.setState({
 			redirect: (
 				<Redirect to={{ pathname: '/question', state: { name, regionID } }} />

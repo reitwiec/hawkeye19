@@ -11,6 +11,8 @@ class UserStore {
 	@observable region5 = 0;
 	@observable isVerified = 0;
 
+	@observable activeRegion = null;
+
 	@action setCurrentUser = user => {
 		this.username = user.username;
 		this.email = user.email;
@@ -34,6 +36,8 @@ class UserStore {
 		this.region5 = 0;
 		this.isVerified = 0;
 	};
+
+	@action setRegion = region => this.activeRegion = region;
 }
 
 export default new UserStore();

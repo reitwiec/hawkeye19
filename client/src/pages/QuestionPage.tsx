@@ -43,7 +43,8 @@ const stats = ['Tries : 6969', 'On-par : 0', 'Leading : 1', 'Trailing : 69'];
 interface IQuestionPageProps {
 	className: string;
 	location: { state: { name: string; regionIndex: number } };
-	UserStore: UserStore;
+  UserStore: UserStore;
+  history: any;
 }
 
 interface IQuestionPageState {
@@ -68,7 +69,7 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 		tryvisible: true,
 		hintvisible: false,
 		statsvisible: false,
-		level: this.props.UserStore[`region${this.props.location.state.regionIndex}`],
+		level: this.props.UserStore[`region${this.props.UserStore.activeRegion}`],
 		question: '',
 		questionID: null,
 		answer: '',
@@ -76,21 +77,24 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 		hints: [],
 		hawkMessage: '',
 		region: this.props.location.state.name,
-		regionIndex: this.props.location.state.regionIndex,
+		regionIndex: this.props.UserStore.activeRegion,
 		barOpen: false,
 		snackbarMessage: ''
 	};
 
 	componentDidMount() {
-		this.getQuestion(() => {
-			this.getHints();
-			this.getAttempts()
-		});
+    if (!this.props.UserStore.activeRegion)
+      this.props.history.push('/dashboard');
+    else
+      this.getQuestion(() => {
+        this.getHints();
+        this.getAttempts()
+      });
 	}
 
 	getQuestion = (after = () => {}) => {
-		console.log(this.state.regionIndex);
-		fetch(`/api/getQuestion?region=${this.state.regionIndex}`)
+		console.log(this.props.UserStore.activeRegion);
+		fetch(`/api/getQuestion?region=${this.props.UserStore.activeRegion}`)
 			.then(res => res.json())
 			.then(json => {
 				this.setState({
@@ -131,7 +135,7 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify({
-					regionID: this.state.regionIndex,
+					regionID: this.props.UserStore.activeRegion,
 					answer: this.state.answer
 				})
 			})
