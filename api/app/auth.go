@@ -418,7 +418,7 @@ func (hawk *App) verifyUser(w http.ResponseWriter, r *http.Request) {
 	*/
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			ResponseWriter(false, "Wrong data", nil, http.StatusOK, w)
+			fmt.Fprintf(w, "%s", "<html><h3>Incorrect data.</h3></html>")
 			return
 		}
 		LogRequest(r, ERROR, err.Error())
@@ -435,5 +435,6 @@ func (hawk *App) verifyUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tx.Commit()
-	ResponseWriter(true, "User verified", nil, http.StatusOK, w)
+	fmt.Fprintf(w, "%s", "<html><h3>You have been verified.</h3></html>")
+	//ResponseWriter(true, "User verified", nil, http.StatusOK, w)
 }
