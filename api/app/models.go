@@ -64,10 +64,10 @@ type User struct {
 	Region4 int `json:"region4" `
 	Region5 int `json:"region5"` //linear
 
-	Points          int    `json:"points"`
-	SidequestOrder  string `json:"sideQuestOrder"`
-	UnlockOrder     string `json:"unlockOrder"`
-	SideQuestPoints int    `json:"sideQuestPoints"`
+	Points          int    `gorm:"not null" json:"points"`
+	SidequestOrder  string `gorm:"not null" json:"sideQuestOrder"`
+	UnlockOrder     string `gorm:"not null" json:"unlockOrder"`
+	SideQuestPoints int    `gorm:"not null" json:"sideQuestPoints"`
 }
 
 type Help struct {

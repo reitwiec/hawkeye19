@@ -66,6 +66,7 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 
 	if level == RegionComplete {
 		ResponseWriter(false, "Region has been completed", nil, http.StatusBadRequest, w)
+		return
 	}
 
 	//sanitize answer
@@ -211,9 +212,9 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 		}
-		tx.Commit()
 
 	}
+	tx.Commit()
 	ResponseWriter(true, "Answer status", status, http.StatusOK, w)
 }
 

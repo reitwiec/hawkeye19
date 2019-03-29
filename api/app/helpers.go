@@ -245,7 +245,7 @@ func SideQuestOrder() string {
 }
 
 func UnlockOrder() string {
-	permutations := [6]string{
+	permutations := [2]string{
 		"0,2,3,4,5",
 		//"0,2,4,3,5",
 		"0,3,2,4,5",
@@ -254,12 +254,13 @@ func UnlockOrder() string {
 		//"0,4,3,2,5",
 	}
 	rand.Seed(time.Now().UnixNano())
-	n := rand.Intn(6)
+	n := rand.Intn(2)
 	return permutations[n]
 }
 
 func GetNextRegion(unlockOrder string) uint8 {
 	//traverse till non 0 number is encountered
+
 	l := len(unlockOrder)
 	for i := 0; i < l; i++ {
 		if unlockOrder[i] != ',' && unlockOrder[i] != '0' {
