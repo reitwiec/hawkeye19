@@ -372,8 +372,7 @@ func (hawk *App) getStats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	currStats.TotalPlayers += 1
-	currStats.Leading += 1
+	
 	currStats.Trailing = currStats.TotalPlayers - (currStats.Leading + currStats.SameLevel)
 	currStats.SameLevel -= 1 //counts currUser also
 	ResponseWriter(true, "Current stats", currStats, http.StatusOK, w)
