@@ -51,6 +51,11 @@ class LoginPage extends Component<Props> {
 		this.setState({ [name]: value });
 	};
 
+	onKey = (e) => {
+		if(e.key === 'Enter')
+			this.login();
+	}
+
 	login = () => {
 		if (this.state.username === '' || this.state.password === '') return;
 		const { loggedIn, ...loginData } = this.state;
@@ -92,6 +97,7 @@ class LoginPage extends Component<Props> {
 							name="username"
 							placeholder="Username"
 							onChange={this.onChange}
+							onKeyPress={this.onKey}
 						/>
 						<br />
 						<TextField
@@ -99,6 +105,7 @@ class LoginPage extends Component<Props> {
 							type="password"
 							placeholder="Password"
 							onChange={this.onChange}
+							onKeyPress={this.onKey}
 						/>
 						<br />
 					</div>

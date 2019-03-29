@@ -5,11 +5,11 @@ class SupportPage extends Component {
 	render() {
 		return (
 			<div className={this.props.className}>
-				<div class="form__group">
+				<div className="form__group">
 					<h1>Send us your queries!</h1>
 					<textarea
 						rows="7"
-						class="form__input"
+						className="form__input"
 						id="textarea-disabled"
 						type="text"
 						placeholder="Write to us here"

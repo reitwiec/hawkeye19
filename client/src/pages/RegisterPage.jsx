@@ -68,6 +68,16 @@ class RegisterPage extends Component {
 
 	onSubmit = () => {
 		// checkerror();
+		if(this.state.formData.name === ''
+		|| this.state.formData.username === ''
+		|| this.state.formData.password === ''
+		|| this.state.formData.confirm_password === ''
+		|| this.state.formData.email === ''
+		|| this.state.formData.tel === ''
+		|| this.state.formData.college === '') {
+			this.openSnackbar('Please fill all field');
+			return;
+		}
 		if (this.state.isVerified) {
 			// Remove error keys from formData
 			const postData = Object.entries(this.state.formData)
@@ -91,7 +101,7 @@ class RegisterPage extends Component {
 									redirect: true
 								}), 1000);
 							} else {
-								this.openSnackbar('Registration failed')
+								this.openSnackbar(json.msg)
 								this.captchaDemo.reset();
 							} 
 						})
@@ -110,6 +120,11 @@ class RegisterPage extends Component {
 		setTimeout(() => this.setState({ barOpen: false, snackbarMessage: '' }), 3000);
 	};
 
+	onKey = (e) => {
+		if(e.key === 'Enter')
+			this.onSubmit()
+	}
+
 	render() {
 
 		return (
@@ -122,29 +137,34 @@ class RegisterPage extends Component {
 							name="name"
 							placeholder="Name"
 							onChange={this.onChange}
+							onKeyPress={this.onKey}
 						/>
 						<TextField
 							name="username"
 							placeholder="Username"
 							onChange={this.onChange}
+							onKeyPress={this.onKey}
 						/>
 						<TextField
 							name="password"
 							type="password"
 							placeholder="Password"
 							onChange={this.onChange}
+							onKeyPress={this.onKey}
 						/>
 						<TextField
 							name="confirm_password"
 							type="password"
 							placeholder="Confirm password"
 							onChange={this.onChange}
+							onKeyPress={this.onKey}
 						/>
 						<TextField
 							name="email"
 							type="email"
 							placeholder="Email"
 							onChange={this.onChange}
+							onKeyPress={this.onKey}
 							validation={v => (validator.isEmail(v) ? '' : 'Invalid Email')}
 							validateOnChange
 						/>
@@ -152,6 +172,7 @@ class RegisterPage extends Component {
 							name="tel"
 							placeholder="Mobile Number"
 							onChange={this.onChange}
+							onKeyPress={this.onKey}
 							validation={v =>
 								validator.isMobilePhone(v) ? '' : 'Invalid Number'
 							}
@@ -161,9 +182,10 @@ class RegisterPage extends Component {
 							name="college"
 							placeholder="College"
 							onChange={this.onChange}
+							onKeyPress={this.onKey}
 						/>
 					</div>
-					<div class="center-captcha">
+					<div className="center-captcha">
 						<Recaptcha
 							id="recap"
 							ref={el => {
