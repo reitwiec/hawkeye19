@@ -6,6 +6,7 @@ require (
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/gorilla/mux v1.7.0
 	github.com/gorilla/securecookie v1.1.1
+	github.com/haisum/recaptcha v0.0.0-20170327142240-7d3b8053900e
 	github.com/jinzhu/gorm v1.9.2
 	github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a // indirect
 	github.com/leodido/go-urn v1.1.0 // indirect
