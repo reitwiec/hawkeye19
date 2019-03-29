@@ -400,7 +400,8 @@ export default styled(QuestionPage)`
         z-index:100;
 
         #question{
-            font-size:1.3em;
+            padding-top: 20px;
+            font-size:1. 1.3rem;
             position:absolute;
             left: 50%;
         top: 10%;
@@ -630,7 +631,8 @@ left:19%;
         z-index:100;
 
         #question{
-            font-size:6vw;
+            padding-top: 20px;
+            font-size: 1.3rem;
             position:absolute;
             left: 50%;
         top: 10%;
@@ -862,7 +864,8 @@ left:22%;
         z-index:100;
 
         #question{
-            font-size:5vw;
+            padding-top: 20px;
+            font-size: 1.3rem;
             position:absolute;
             left: 50%;
         top: 10%;
@@ -1105,7 +1108,8 @@ left:26%;
         z-index:100;
 
         #question{
-            font-size:4vw;
+            padding-top: 20px;
+            font-size: 1.3rem;
             position:absolute;
             left: 50%;
         top: 10%;
@@ -1344,7 +1348,8 @@ left:29%;
         z-index:100;
 
         #question{
-            font-size:4vw;
+            padding-top: 20px;
+            font-size: 1.3rem;
             position:absolute;
             left: 50%;
         top: 10%;
@@ -1603,7 +1608,8 @@ left:35%;
         z-index:100;
 
         #question{
-            font-size:2.5vw;
+            padding-top: 20px;
+            font-size:2. 1.3rem;
             position:absolute;
             left: 50%;
         top: 10%;
