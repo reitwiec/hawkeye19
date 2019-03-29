@@ -210,11 +210,11 @@ class RegisterPage extends Component {
 				</div>
 				<img src={hawk} alt="" id="hawk" />
 				<img src={logo} alt="" id="logo" />
-				<div id="bg">
+				{window.innerWidth > 500 && <div id="bg">
 					<img src={pcb} alt="" id="pcb1" />
 					<img src={pcb} alt="" id="pcb2" />
 					<img src={pcb1} alt="" id="pcbdesk" />
-				</div>
+				</div>}
 			<Snackbar open={this.state.barOpen} message={this.state.snackbarMessage}/>
 			{ this.state.redirect && <Redirect to="/"/>}
 			</div>
@@ -287,12 +287,13 @@ export default styled(RegisterPage)`
 
 			background: #1c1c1c;
 			filter: drop-shadow(0px 15px 15px #000);
-			width: 80%;
+			width: 100%;
+			height: calc(100vh - 45px);
+			overflow: scroll;
 			position: absolute;
-			height: auto;
 			text-align: center;
 			left: 50%;
-			top: 50%;
+			top: calc(50% + 45px);
 			transform: translate(-50%, -50%);
 			#inputs {
 				${TextField} {
