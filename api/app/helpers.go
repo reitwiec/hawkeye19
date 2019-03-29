@@ -3,6 +3,7 @@ package app
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/jinzhu/gorm"
 	"github.com/texttheater/golang-levenshtein/levenshtein"
 	"io/ioutil"
@@ -322,13 +323,17 @@ func SendVUEmail(email string, token string, name string) error {
 func LogRequest(r *http.Request, status string, err string) {
 
 	body, _ := ioutil.ReadAll(r.Body)
+	m := make(map[string]string)
+	if err := json.Unmarshal(body,&m); err != nil {
+	fmt.Printf("Error:%s\n",err)
+	return
+	}
+	delete(m,"password")
 	logInfo := LogInfo{
 		Timestamp: time.Now(),
 		Method:    r.Method,
 		URL:       r.URL.Path,
-		//@TODO add body after verified
-		//Body:      string(body),
-		Body: "",
+		Body:      fmt.Sprintf("%#v\n",m),
 		User: r.Context().Value("User"),
 	}
 	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
