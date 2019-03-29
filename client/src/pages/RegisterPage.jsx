@@ -288,14 +288,14 @@ export default styled(RegisterPage)`
 			background: #1c1c1c;
 			filter: drop-shadow(0px 15px 15px #000);
 			width: 100%;
-			height: calc(100vh - 35px);
+			height: calc(100vh - 65px);
 			padding-bottom: 50px;
 			box-sizing: border-box;
 			overflow: scroll;
 			position: absolute;
 			text-align: center;
 			left: 50%;
-			top: calc(50% + 35px);
+			top: calc(50% + 65px);
 			transform: translate(-50%, -50%);
 			#inputs {
 				${TextField} {
