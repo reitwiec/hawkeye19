@@ -117,7 +117,7 @@ class TutPage extends Component<Props, IState> {
 	};
 
 	showww1 = () => {
-		let x = `When you solve all five questions in a region, a new region is unlocked for you. Once you complete all the questions in the four main regions you proceed to EDEN. Your objective is to solve the most number of questions in a fair manner...`;
+		let x = `When you solve all four questions in a region, a new region is unlocked for you. Once you complete all the questions in the four main regions you proceed to EDEN. Your objective is to solve the most number of questions in a fair manner...`;
 
 		this.setState({
 			cursor1: this.state.cursor1 + 1,
@@ -171,7 +171,7 @@ class TutPage extends Component<Props, IState> {
 
 	showww2 = () => {
 		let x =
-			'Every 8 hours after the game starts, a new region will be unlocked for you. However, EDEN, the final region, will not be unlocked until you complete the four main regions...';
+			'EDEN, the final region, will not be unlocked until you complete the four main regions...';
 		this.setState({
 			cursor3: this.state.cursor3 + 1,
 			display3: this.state.display3 + x[this.state.cursor3]
@@ -434,7 +434,7 @@ export default styled(TutPage)`
 			margin-left: auto;
 			margin-right: auto;
 			line-height: 20px;
-			font-size: 0.7em;
+			font-size: 0.8em;
 			letter-spacing: 1.7px;
 			padding: 0px 20px 0px 20px;
 		}
