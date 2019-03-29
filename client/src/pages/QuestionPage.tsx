@@ -426,8 +426,8 @@ export default styled(QuestionPage)`
         #answer{
             position:absolute;
             left: 50%;
-        top: 50%;
-        transform: translate(-50%, 80%);
+        top: 10px;
+        transform: translateX(-50%);
         width:80%;
         height:2.7em;
         font-size: 0.8em;
