@@ -49,7 +49,7 @@ class App extends Component {
 									component={TutPage}
 									auth={this.loggedIn}
 								/>
-								<PublicRoute
+								<PrivateRoute
 									exact
 									path="/rules"
 									component={Rules}

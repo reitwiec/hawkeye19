@@ -35,6 +35,7 @@ const SnackbarWrapper = styled.div`
 	opacity: 0;
 	transition: all 0.25s ease;
 	margin-bottom: -2em;
+	z-index: 999;
 
 	${(props: ISnackbarProps) =>
 		props.open

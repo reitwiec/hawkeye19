@@ -5,8 +5,12 @@ import media from '../components/theme/media';
 import logo from '../components/assets/hawk_logo.png';
 import sideq from '../components/assets/sideq.svg';
 import { inject, observer } from 'mobx-react';
+import map from '../components/assets/mapbg.png';
 import { Button } from '../components';
+import { Link } from 'react-router-dom';
 import Logout from '../components/Logout';
+import { UserStore } from '../stores/User';
+import { Snackbar } from '../components';
 
 const size = {
 	mobileS: '320px',
@@ -39,6 +43,7 @@ const stats = ['Tries : 6969', 'On-par : 0', 'Leading : 1', 'Trailing : 69'];
 interface IQuestionPageProps {
 	className: string;
 	location: { state: { name: string; regionIndex: number } };
+	UserStore: UserStore;
 }
 
 interface IQuestionPageState {
@@ -52,6 +57,8 @@ interface IQuestionPageState {
 	attempts: string[];
 	hints: string[];
 	hawkMessage: string;
+	barOpen: boolean;
+	snackbarMessage: string;
 }
 
 @inject('UserStore')
@@ -61,7 +68,7 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 		tryvisible: true,
 		hintvisible: false,
 		statsvisible: false,
-		level: 1,
+		level: this.props.UserStore[`region${this.props.location.state.regionIndex}`],
 		question: '',
 		questionID: null,
 		answer: '',
@@ -69,22 +76,28 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 		hints: [],
 		hawkMessage: '',
 		region: this.props.location.state.name,
-		regionIndex: this.props.location.state.regionIndex
+		regionIndex: this.props.location.state.regionIndex,
+		barOpen: false,
+		snackbarMessage: ''
 	};
 
 	componentDidMount() {
-		this.getQuestion();
-		this.getHints();
-		this.getAttempts();
+		this.getQuestion(() => {
+			this.getHints();
+			this.getAttempts()
+		});
 	}
 
-	getQuestion = () => {
+	getQuestion = (after = () => {}) => {
+		console.log(this.state.regionIndex);
 		fetch(`/api/getQuestion?region=${this.state.regionIndex}`)
 			.then(res => res.json())
 			.then(json => {
 				this.setState({
 					question: json.data.question,
 					questionID: json.data.questionID
+				}, () => {
+					after();
 				});
 			})
 			.catch(() => {});
@@ -106,33 +119,49 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 		fetch(`/api/getRecentTries?question=${this.state.questionID}`)
 		.then(res => res.json())
 		.then(json => {
-			console.log(json);
 			this.setState({ attempts: json.data? json.data : [] })
 		});
 	};
 
 	checkAnswer = () => {
-		fetch(`/api/checkAnswer`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				regionID: this.state.regionIndex,
-				answer: this.state.answer
+		if (this.props.UserStore.isVerified == 1) {
+			fetch(`/api/checkAnswer`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					regionID: this.state.regionIndex,
+					answer: this.state.answer
+				})
 			})
-		})
-			.then(res => res.json())
-			.then(json => {
-				this.getAttempts();
-				this.clearAnswer();
-				this.setState({
-					hawkMessage: hawkResponses[json.data]
+				.then(res => res.json())
+				.then(json => {
+					this.onSubmit(json);
 				});
-				if (json.data == 1) {
-					this.getQuestion();
-				}
-			});
+		} else {
+			this.openSnackbar('Please verify your email');
+		}
+	};
+
+	onSubmit = (json) => {
+		this.clearAnswer();
+		this.setState({
+			hawkMessage: hawkResponses[json.data]
+		});
+		if (json.data == 1) {
+			this.onCorrectAnswer();
+		}
+	};
+
+	onCorrectAnswer = () => {
+		this.getQuestion();
+		this.getAttempts();
+	}
+
+
+	openSnackbar = (message) => {
+		this.setState({ barOpen: true, snackbarMessage: message });
 	};
 
 	onEditAnswer = e => {
@@ -247,15 +276,16 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 					</div>
 				</div>
 				<span id="status">{this.state.hawkMessage}</span>
-
 				<div id="control">
 					<div id="signals">
-						<i className="fas fa-question" />
+						<Link to="/rules"><i className="fas fa-question" /></Link>
 						<img src={logo} id="hawklogo" alt="" />
-						<i className="fas fa-chess-rook" />
+						<i className="fas fa-chess-rook" onClick={() => alert('Sidequest is currently locked. It will be accessible 12 hours into the game...')}/>
 					</div>
 					<img src={sideq} alt="" id="sideq" />
+					<img src={map} alt="" id="map" />
 				</div>
+				<Snackbar open={this.state.barOpen} message={this.state.snackbarMessage}/>
 			</div>
 		);
 	}
@@ -270,7 +300,6 @@ const drag = keyframes`
 }
 100%{
 	opacity:1;
-
 }
 `;
 
@@ -282,6 +311,14 @@ export default styled(QuestionPage)`
         top: 8%;
         transform: translate(-50%,50%);
       }
+		#map {
+			position: fixed;
+			top: 0;
+			z-index: -10;
+			min-width: 100%;
+			max-height: 200vh;
+			opacity: 0.25;
+		}
 			#submit {
         left: 50%;
         bottom: 15%;
@@ -292,6 +329,7 @@ export default styled(QuestionPage)`
 				font-weight: 500;
 				background: #ffd627;
 				width: 20%;
+				max-width: 150px;
 				height: 35px;
 				padding: 10px;
 				padding-top: 7px;
@@ -544,28 +582,8 @@ left:19%;
 }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /******************  LARGE MOBILE  ************************/
-@media ${device.mobileL} {  
+@media ${device.mobileL} {
   max-width: 580px; 
 #name{
     text-align:center;
@@ -791,21 +809,8 @@ left:22%;
   bottom:0.3vh;
   /* transform: translate(-50%,0%); */
         padding:15px;
+	}
 }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /******************  TABLET  ************************/
 @media ${device.tablet} {  
@@ -1534,6 +1539,13 @@ left:35%;
 
 /******************  larggetsssss ************************/
 @media ${device.desktop} {  
+		#map {
+			position: fixed;
+			top: 0;
+			min-width: 100%;
+			max-height: 400vh;
+			opacity: 0.25;
+		}
   .hintnew{
   display:block;
 }

@@ -5,3 +5,4 @@ DROP TABLE hints;
 DROP TABLE questions;
 DROP TABLE forgot_pass_reqs;
 DROP TABLE helps;
+DROP TABLE verifications;

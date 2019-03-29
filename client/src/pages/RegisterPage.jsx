@@ -84,15 +84,19 @@ class RegisterPage extends Component {
 				.then(res => res.json())
 				.then(json => { 
 					if (json.success) {
-						this.openSnackbar('Registered successfully')
-						this.setState({
+						this.openSnackbar('Registered - Please verify your email');
+						setTimeout(() => this.setState({
 							redirect: true
-						});
+						}), 1000);
 					} else {
 						this.openSnackbar('Registration failed')
+						this.captchaDemo.reset();
 					} 
 				})
-				.catch(() => this.openSnackbar('Registration failed'));
+				.catch(() => {
+					this.openSnackbar('Registration failed');
+					this.captchaDemo.reset();
+				});
 		} else {
 			this.openSnackbar('Please verify that you are a human')
 		}
