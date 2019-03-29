@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	SimilarStringRatio = 0.75
+	SimilarStringRatio = 0.65
 	CorrectAnswer      = 1
 	CloseAnswer        = 2
 	IncorrectAnswer    = 3

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-sql-driver/mysql"
-	"github.com/haisum/recaptcha"
 	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/go-playground/validator.v9"
@@ -19,8 +18,16 @@ type RegisterUser struct {
 }
 
 func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
+
 	var captchaUser RegisterUser
+
 	err := json.NewDecoder(r.Body).Decode(&captchaUser)
+
+	if err != nil {
+		ResponseWriter(false, "Bad Request", nil, http.StatusBadRequest, w)
+		return
+	}
+	/*
 	re := recaptcha.R{
 		Secret: "6LftZZoUAAAAAPXZ3nAqHd4jzIbHBNxfMFpuWfMe",
 	}
@@ -30,10 +37,7 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "Captcha failed. Please reload the page and try again", nil, http.StatusBadRequest, w)
 		return
 	}
-	if err != nil {
-		ResponseWriter(false, "Bad Request", nil, http.StatusBadRequest, w)
-		return
-	}
+	*/
 	user := captchaUser.User
 	if !hawk.checkEmail(user.Email) || !hawk.checkUsername(user.Username) {
 		ResponseWriter(false, "Email or Username already exists", nil, http.StatusOK, w)
@@ -145,8 +149,10 @@ func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	user := User{}
+	fmt.Println (formData.Username)
 	//check if username exists
 	err = hawk.DB.Where("username = ?", strings.TrimSpace(formData.Username)).First(&user).Error
+	fmt.Println(user.Username)
 	if gorm.IsRecordNotFoundError(err) {
 		ResponseWriter(false, "User not registered", nil, http.StatusOK, w)
 		return
@@ -289,8 +295,9 @@ func (hawk *App) resetPassword(w http.ResponseWriter, r *http.Request) {
 	//else abort
 	formData := ResetPassReq{}
 	err := json.NewDecoder(r.Body).Decode(&formData)
+	fmt.Println (r.Body)
 	if err != nil {
-		ResponseWriter(false, "Could not decode form data", nil, http.StatusBadRequest, w)
+		ResponseWriter(false, "Could not decode form data", err.Error(), http.StatusBadRequest, w)
 		return
 	}
 	//trim spaces
@@ -411,7 +418,7 @@ func (hawk *App) verifyUser(w http.ResponseWriter, r *http.Request) {
 	*/
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			ResponseWriter(false, "Wrong data", nil, http.StatusOK, w)
+			fmt.Fprintf(w, "%s", "<html><h3>Incorrect data.</h3></html>")
 			return
 		}
 		LogRequest(r, ERROR, err.Error())
@@ -428,5 +435,6 @@ func (hawk *App) verifyUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tx.Commit()
-	ResponseWriter(true, "User verified", nil, http.StatusOK, w)
+	fmt.Fprintf(w, "%s", "<html><h3>You have been verified.</h3></html>")
+	//ResponseWriter(true, "User verified", nil, http.StatusOK, w)
 }

@@ -69,7 +69,7 @@ func (hawk *App) addHint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tx.Commit()
-	ResponseWriter(true, "Hint added", nil, http.StatusOK, w)
+	ResponseWriter(true, "Hint added", newHint.ID, http.StatusOK, w)
 }
 
 func (hawk *App) editQuestion(w http.ResponseWriter, r *http.Request) {
