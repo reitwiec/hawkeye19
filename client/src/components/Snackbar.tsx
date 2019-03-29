@@ -37,6 +37,10 @@ const SnackbarWrapper = styled.div`
 	margin-bottom: -2em;
 	z-index: 999;
 
+	@media only screen and (max-width: 500px) {
+		font-size: 0.8rem;
+	}
+
 	${(props: ISnackbarProps) =>
 		props.open
 			? css`

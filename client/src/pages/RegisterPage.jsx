@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import styled, { keyframes } from 'styled-components';
 import validator from 'validator';
 import Recaptcha from 'react-recaptcha';
-import media from '../components/theme/media';
 import logo from '../components/assets/iecse_logo.png';
 import hawk from '../components/assets/hawk_logo.png';
 import pcb from '../components/assets/pcbdesign.png';
@@ -44,7 +43,8 @@ class RegisterPage extends Component {
 		isVerified: false,
 		snackbarMessage: '',
 		barOpen: false,
-		redirect: false
+		redirect: false,
+		sending: false
 	};
 
 	onChange = (name, value, error) => {
@@ -75,28 +75,31 @@ class RegisterPage extends Component {
 					return { [k]: v.value };
 				})
 				.reduce((acc, val) => Object.assign(acc, val));
-
-			fetch('/api/addUser', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ user: postData, captcha: this.state.token})
-			})
-				.then(res => res.json())
-				.then(json => { 
-					if (json.success) {
-						this.openSnackbar('Registered - Please verify your email');
-						setTimeout(() => this.setState({
-							redirect: true
-						}), 1000);
-					} else {
-						this.openSnackbar('Registration failed')
-						this.captchaDemo.reset();
-					} 
+			
+				this.setState({sending: true}, () => {
+					fetch('/api/addUser', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ user: postData, captcha: this.state.token})
+					})
+						.then(res => res.json())
+						.then(json => { 
+							this.setState({sending: false});
+							if (json.success) {
+								this.openSnackbar('Registered - Please verify your email');
+								setTimeout(() => this.setState({
+									redirect: true
+								}), 1000);
+							} else {
+								this.openSnackbar('Registration failed')
+								this.captchaDemo.reset();
+							} 
+						})
+						.catch(() => {
+							this.openSnackbar('Registration failed');
+							this.captchaDemo.reset();
+						});
 				})
-				.catch(() => {
-					this.openSnackbar('Registration failed');
-					this.captchaDemo.reset();
-				});
 		} else {
 			this.openSnackbar('Please verify that you are a human')
 		}
@@ -104,7 +107,7 @@ class RegisterPage extends Component {
 
 	openSnackbar = (message) => {
 		this.setState({ barOpen: true, snackbarMessage: message });
-		setTimeout(() => this.setState({ barOpen: false, snackbarMessage: '' }), 1000);
+		setTimeout(() => this.setState({ barOpen: false, snackbarMessage: '' }), 3000);
 	};
 
 	render() {
@@ -160,24 +163,26 @@ class RegisterPage extends Component {
 							onChange={this.onChange}
 						/>
 					</div>
-					<Recaptcha
-						id="recap"
-						ref={el => {
-							this.captchaDemo = el;
-						}}
-						size="normal"
-						theme="dark"
-						render="explicit"
-						sitekey="6LftZZoUAAAAAJPGqjgVjZ0ZI9aPQ7RJWKvocH1g"
-						onloadCallback={this.recaptchaLoaded}
-						verifyCallback={this.verifyCallback}
-					/>
-					<Button onClick={this.onSubmit} id="regbtn">
-						Register
+					<div class="center-captcha">
+						<Recaptcha
+							id="recap"
+							ref={el => {
+								this.captchaDemo = el;
+							}}
+							size="normal"
+							theme="dark"
+							render="explicit"
+							sitekey="6LftZZoUAAAAAJPGqjgVjZ0ZI9aPQ7RJWKvocH1g"
+							onloadCallback={this.recaptchaLoaded}
+							verifyCallback={this.verifyCallback}
+						/>
+					</div>
+					<Button onClick={this.onSubmit} id="regbtn" disabled={this.state.sending}>
+						{this.state.sending ? 'Sending...' : 'Register'}
 					</Button>
 					<span>
 					<br/>
-					<Link to="/" style={{ 'color': 'white', 'text-decoration': 'none', 'font-weight': '500', 'font-size': '1.2em'}}>
+					<Link to="/" style={{ 'color': 'white', 'textDecoration': 'none', 'fontWeight': '500', 'fontSize': '1.2em'}}>
 						Already have an account? Log in
 					</Link></span>
 				</div>
@@ -212,12 +217,15 @@ const flash = keyframes`
 `;
 
 export default styled(RegisterPage)`
+	.center-captcha {
+		display: flex;
+		justify-content: center;
+	}
 	/* #recap.rc-anchor-dark.rc-anchor-normal {
 		border: none !important;
 	}*/
 	#g-recaptcha {
-		margin: 0 auto;
-		display: table;
+		transform: scale(0.7);
 	}
 
 	#pcbdesk {
@@ -242,7 +250,7 @@ export default styled(RegisterPage)`
 			width: 8%;
 		}
 		#box {
-			padding-top: 10px;
+			padding 10px;
 			h1 {
 				color: #ffd627;
 				margin: 10px 0 3px 0;
@@ -259,7 +267,7 @@ export default styled(RegisterPage)`
 			filter: drop-shadow(0px 15px 15px #000);
 			width: 80%;
 			position: absolute;
-			height: 520px;
+			height: auto;
 			text-align: center;
 			left: 50%;
 			top: 50%;
@@ -344,11 +352,7 @@ export default styled(RegisterPage)`
 	/*************tablettttt******************/
 	@media ${device.tablet} {
 		#g-recaptcha {
-			position: absolute;
-			margin-left: 15%;
-			bottom: 5%;
 			transform: scale(0.7);
-			transform-origin: 0 0;
 		}
 		max-width: 1000px;
 		#hawk {
@@ -368,7 +372,7 @@ export default styled(RegisterPage)`
 			width: 5%;
 		}
 		#box {
-			padding-top: 10px;
+			padding: 10px;
 			h1 {
 				color: #ffd627;
 				margin: 10px 0 3px 0;
@@ -385,7 +389,7 @@ export default styled(RegisterPage)`
 			filter: drop-shadow(0px 15px 15px #000);
 			width: 40%;
 			position: absolute;
-			height: 520px;
+			height: auto;
 			text-align: center;
 			left: 50%;
 			top: 50%;
@@ -469,9 +473,6 @@ export default styled(RegisterPage)`
 	/*************desktop******************/
 	@media ${device.desktop} {
 		#g-recaptcha {
-			margin-bottom: -30px;
-			margin-left: 25%;
-			/* display: table; */
 		}
 		#pcbdesk {
 			display: block;
@@ -503,7 +504,7 @@ export default styled(RegisterPage)`
 			width: 5%;
 		}
 		#box {
-			padding-top: 10px;
+			padding: 10px;
 			h1 {
 				color: #ffd627;
 				margin: 10px 0 3px 0;
@@ -520,7 +521,7 @@ export default styled(RegisterPage)`
 			filter: drop-shadow(0px 15px 15px #000);
 			width: 30%;
 			position: absolute;
-			height: 520px;
+			height: auto;
 			text-align: center;
 			left: 50%;
 			top: 50%;

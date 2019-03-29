@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import {
 	BrowserRouter as Router,
-	Redirect,
-	Route,
 	Switch
 } from 'react-router-dom';
 import { CookiesProvider, withCookies } from 'react-cookie';

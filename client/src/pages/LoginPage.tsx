@@ -25,7 +25,7 @@ export const device = {
 	laptopL: `(min-width: ${size.laptopL})`,
 	desktop: `(min-width: ${size.desktop})`
 };
-
+import { Snackbar } from '../components';
 import { Link, Redirect } from 'react-router-dom';
 
 import { Button, TextField } from '../components';
@@ -41,7 +41,10 @@ class LoginPage extends Component<Props> {
 	state = {
 		username: '',
 		password: '',
-		loggedIn: false
+		loggedIn: false,
+		barOpen: false,
+		snackbarMessage: '',
+		sending: false
 	};
 
 	onChange = (name, value) => {
@@ -49,19 +52,31 @@ class LoginPage extends Component<Props> {
 	};
 
 	login = () => {
+		if (this.state.username === '' || this.state.password === '') return;
 		const { loggedIn, ...loginData } = this.state;
-		fetch('/api/login', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(loginData)
+		this.setState({sending: true}, () => {
+			fetch('/api/login', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(loginData)
+			})
+				.then(res => res.json())
+				.then(json => {
+					this.setState({sending: false});
+					if (json.success) {
+						this.props.UserStore.setCurrentUser(json.data);
+						this.setState({ loggedIn: true });
+					} else {
+						console.log(json);
+						this.openSnackbar(json.msg);
+					}
+				});
 		})
-			.then(res => res.json())
-			.then(json => {
-				if (json.success) {
-					this.props.UserStore.setCurrentUser(json.data);
-					this.setState({ loggedIn: true });
-				}
-			});
+	};
+
+	openSnackbar = (message) => {
+		this.setState({ barOpen: true, snackbarMessage: message });
+		setTimeout(() => this.setState({ barOpen: false, snackbarMessage: '' }), 3000);
 	};
 
 	render() {
@@ -87,7 +102,7 @@ class LoginPage extends Component<Props> {
 						/>
 						<br />
 					</div>
-					<Button onClick={this.login}>Sign In</Button>
+					<Button disabled={this.state.sending} onClick={this.login}>{this.state.sending? 'Sending...' : 'Sign In'}</Button>
 					{this.state.loggedIn ? <Redirect to="/dashboard" /> : null}
 					<br />
 					<Link to="/register" id="register">
@@ -98,6 +113,7 @@ class LoginPage extends Component<Props> {
 				<a href="https://www.iecsemanipal.com/">
 					<img src={logo} alt="" id="logo" />
 				</a>
+				<Snackbar open={this.state.barOpen} message={this.state.snackbarMessage}/>
 			</div>
 		);
 	}
