@@ -51,6 +51,8 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 
 	//get level from currUser
 	switch checkAns.RegionID {
+	case 0:
+		level = currUser.Region0
 	case 1:
 		level = currUser.Region1
 	case 2:
@@ -110,6 +112,9 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 		//update currUser level
 
 		switch checkAns.RegionID {
+		case 0:
+			err = tx.Model(&currUser).Updates(User{Region1: level + 1, Points: currUser.Points + 1}).Error
+
 		case 1:
 			err = tx.Model(&currUser).Updates(User{Region1: level + 1, Points: currUser.Points + 1}).Error
 
@@ -135,6 +140,10 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 		//unlock region
 		isRegionComplete := false
 		switch checkAns.RegionID {
+		case 0:
+			if currUser.Region0 == RegionComplete {
+				isRegionComplete = true
+			}
 		case 1:
 			if currUser.Region1 == RegionComplete {
 				isRegionComplete = true
