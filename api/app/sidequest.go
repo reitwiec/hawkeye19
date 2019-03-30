@@ -14,11 +14,21 @@ const (
 	TotalSidequestQuestions = 6
 )
 
+type SideQuestQuestion struct{
+	level int
+	question string
+	sideQuestComplete int
+}
+
 func (hawk *App) getSidequestQuestion(w http.ResponseWriter, r *http.Request) {
 	currUser := r.Context().Value("User").(User)
 	currLevel := currUser.Region0
+	ques := SideQuestQuestion{}
+	ques.sideQuestComplete = 0
+	ques.level=currLevel
 	if currLevel == TotalSidequestQuestions+1 {
-		ResponseWriter(true, "Sidequest over", nil, http.StatusOK, w)
+		ques.sideQuestComplete = 1
+		ResponseWriter(true, "Sidequest over", ques, http.StatusOK, w)
 		return
 	}
 	index := (currLevel - 1) * 2
@@ -37,7 +47,8 @@ func (hawk *App) getSidequestQuestion(w http.ResponseWriter, r *http.Request) {
 		}
 
 	}
-	ResponseWriter(true, "Question fetched", question, http.StatusOK, w)
+	ques.question=question.Question
+	ResponseWriter(true, "Question fetched", ques, http.StatusOK, w)
 }
 
 func (hawk *App) checkSidequestAnswer(w http.ResponseWriter, r *http.Request) {
