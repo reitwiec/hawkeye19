@@ -56,6 +56,7 @@ interface IQuestionPageProps {
 }
 
 interface IQuestionPageState {
+	msg: string;
 	stats: string[];
 	tryvisible: boolean;
 	hintvisible: boolean;
@@ -77,6 +78,7 @@ interface IQuestionPageState {
 @observer
 class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 	state = {
+		msg: '',
 		tryvisible: true,
 		hintvisible: false,
 		statsvisible: false,
@@ -95,7 +97,6 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 		points: 0,
 		redirect: null
 	};
-
 	componentDidMount() {
 		if (this.props.UserStore.activeRegion === null)
 			this.props.history.push('/dashboard');
@@ -120,7 +121,11 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 		fetch(`/api/getSidequestQuestion`)
 			.then(res => res.json())
 			.then(json => {
-				console.log(json);
+				// if (json.data.level == 7) {
+				// 	this.unlockSideRegion();
+				// }
+				console.log(json.data.level);
+				console.log(json.data);
 				this.setState(
 					{
 						question: json.data.question,
@@ -132,7 +137,9 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 					}
 				);
 			})
-			.catch(() => {});
+			.catch(() => {
+
+      });
 	};
 
 	getQuestion = (after = () => {}) => {
@@ -180,6 +187,14 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 			.catch(() => {});
 	};
 
+	unlockSideRegion = () => {
+		fetch(`/api/unlockRegion`)
+			.then(res => res.json())
+			.then(json => {
+				this.setState({ points: 0, redirect: <Redirect to="/dashboard" /> });
+			});
+	};
+
 	getAttempts = () => {
 		fetch(`/api/getRecentTries?question=${this.state.questionID}`)
 			.then(res => res.json())
@@ -192,7 +207,6 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 		fetch(`/api/getStats`)
 			.then(res => res.json())
 			.then(json => {
-				console.log(json);
 				this.setState({
 					stats: [
 						json.data.AnswerAttempts,
@@ -291,6 +305,10 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 		this.getSideQuestion();
 		this.getAttempts();
 		this.getStats();
+		this.getUser();
+		if (this.state.level > 6) {
+			this.unlockSideRegion();
+		}
 	};
 
 	openSnackbar = message => {
@@ -337,9 +355,16 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 				{/* <Logout /> */}
 				<h1 id="name">HAWKEYE</h1>
 				<h2 id="region" />
+				<Button
+					id="autounlock"
+					className={this.state.points == 3 ? 'newregion' : 'nonewregion'}
+					onClick={this.unlockSideRegion}
+				>
+					UNLOCK A REGION
+				</Button>
 				<div id="questionbox">
 					{this.props.UserStore.activeRegion == 0 ? (
-						<div id="level">{`Points : ${this.state.points}`}</div>
+						<div id="level">{`Scrolls : ${this.state.points}`}</div>
 					) : (
 						<div id="level">{`Level ${this.state.level}`}</div>
 					)}
@@ -366,7 +391,7 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 						</button>
 					</div>
 				</div>
-
+				{this.state.redirect}
 				<div id="hint_try">
 					<div className="tab">
 						<button
@@ -391,6 +416,7 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 							Stats
 						</button>
 					</div>
+
 					<div
 						id="hints"
 						className={this.state.hintvisible ? 'available' : 'notavail'}
@@ -443,11 +469,14 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 						</Link>
 						<i
 							className="fas fa-chess-rook"
-							onClick={() =>
-								alert('Sidequest unlocks in 12 hours into the game...')
+							onClick={
+								this.state.level > 6
+									? () => {
+											alert('Hello');
+									  }
+									: this.sideen
 							}
 						/>
-						{/* onClick={this.sideen} */}
 					</div>
 					<img src={sideq} alt="" id="sideq" />
 					{/* <img src={map} alt="" id="map" /> */}
@@ -470,6 +499,18 @@ const drag = keyframes`
 }
 100%{
 	opacity:1;
+}
+`;
+
+const newunlock = keyframes`
+  0%{
+	top:70px;
+}
+50%{
+	top:80px;
+}
+100%{
+	top:70px;
 }
 `;
 
@@ -515,6 +556,36 @@ export default styled(QuestionPage)`
   display:none;
 }
 @media ${device.mobileS} {  
+  #autounlock{
+  animation: ${newunlock} 2s infinite 0s ease-in-out;
+  padding:5px 10px 5px 10px;
+  border:none;
+  height:40px;
+  position:fixed;
+  transform: translate(-50%,0);
+  left: 50%;
+  top:70px;
+  box-shadow: none;
+	outline: none;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+  appearance: none;
+  z-index:120;
+  background:#FFD627;
+  transition:0.5s;
+  font-weight:700;
+  letter-spacing:1.4px;
+}
+#autounlock:hover{
+    filter: drop-shadow(0px 15px 15px #000);
+}
+.newregion{
+  display:block
+}
+
+.nonewregion{
+  display:none;
+}
   #status{
     left: 50%;
     margin-bottom:8px;
@@ -758,6 +829,36 @@ left:19%;
 }
 /******************  LARGE MOBILE  ************************/
 @media ${device.mobileL} {
+  #autounlock{
+  animation: ${newunlock} 2s infinite 0s ease-in-out;
+  padding:5px 10px 5px 10px;
+  border:none;
+  height:40px;
+  position:fixed;
+  transform: translate(-50%,0);
+  left: 50%;
+  top:70px;
+  box-shadow: none;
+	outline: none;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+  appearance: none;
+  z-index:120;
+  background:#FFD627;
+  transition:0.5s;
+  font-weight:700;
+  letter-spacing:1.4px;
+}
+#autounlock:hover{
+    filter: drop-shadow(0px 15px 15px #000);
+}
+.newregion{
+  display:block
+}
+
+.nonewregion{
+  display:none;
+}
   max-width: 580px; 
 #name{
     text-align:center;
@@ -987,7 +1088,37 @@ left:22%;
 }
 
 /******************  TABLET  ************************/
-@media ${device.tablet} {  
+@media ${device.tablet} { 
+  #autounlock{
+  animation: ${newunlock} 2s infinite 0s ease-in-out;
+  padding:5px 10px 5px 10px;
+  border:none;
+  height:40px;
+  position:fixed;
+  transform: translate(-50%,0);
+  left: 50%;
+  top:70px;
+  box-shadow: none;
+	outline: none;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+  appearance: none;
+  z-index:120;
+  background:#FFD627;
+  transition:0.5s;
+  font-weight:700;
+  letter-spacing:1.4px;
+}
+#autounlock:hover{
+    filter: drop-shadow(0px 15px 15px #000);
+}
+.newregion{
+  display:block
+}
+
+.nonewregion{
+  display:none;
+} 
   max-width: 730px; 
 #name{
     text-align:center;
@@ -1229,6 +1360,36 @@ left:26%;
 
 /******************  TABLETlarge  ************************/
 @media ${device.laptop} {  
+  #autounlock{
+  animation: ${newunlock} 2s infinite 0s ease-in-out;
+  padding:5px 10px 5px 10px;
+  border:none;
+  height:40px;
+  position:fixed;
+  transform: translate(-50%,0);
+  left: 50%;
+  top:70px;
+  box-shadow: none;
+	outline: none;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+  appearance: none;
+  z-index:120;
+  background:#FFD627;
+  transition:0.5s;
+  font-weight:700;
+  letter-spacing:1.4px;
+}
+#autounlock:hover{
+    filter: drop-shadow(0px 15px 15px #000);
+}
+.newregion{
+  display:block
+}
+
+.nonewregion{
+  display:none;
+}
   max-width: 862px; 
 #name{
     text-align:center;
@@ -1466,6 +1627,36 @@ left:29%;
 
 /******************  laptop  ************************/
 @media ${device.laptopL} {  
+  #autounlock{
+  animation: ${newunlock} 2s infinite 0s ease-in-out;
+  padding:5px 10px 5px 10px;
+  border:none;
+  height:40px;
+  position:fixed;
+  transform: translate(-50%,0);
+  left: 50%;
+  top:70px;
+  box-shadow: none;
+	outline: none;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+  appearance: none;
+  z-index:120;
+  background:#FFD627;
+  transition:0.5s;
+  font-weight:700;
+  letter-spacing:1.4px;
+}
+#autounlock:hover{
+    filter: drop-shadow(0px 15px 15px #000);
+}
+.newregion{
+  display:block
+}
+
+.nonewregion{
+  display:none;
+}
   max-width: 1000px; 
 #name{
     text-align:center;
@@ -1717,6 +1908,39 @@ left:35%;
   .hintnew{
   display:block;
 }
+
+#autounlock{
+  animation: ${newunlock} 2s infinite 0s ease-in-out;
+  padding:5px 10px 5px 10px;
+  border:none;
+  height:40px;
+  position:fixed;
+  transform: translate(-50%,0);
+  left: 50%;
+  top:70px;
+  box-shadow: none;
+	outline: none;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+  appearance: none;
+  z-index:120;
+  background:#FFD627;
+  transition:0.5s;
+  font-weight:700;
+  letter-spacing:1.4px;
+}
+#autounlock:hover{
+    filter: drop-shadow(0px 15px 15px #000);
+}
+
+.newregion{
+  display:block
+}
+
+.nonewregion{
+  display:none;
+}
+
   max-width: 2000px; 
 #name{
     text-align:center;

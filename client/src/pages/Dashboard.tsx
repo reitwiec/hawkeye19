@@ -100,15 +100,12 @@ class Dashboard extends Component<IDashBoardProps> {
 		});
 	};
 
-	locky = () => {
-		console.log('locked');
-	};
+	locky = () => {};
 
 	getUser = (callback = () => {}) => {
 		fetch(`/api/getUser`)
 			.then(res => res.json())
 			.then(json => {
-				console.log(json);
 				const userFields = {
 					username: json.data.username,
 					email: json.data.email,
@@ -176,10 +173,7 @@ class Dashboard extends Component<IDashBoardProps> {
 						<Logout className="logout-btn" />
 						<i
 							className="fas fa-chess-rook"
-							onClick={() =>
-								alert('Sidequest unlocks 12 hours into the game...')
-							}
-							// onClick={this.unlock('ashvalley', 0)}
+							onClick={this.unlock('ashvalley', 0)}
 						/>
 					</div>
 					<img src={sideq} alt="" id="sideq" />

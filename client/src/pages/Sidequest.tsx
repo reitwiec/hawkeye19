@@ -90,7 +90,8 @@ class Sidequest extends Component<ISideQuestProps, IQuestionPageState> {
 	render() {
 		return (
 			<div className={this.props.className}>
-				<div id="points">{`Points : ${this.state.points}`}</div>
+				<div id="points">{`Scrolls : ${this.state.points}`}</div>
+				<button id="unlockreg">UNLOCK REGION</button>
 				<div className="container1">
 					<div id="hints" className="hintnew">
 						<div className="tab">
