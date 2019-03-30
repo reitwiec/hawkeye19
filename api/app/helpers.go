@@ -322,24 +322,39 @@ func SendVUEmail(email string, token string, name string) error {
 }
 func LogRequest(r *http.Request, status string, err string) {
 
-	body, _ := ioutil.ReadAll(r.Body)
-	m := make(map[string]string)
-	if err := json.Unmarshal(body,&m); err != nil {
-	fmt.Printf("Error:%s\n",err)
-	return
+	body, err1 := ioutil.ReadAll(r.Body)
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+
+	m := make(map[string]interface{})
+	err1 = json.Unmarshal(body,&m)
+	if err1 != nil {
+		fmt.Println("Error is fjddk", err1)
+		return
 	}
 	delete(m,"password")
+
+	reqBody, err1 := json.MarshalIndent(m, "", "  ")
+	if err1 != nil {
+		fmt.Println("Error is fjddk", err1)
+		return
+	}
+	//fmt.Println("M is ", m)
+
 	logInfo := LogInfo{
-		Timestamp: time.Now(),
 		Method:    r.Method,
 		URL:       r.URL.Path,
-		Body:      fmt.Sprintf("%#v\n",m),
-		User: r.Context().Value("User"),
+		Body:      string(reqBody),
+		User: 	   r.Context().Value("User"),
+
 	}
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
-	log.Printf("%s\nTimestamp: %s\nMethod: %s\nURL: %s\nBody: %s\nUser: %v\nError: %s\n\n", status,
-		logInfo.Timestamp.Format("Mon Jan _2 15:04:05 2006"), logInfo.Method, logInfo.URL, logInfo.Body, logInfo.User,
-		err)
+	log.Printf("%s %s\nURL: %s\nBody: %s\nUser: %v\nError: %v\n",
+		status,
+		logInfo.Method,
+		logInfo.URL,
+		logInfo.Body,
+		logInfo.User,
+		err,
+	)
 }
 
 func (hawk *App) GetUser(w http.ResponseWriter, r *http.Request) {

@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strings"
 	"time"
+	"log"
 )
 
 type RegisterUser struct {
@@ -21,12 +22,17 @@ func (hawk *App) addUser(w http.ResponseWriter, r *http.Request) {
 
 	var captchaUser RegisterUser
 
+	//fmt.Println("Body is ", r.Body)
+	//fmt.Println("Body printed")
 	err := json.NewDecoder(r.Body).Decode(&captchaUser)
-
 	if err != nil {
+		log.Println("Error is ", err, "Captcha user is ", captchaUser)
 		ResponseWriter(false, "Bad Request", nil, http.StatusBadRequest, w)
 		return
+
 	}
+	//fmt.Println("Captcha user is ", captchaUser)
+
 	/*
 	re := recaptcha.R{
 		Secret: "6LftZZoUAAAAAPXZ3nAqHd4jzIbHBNxfMFpuWfMe",
@@ -149,10 +155,8 @@ func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	user := User{}
-	fmt.Println (formData.Username)
 	//check if username exists
 	err = hawk.DB.Where("username = ?", strings.TrimSpace(formData.Username)).First(&user).Error
-	fmt.Println(user.Username)
 	if gorm.IsRecordNotFoundError(err) {
 		ResponseWriter(false, "User not registered", nil, http.StatusOK, w)
 		return
@@ -195,8 +199,8 @@ func (hawk *App) login(w http.ResponseWriter, r *http.Request) {
 		tx.Rollback()
 		return
 	}
-	ResponseWriter(true, "User logged in and session is set", user, http.StatusOK, w)
 	tx.Commit()
+	ResponseWriter(true, "User logged in and session is set", user, http.StatusOK, w)
 }
 
 func (hawk *App) logout(w http.ResponseWriter, r *http.Request) {

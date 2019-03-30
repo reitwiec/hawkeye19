@@ -136,7 +136,6 @@ type Verification struct {
 }
 
 type LogInfo struct {
-	Timestamp time.Time
 	Method    string
 	URL       string
 	Body      string

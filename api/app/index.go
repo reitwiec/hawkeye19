@@ -18,8 +18,7 @@ var (
 )
 
 func (hawk *App) Initialise() {
-	//initialise logger
-	//create your file with desired read/write permissions
+
 	var err error
 	hawk.logFile, err = os.OpenFile("info.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
@@ -29,19 +28,9 @@ func (hawk *App) Initialise() {
 	log.SetOutput(hawk.logFile)
 	//test case
 	log.Println("Logging to file")
+
 	//configure Instance
 	ConfigureInstance()
-	log.Printf(`
-
-Configuration:
-DB Username: %s
-DB Password: %s
-DB Name: %s
-Hash Key: %s
-Block Key: %s
-
-`, Configuration.DBUsername, Configuration.DBPassword, Configuration.DBName, Configuration.HashKey, Configuration.BlockKey)
-
 	//configure mux
 	hawk.LoadRoutes()
 	//initialise validator
@@ -52,7 +41,6 @@ Block Key: %s
 
 	//create securecookie instance
 	CookieHandler = securecookie.New([]byte(Configuration.HashKey), []byte(Configuration.BlockKey))
-
 }
 
 func (hawk *App) migrate() {
@@ -85,11 +73,11 @@ func (hawk *App) Run(Args []string) {
 		}
 	}
 
+ 	log.Println("Server Started on port", Configuration.ServerAddr)
 	err = http.ListenAndServe(Configuration.ServerAddr, hawk.router)
 	if err != nil {
 		log.Fatalf("Could not start server, shutting down")
 	}
 
 	defer hawk.logFile.Close()
-
 }
