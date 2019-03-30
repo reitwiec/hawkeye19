@@ -148,7 +148,7 @@ class RegisterPage extends Component {
 						/>
 						<TextField
 							name="username"
-							placeholder="Username"
+							placeholder="Username (Alpha Numeric eg.0,1,a,b...)"
 							onChange={this.onChange}
 							onKeyPress={this.onKey}
 						/>

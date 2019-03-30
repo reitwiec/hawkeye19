@@ -12,6 +12,8 @@ import Logout from '../components/Logout';
 import { UserStore } from '../stores/User';
 import { Redirect } from 'react-router-dom';
 import { Snackbar } from '../components';
+import quesbg1 from '../components/assets/questionpreview1.svg';
+import quesbg2 from '../components/assets/questionpreview2.svg'; //phone
 
 const size = {
 	mobileS: '320px',
@@ -72,6 +74,7 @@ interface IQuestionPageState {
 	snackbarMessage: string;
 	points: number;
 	redirect: any;
+	scrolls: number;
 }
 
 @inject('UserStore')
@@ -95,19 +98,14 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 		barOpen: false,
 		snackbarMessage: '',
 		points: 0,
-		redirect: null
+		redirect: null,
+		scrolls: this.props.UserStore.sideQuestPoints
 	};
 	componentDidMount() {
+		console.log(this.props.UserStore);
 		if (this.props.UserStore.activeRegion === null)
 			this.props.history.push('/dashboard');
-		else if (this.props.UserStore.activeRegion == 0) {
-			this.getSideQuestion(() => {
-				this.getHints();
-				this.getAttempts();
-				this.getUser();
-				this.getStats();
-			});
-		} else {
+		else {
 			this.getQuestion(() => {
 				this.getHints();
 				this.getAttempts();
@@ -117,40 +115,42 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 		}
 	}
 
-	getSideQuestion = (after = () => {}) => {
-		fetch(`/api/getSidequestQuestion`)
-			.then(res => res.json())
-			.then(json => {
-				// if (json.data.level == 7) {
-				// 	this.unlockSideRegion();
-				// }
-				console.log(json.data.level);
-				console.log(json.data);
-				this.setState(
-					{
-						question: json.data.question,
-						questionID: json.data.questionID,
-						level: json.data.level
-					},
-					() => {
-						after();
-					}
-				);
-			})
-			.catch(() => {
+	// getSideQuestion = (after = () => {}) => {
+	// 	fetch(`/api/getSidequestQuestion`)
+	// 		.then(res => res.json())
+	// 		.then(json => {
+	// 			// if (json.data.level == 7) {
+	// 			// 	this.unlockSideRegion();
+	// 			// }
+	// 			console.log(json.data.level);
+	// 			console.log(json.data);
+	// 			this.setState(
+	// 				{
+	// 					question: json.data.question,
+	// 					questionID: json.data.questionID,
+	// 					level: json.data.level
+	// 				},
+	// 				() => {
+	// 					after();
+	// 				}
+	// 			);
+	// 		})
+	// 		.catch(() => {
 
-      });
-	};
+	//     });
+	// };
 
 	getQuestion = (after = () => {}) => {
 		fetch(`/api/getQuestion?region=${this.props.UserStore.activeRegion}`)
 			.then(res => res.json())
 			.then(json => {
+				console.log(json);
 				this.setState(
 					{
 						question: json.data.question,
 						questionID: json.data.questionID,
-						level: json.data.level
+						level: json.data.level,
+						scrolls: this.props.UserStore.sideQuestPoints
 					},
 					() => {
 						after();
@@ -175,14 +175,10 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 		fetch(`/api/getUser`)
 			.then(res => res.json())
 			.then(json => {
-				this.setState(
-					{
-						points: json.data.sideQuestPoints
-					},
-					() => {
-						after();
-					}
-				);
+				console.log(json);
+				this.setState({
+					scrolls: json.data.sideQuestPoints
+				});
 			})
 			.catch(() => {});
 	};
@@ -241,29 +237,9 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 		}
 	};
 
-	checkSideAnswer = () => {
-		if (this.props.UserStore.isVerified == 1) {
-			fetch(`/api/checkSidequestAnswer`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					answer: this.state.answer
-				})
-			})
-				.then(res => res.json())
-				.then(json => {
-					this.onSubmit(json);
-				});
-		} else {
-			this.openSnackbar('Please verify your email');
-		}
-	};
-
 	sideen = () => {
 		this.props.UserStore.setRegion(0);
-		this.getSideQuestion(() => {
+		this.getQuestion(() => {
 			this.getHints();
 			this.getAttempts();
 			this.getUser();
@@ -271,15 +247,15 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 		});
 	};
 	onSubmit = json => {
+		console.log(json);
 		this.getStats();
+		this.getUser();
 		this.clearAnswer();
 		this.setState({
 			hawkMessage: hawkResponses[json.data]
 		});
 		if (json.data == 1) {
-			this.props.UserStore.activeRegion == 0
-				? this.onSideCorrectAnswer()
-				: this.onCorrectAnswer();
+			this.onCorrectAnswer();
 		} else {
 			this.getAttempts();
 		}
@@ -291,26 +267,16 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 	};
 
 	onCorrectAnswer = () => {
-		if (this.state.level === 4) {
+		if (this.state.level === 4 && this.props.UserStore.activeRegion != 0) {
 			this.props.history.push('/dashboard');
 		} else {
 			this.clearHints();
 			this.getQuestion();
 			this.getAttempts();
 			this.getStats();
+			this.getUser();
 		}
 	};
-	onSideCorrectAnswer = () => {
-		this.clearHints();
-		this.getSideQuestion();
-		this.getAttempts();
-		this.getStats();
-		this.getUser();
-		if (this.state.level > 6) {
-			this.unlockSideRegion();
-		}
-	};
-
 	openSnackbar = message => {
 		this.setState({ barOpen: true, snackbarMessage: message });
 	};
@@ -343,28 +309,29 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 		});
 	};
 	onKey = e => {
-		if (e.key === 'Enter')
-			this.props.UserStore.activeRegion == 0
-				? this.checkSideAnswer()
-				: this.checkAnswer();
+		if (e.key === 'Enter') this.checkAnswer();
 	};
 
 	render() {
 		return (
 			<div className={this.props.className}>
+				<div id="bg">
+					<img src={quesbg1} alt="" id="pcb1" />
+					<img src={quesbg2} alt="" id="pcb2" />
+				</div>
 				{/* <Logout /> */}
 				<h1 id="name">HAWKEYE</h1>
 				<h2 id="region" />
 				<Button
 					id="autounlock"
-					className={this.state.points == 3 ? 'newregion' : 'nonewregion'}
+					className={this.state.scrolls >= 2 ? 'newregion' : 'nonewregion'}
 					onClick={this.unlockSideRegion}
 				>
 					UNLOCK A REGION
 				</Button>
 				<div id="questionbox">
 					{this.props.UserStore.activeRegion == 0 ? (
-						<div id="level">{`Scrolls : ${this.state.points}`}</div>
+						<div id="level">{`Scrolls : ${this.state.scrolls}`}</div>
 					) : (
 						<div id="level">{`Level ${this.state.level}`}</div>
 					)}
@@ -380,12 +347,14 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 							onKeyPress={this.onKey}
 						/>
 						<button
-							onClick={
-								this.props.UserStore.activeRegion == 0
-									? this.checkSideAnswer
-									: this.checkAnswer
-							}
+							onClick={this.checkAnswer}
 							id="submit"
+							className={
+								this.props.UserStore.region0 == 5 &&
+								this.props.UserStore.activeRegion == 0
+									? 'notavail'
+									: 'available'
+							}
 						>
 							Submit
 						</button>
@@ -467,16 +436,7 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 						<Link to="/dashboard">
 							<img src={logo} id="hawklogo" alt="" />
 						</Link>
-						<i
-							className="fas fa-chess-rook"
-							onClick={
-								this.state.level > 6
-									? () => {
-											alert('Hello');
-									  }
-									: this.sideen
-							}
-						/>
+						<i className="fas fa-chess-rook" onClick={this.sideen} />
 					</div>
 					<img src={sideq} alt="" id="sideq" />
 					{/* <img src={map} alt="" id="map" /> */}
@@ -556,6 +516,16 @@ export default styled(QuestionPage)`
   display:none;
 }
 @media ${device.mobileS} {  
+   #pcb1 {
+    display:none;}
+    #pcb2 {
+    display:inline;
+			position: fixed;
+			top: 0;
+			z-index: -10;
+			min-width: 100%;
+			max-height: 200vh;
+			opacity: 0.25;}
   #autounlock{
   animation: ${newunlock} 2s infinite 0s ease-in-out;
   padding:5px 10px 5px 10px;
@@ -829,6 +799,8 @@ left:19%;
 }
 /******************  LARGE MOBILE  ************************/
 @media ${device.mobileL} {
+   #pcb1 {
+    display:none;}
   #autounlock{
   animation: ${newunlock} 2s infinite 0s ease-in-out;
   padding:5px 10px 5px 10px;
@@ -1360,6 +1332,14 @@ left:26%;
 
 /******************  TABLETlarge  ************************/
 @media ${device.laptop} {  
+   #pcb1 {
+    display:inline;
+			position: fixed;
+			top: 0;
+			z-index: -10;
+			min-width: 100%;
+			max-height: 200vh;
+			opacity: 0.25;}
   #autounlock{
   animation: ${newunlock} 2s infinite 0s ease-in-out;
   padding:5px 10px 5px 10px;
@@ -1627,6 +1607,15 @@ left:29%;
 
 /******************  laptop  ************************/
 @media ${device.laptopL} {  
+  #pcb1 {
+    display:inline;
+			position: fixed;
+			top: 0;
+			z-index: -10;
+			min-width: 100%;
+			max-height: 200vh;
+			opacity: 0.25;}
+		
   #autounlock{
   animation: ${newunlock} 2s infinite 0s ease-in-out;
   padding:5px 10px 5px 10px;

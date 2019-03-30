@@ -115,7 +115,8 @@ class Dashboard extends Component<IDashBoardProps> {
 					region3: json.data.region3,
 					region4: json.data.region4,
 					region5: json.data.region5,
-					isVerified: json.data.isVerified
+					isVerified: json.data.isVerified,
+					sideQuestPoints: json.data.sideQuestPoints
 				};
 				this.props.UserStore.setCurrentUser(userFields);
 				callback();
@@ -158,8 +159,6 @@ class Dashboard extends Component<IDashBoardProps> {
 								{this.state.regions[i].name}{' '}
 								<img id="icons" src={this.state.regions[i].icon} alt="" />
 							</section>
-							{/* <span className="details">Max Score: 15</span>
-							<span className="strength">Difficulty: Easy</span> */}
 						</div>
 						// <RegionCard key={i} regionIndex={i + 1} {...region} />
 					))}

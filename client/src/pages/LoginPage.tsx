@@ -69,11 +69,9 @@ class LoginPage extends Component<Props> {
 				.then(json => {
 					this.setState({ sending: false });
 					if (json.success) {
-						console.log(json);
 						this.props.UserStore.setCurrentUser(json.data);
 						this.setState({ loggedIn: true, firstlog: json.data.firstLogin });
 					} else {
-						console.log(json);
 						this.openSnackbar(json.msg);
 					}
 				});

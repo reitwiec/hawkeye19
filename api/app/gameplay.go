@@ -255,7 +255,6 @@ func (hawk *App) getQuestion(w http.ResponseWriter, r *http.Request) {
 		ResponseWriter(false, "User not logged in.", nil, http.StatusNetworkAuthenticationRequired, w)
 		return
 	}
-
 	keys, ok := r.URL.Query()["region"]
 	if !ok || len(keys[0]) < 1 {
 		ResponseWriter(false, "Invalid request", nil, http.StatusBadRequest, w)

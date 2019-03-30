@@ -10,6 +10,7 @@ class UserStore {
 	@observable region4 = 0;
 	@observable region5 = 0;
 	@observable isVerified = 0;
+	@observable sideQuestPoints = 0;
 
 	@observable activeRegion = null;
 
@@ -23,6 +24,7 @@ class UserStore {
 		this.region4 = user.region4;
 		this.region5 = user.region5;
 		this.isVerified = user.isVerified;
+		this.sideQuestPoints = user.sideQuestPoints;
 	};
 
 	@action clear = () => {
@@ -35,9 +37,10 @@ class UserStore {
 		this.region4 = 0;
 		this.region5 = 0;
 		this.isVerified = 0;
+		this.sideQuestPoints = 0;
 	};
 
-	@action setRegion = region => this.activeRegion = region;
+	@action setRegion = region => (this.activeRegion = region);
 }
 
 export default new UserStore();
