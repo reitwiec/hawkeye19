@@ -113,7 +113,7 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 
 		switch checkAns.RegionID {
 		case 0:
-			err = tx.Model(&currUser).Updates(User{Region1: level + 1, Points: currUser.Points + 1}).Error
+			err = tx.Model(&currUser).Updates(User{Region0: level + 1, SideQuestPoints: currUser.SideQuestPoints + 1}).Error
 
 		case 1:
 			err = tx.Model(&currUser).Updates(User{Region1: level + 1, Points: currUser.Points + 1}).Error
@@ -176,7 +176,7 @@ func (hawk *App) checkAnswer(w http.ResponseWriter, r *http.Request) {
 					}
 			*/
 		}
-		if isRegionComplete {
+		if isRegionComplete && checkAns.RegionID != 0 {
 			//is it time to unlock linear ?
 			if currUser.Region5 == 0 && currUser.Region1+currUser.Region2+currUser.Region3+currUser.Region4 == RegionComplete*4 {
 				err = tx.Model(&currUser).Update("Region5", 1).Error

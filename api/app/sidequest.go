@@ -11,8 +11,8 @@ import (
 
 const (
 	PointsPerQuestion       = 1
-	UnlockRegionPoints      = 3
-	TotalSidequestQuestions = 6
+	UnlockRegionPoints      = 2
+	TotalSidequestQuestions = 4
 )
 
 func (hawk *App) getSidequestQuestion(w http.ResponseWriter, r *http.Request) {
