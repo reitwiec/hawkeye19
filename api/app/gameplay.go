@@ -266,6 +266,8 @@ func (hawk *App) getQuestion(w http.ResponseWriter, r *http.Request) {
 	level := 0
 
 	switch key {
+	case "0":
+		level = currUser.Region0
 	case "1":
 		level = currUser.Region1
 	case "2":
