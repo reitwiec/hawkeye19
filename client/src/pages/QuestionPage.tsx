@@ -267,7 +267,7 @@ class QuestionPage extends Component<IQuestionPageProps, IQuestionPageState> {
 	};
 
 	onCorrectAnswer = () => {
-		if (this.state.level === 4 && this.props.UserStore.activeRegion != 0) {
+		if (this.state.level === 4 && this.props.UserStore.activeRegion != 0 && this.props.UserStore.activeRegion!=5) {
 			this.props.history.push('/dashboard');
 		} else {
 			this.clearHints();

@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { inject, observer } from 'mobx-react';
 import { UserStore } from '../stores/User';
 import { RegionCard } from '../components';
+import Countdown from 'react-countdown-now';
 import media from '../components/theme/media';
 import colors from '../colors';
 import { onCircle } from '../mixins';
@@ -140,7 +141,10 @@ class Dashboard extends Component<IDashBoardProps> {
 		return (
 			<div className={className}>
 				<img src={iecse} alt="" id="iecse" />
-				<h1>Dashboard</h1>
+				<h1>
+					Time Left
+					<br /> <Countdown date="Mon, 01 Apr 2019 00:00:00" />
+				</h1>
 				{/* <h5>Logged in as {this.props.UserStore.username}</h5> */}
 				<div className="regions-container">
 					{this.state.regions.map((region, i) => (
