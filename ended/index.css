@@ -1,0 +1,157 @@
+@import url("https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,900");
+html,
+body,
+div,
+span {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  font-size: 100%;
+  vertical-align: baseline;
+  background: transparent;
+  font-family: "Source Sans Pro", sans-serif;
+}
+
+#hawklogo {
+  opacity: 0.3;
+  z-index: -10;
+  filter: gray; /* IE6-9 */
+  -webkit-filter: grayscale(100%);
+  position: absolute;
+  width: 50%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#container {
+  color: #ffd627;
+  margin: 30px;
+  text-align: center;
+}
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  background: #181818;
+  /* background: -moz-radial-gradient(
+		center,
+		ellipse cover,
+		#181818 40%,
+		#0000 100%
+	); 
+	background: -webkit-radial-gradient(
+		center,
+		ellipse cover,
+		#181818 40%,
+		#000 100%
+	);
+	background: radial-gradient(
+		ellipse at center,
+		#181818 40%,
+		#000000 100%
+	); 
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#181818', endColorstr='#000',GradientType=1 ); */
+  line-height: 1;
+}
+
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+  display: block;
+}
+
+nav ul {
+  list-style: none;
+}
+
+blockquote,
+q {
+  quotes: none;
+}
+
+blockquote:before,
+blockquote:after,
+q:before,
+q:after {
+  content: "";
+  content: none;
+}
+
+a {
+  margin: 0;
+  padding: 0;
+  font-size: 100%;
+  vertical-align: baseline;
+  background: transparent;
+}
+
+/* change colours to suit your needs */
+ins {
+  background-color: #ff9;
+  color: #000;
+  text-decoration: none;
+}
+
+/* change colours to suit your needs */
+mark {
+  background-color: #ff9;
+  color: #000;
+  font-style: italic;
+  font-weight: bold;
+}
+
+del {
+  text-decoration: line-through;
+}
+
+abbr[title],
+dfn[title] {
+  border-bottom: 1px dotted;
+  cursor: help;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* change border colour to suit your needs */
+hr {
+  display: block;
+  height: 1px;
+  border: 0;
+  border-top: 1px solid #cccccc;
+  margin: 1em 0;
+  padding: 0;
+}
+
+input,
+select {
+  vertical-align: middle;
+}
+
+@media (max-width: 600px) {
+  #hawklogo {
+    opacity: 0.3;
+    z-index: -10;
+    filter: gray; /* IE6-9 */
+    -webkit-filter: grayscale(100%);
+    position: absolute;
+    width: 100%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
