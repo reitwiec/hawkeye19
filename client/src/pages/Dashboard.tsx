@@ -153,7 +153,9 @@ class Dashboard extends Component<IDashBoardProps> {
 									: this.unlock(this.state.regions[i].name, i + 1)
 							}
 							id={
-								this.state.regions[i].level > 4 ? 'completed' : 'notcompleted'
+								this.state.regions[i].level > 4 && i != 5
+									? 'completed'
+									: 'notcompleted'
 							}
 						>
 							<section className={this.state.regions[i].locked ? 'locked' : ''}>
