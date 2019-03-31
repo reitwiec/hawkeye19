@@ -148,12 +148,12 @@ class Dashboard extends Component<IDashBoardProps> {
 							className="questions"
 							onClick={
 								this.state.regions[i].locked ||
-								(this.state.regions[i].level > 4 && i != 5)
+								(this.state.regions[i].level > 4 && i != 4)
 									? this.locky
 									: this.unlock(this.state.regions[i].name, i + 1)
 							}
 							id={
-								this.state.regions[i].level > 4 && i != 5
+								this.state.regions[i].level > 4 && i != 4
 									? 'completed'
 									: 'notcompleted'
 							}
