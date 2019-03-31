@@ -36,6 +36,10 @@ class Rules extends Component<Props> {
 							1/4/19 00:00 HRs
 						</li>
 						<li>
+							The final region(Eden) only unlocks once you COMPLETE ALL THE
+							REGIONS.
+						</li>
+						<li>
 							Cheaters will be found by our monitoring system and will be
 							ineligible for any prizes. Any suspicious behaviour will be
 							reported to us by the game.
@@ -74,6 +78,9 @@ class Rules extends Component<Props> {
 					<Link to="/dashboard">
 						<button>RETURN</button>
 					</Link>
+					<Link to="/tutorial">
+						<button>TUTORIAL</button>
+					</Link>
 				</div>
 				<img src={map} alt="" id="map" />
 			</div>
@@ -82,6 +89,8 @@ class Rules extends Component<Props> {
 }
 export default styled(Rules)`
 	button {
+		margin-left: 10px;
+		margin-right: 10px;
 		letter-spacing: 1px;
 		font-size: 0.9em;
 		border-radius: 5px;
